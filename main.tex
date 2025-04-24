@@ -4,26 +4,109 @@
 \newcommand{\class}[1]{`\code{#1}'}
 \newcommand{\fct}[1]{\code{#1()}}
 
-\author{Johan Larsson~\orcidlink{0000-0002-4029-5945}\\Department of Mathematical Sciences\\University of Copenhagen
+\usepackage{amssymb,amsmath,amsthm,mathtools,bm}
+\usepackage{upquote}
+\usepackage{booktabs}
+
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+
+\usepackage{subfigure}
+
+\usepackage{siunitx}
+
+\usepackage{hyperref}
+
+\definecolor{mydarkblue}{rgb}{0,0.08,0.45}
+\hypersetup{ %
+  colorlinks=true,
+  linkcolor=mydarkblue,
+  citecolor=mydarkblue,
+  filecolor=mydarkblue,
+  urlcolor=mydarkblue,
+}
+
+\usepackage[capitalize,noabbrev]{cleveref}
+\usepackage{crossreftools}
+\pdfstringdefDisableCommands{%
+  \let\Cref\crtCref
+  \let\cref\crtcref
+}
+
+\usepackage{todonotes}
+
+\input{tex/macros}
+
+\author{Johan Larsson~\orcidlink{0000-0002-4029-5945}\\University of Copenhagen
    \And Second Author\\Plus Affiliation}
 \Plainauthor{}
 
-\title{Efficient Solvers for SLOPE in \proglang{R}, \proglang{Python},\proglang{Julia}, and \proglang{C++}}
+\title{Efficient Solvers for SLOPE in \proglang{R}, \proglang{Python}, \proglang{Julia}, and \proglang{C++}}
 \Plaintitle{Efficient Solvers for SLOPE in R, Python, Julia, and C++}
 \Shorttitle{Efficient Solvers for SLOPE}
 
 \Abstract{
+  We present a collection of packages in \proglang{R}, \proglang{Python},
+  \proglang{Julia}, and \proglang{C++} to efficiently solve the full
+  regularization path for Sorted L-One Penalized Estimation (SLOPE) in
+  \proglang{R}, \proglang{Python}, \proglang{Julia}, and \proglang{C++}.
+  The packages feature a new and improved implementation of the 
+  hybrid coordinate descent algorithm for solving SLOPE, which
+  features improved and robust convergence properties.
 }
 
-\Keywords{SLOPE, regularization, generalized linear models, \proglang{R}, \proglang{Python}, \proglang{Julia}, \proglang{C++}}
-\Plainkeywords{SLOPE, regularization, generalized linear models, R, Python, C++}
+\Keywords{SLOPE, OWL, regularization, generalized linear models, \proglang{R}, \proglang{Python}, \proglang{Julia}, \proglang{C++}}
+\Plainkeywords{SLOPE, OWL, regularization, generalized linear models, R, Python, C++}
 
 \Address{
+  Johan Larsson\\
+  Department of Mathematical Sciences\\
+  Faculty of Science\\
+  University of Copenhagen\\
+  Universitetsparken 5\\
+  2100 København Ø, Denmark\\
+  E-mail: \email{jolars@posteo.com}\\
+  URL: \url{https://jolars.co/}
 }
 
 \begin{document}
 
 \section{Introduction}
+
+Sorted L-One Penalized Estimation
+(SLOPE)~\citep{bogdan2013,zeng2014,bogdan2015} is a type of
+regularized regression that consists of following convex optimization problem:
+\begin{equation}
+  \label{eq:slope}
+  \minimize_{\beta_0,\bm{\beta}} \left( \frac{1}{n} \sum_{i=1}^n f(y_i, \beta_0 + \bm{\beta}^\intercal \bm{x}_i) + \alpha J_{\bm{\lambda}}(\bm{\beta})\right)
+\end{equation}
+where \((y_i, \bm{x}_i)\) is the \(i\)th observation, \(\alpha\) a parameter
+that controls the strength of regularization, and \(\bm{\lambda}\) a non-increasing sequence of penalty weights. \(J\) is the
+\emph{sorted $\ell_1$ norm}, defined as
+\begin{equation}
+  \label{eq:sl1}
+  J_{\bm{\lambda}}(\bm{\beta}) = \sum_{j=1}^p \lambda_j |\beta_{(j)}|, \quad
+  \text{where}\quad |\bm{\beta}_{(1)}| \geq |\bm{\beta}_{(2)}| \geq \ldots \geq
+  |\bm{\beta}_{(p)}|.
+\end{equation}
+We let \((\hat{\beta}_0, \hat{\bm{\beta}})\) denote a solution to the problem in \Cref{eq:slope}.
+
+SLOPE is a generalization of OSCAR (octagonal shrinkage and clustering
+algorithm for regression)~\citep{bondell2008} and serves as an alternative to the
+lasso~\citep{santosa1986,donoho1994,donoho1995,tibshirani1996}, elastic
+net~\citep{zou2005}, the SCAD (smoothly clipped absolute deviation)
+penalty~\citep{fan2001}, and the MCP~(minimax concave
+penalty)~\citep{zhang2010} for sparse regression.
+
+One of the main advantages of SLOPE is that it deals naturally with
+correlated predictors by clustering them together. This is a natural
+consequence of the sorted \(\ell_1\) norm.
+
+\section{Coordinate Descent for SLOPE}
+
+\section{Implementation}
+
+\section{Benchmarks}
 
 \bibliography{main}
 
