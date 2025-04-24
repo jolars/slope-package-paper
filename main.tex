@@ -6,25 +6,16 @@
 
 \usepackage{amssymb,amsmath,amsthm,mathtools,bm}
 \usepackage{upquote}
-\usepackage{booktabs}
 
 \usepackage{microtype}
 \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 
-\usepackage{subfigure}
-
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{subcaption}
 \usepackage{siunitx}
 
-\usepackage{hyperref}
-
-\definecolor{mydarkblue}{rgb}{0,0.08,0.45}
-\hypersetup{ %
-  colorlinks=true,
-  linkcolor=mydarkblue,
-  citecolor=mydarkblue,
-  filecolor=mydarkblue,
-  urlcolor=mydarkblue,
-}
+\usepackage{enumitem}
 
 \usepackage[capitalize,noabbrev]{cleveref}
 \usepackage{crossreftools}
@@ -36,6 +27,9 @@
 \usepackage{todonotes}
 
 \input{tex/macros}
+
+% setup url command for hyperref
+\newcommand{\myurl}[1]{\href{https://#1}{\nolinkurl{#1}}}
 
 \author{Johan Larsson~\orcidlink{0000-0002-4029-5945}\\University of Copenhagen
    \And Second Author\\Plus Affiliation}
@@ -105,6 +99,57 @@ consequence of the sorted \(\ell_1\) norm.
 \section{Coordinate Descent for SLOPE}
 
 \section{Implementation}
+
+In this paper we present a collection of packages for solving SLOPE, currently
+with support for fitting SLOPE in \proglang{R}, \proglang{Python}, and
+\proglang{Julia}. The backbone of all of these packages is based on a
+\proglang{C++} library that implements all of the numerical algorithms for
+SLOPE, including preprocessing, cross-validation, and path fitting. The
+packages for the high-level languages all serve as thin wrappers to the
+\proglang{C++} library, with some additional functionality for handling data
+and plotting the results. This means that new features and bug fixes propagate
+quickly and easily to all these wrapppers and enable users to promptly take
+advantage of the latest developments.
+
+The entire suite of packages is open source and licensed under the GPL-3.0 license,
+and is available on GitHub~(\Cref{tab:slope-packages}).
+
+\begin{table}[htpb]
+  \centering
+  \caption{SLOPE packages}
+  \label{tab:slope-packages}
+  \begin{tabular}{llll}
+    \toprule
+    Language          & Package        & Repository                         & Documentation                     \\
+    \midrule
+    \proglang{R}      & \pkg{SLOPE}    & \myurl{github.com/jolars/SLOPE}    & \myurl{jolars.github.io/libslope} \\
+    \proglang{Python} & \pkg{sortedl1} & \myurl{github.com/jolars/sortedl1} & \myurl{jolars.github.io/sortedl1} \\
+    \proglang{Julia}  & \pkg{SLOPE.jl} & \myurl{github.com/jolars/SLOPE.jl} & \myurl{jolars.github.io/SLOPE.jl} \\
+    \proglang{C++}    & \pkg{slope}    & \myurl{github.com/jolars/libslope} & \myurl{jolars.github.io/libslope} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The packages are
+available through the respective package managers for each language, and can be
+be installed using the following commands:
+
+\begin{description}[labelwidth=8ex]
+  \item[\proglang{R}] \code{install.packages("SLOPE")}
+  \item[\proglang{Python}] \code{pip install sortedl1}
+  \item[\proglang{Julia}] \code{using Pkg; Pkg.add("SLOPE")}
+\end{description}
+
+This is made possible via several pieces of software that enable us to link the
+API from our \proglang{C++} library to the high-level languages. This includes
+\pkg{Rcpp}~\citep{eddelbuettel2011} and \pkg{RcppEigen}~\citep{bates2013} for
+\proglang{R}, \pkg{pybind11}~\citep{jakob2025}, and \pkg{CxxWrap}~\citep{janssens2020} for
+\proglang{Julia}.
+
+\section{Examples}
+
+In this section we will show how to use the packages to fit SLOPE models in
+the different languages.
 
 \section{Benchmarks}
 
