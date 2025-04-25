@@ -72,18 +72,22 @@ Sorted L-One Penalized Estimation
 regularized regression that consists of following convex optimization problem:
 \begin{equation}
   \label{eq:slope}
-  \minimize_{\beta_0,\bm{\beta}} \left( \frac{1}{n} \sum_{i=1}^n f(y_i, \beta_0 + \bm{\beta}^\intercal \bm{x}_i) + \alpha J_{\bm{\lambda}}(\bm{\beta})\right)
+  \minimize_{\beta_0,\bm{\beta}} \left( \frac{1}{n} \sum_{i=1}^n f(\bm{y}_i, \beta_0 + \bm{\beta}^\intercal \bm{x}_i) + \alpha J_{\bm{\lambda}}(\bm{\beta})\right)
 \end{equation}
-where \((y_i, \bm{x}_i)\) is the \(i\)th observation, \(\alpha\) a parameter
+where \((\bm{y}_i, \bm{x}_i)\) is the \(i\)th observation, \(\alpha\) a parameter
 that controls the strength of regularization, and \(\bm{\lambda}\) a non-increasing sequence of penalty weights. \(J\) is the
 \emph{sorted $\ell_1$ norm}, defined as
 \begin{equation}
   \label{eq:sl1}
   J_{\bm{\lambda}}(\bm{\beta}) = \sum_{j=1}^p \lambda_j |\beta_{(j)}|, \quad
-  \text{where}\quad |\bm{\beta}_{(1)}| \geq |\bm{\beta}_{(2)}| \geq \ldots \geq
-  |\bm{\beta}_{(p)}|.
+  \text{where}\quad |\beta_{(1)}| \geq |\beta_{(2)}| \geq \ldots \geq
+  |\beta_{(p)}|.
 \end{equation}
 We let \((\hat{\beta}_0, \hat{\bm{\beta}})\) denote a solution to the problem in \Cref{eq:slope}.
+
+We take \(\bm{X}\) to be the \(n \times p\) design matrix and \(\bm{Y}\) the
+\(n \times m\) response matrix.\footnote{For our case, \(m = 1\) unless
+  the model is multinomial logistic regression.}
 
 SLOPE is a generalization of OSCAR (octagonal shrinkage and clustering
 algorithm for regression)~\citep{bondell2008} and serves as an alternative to the
