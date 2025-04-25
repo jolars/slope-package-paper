@@ -98,7 +98,49 @@ consequence of the sorted \(\ell_1\) norm.
 
 \section{Coordinate Descent for SLOPE}
 
-\section{Implementation}
+\section{Mathematical Details}
+
+\subsection{Solvers}
+
+The packages feature multiple solvers, currently proximal gradient descent,
+FISTA (fast iterative thresholding algorithm), and the hybrid
+coordinate descent method. The codebase is modular by design, so
+adding new solvers is straightforward.
+
+\subsection{Convergence Criteria}
+
+Our packages use a duality-based stopping criterion, providing an upper
+bound on suboptimality at convergence. To achieve this, we
+
+\section{Technical Details}
+
+\subsection{Sparsity}
+
+Our package interfaces directly with the Eigen library and handles
+sparse design matrices in a natural fashion. In \proglang{R}, these
+can be created directly through the \pkg{Matrix} package, and in
+\proglang{Python} through the \pkg{scipy.sparse} package. In
+\proglang{Julia}, we use the \pkg{SparseArrays} package, which is
+part of the standard library.
+
+The returned coefficients are also stored in a sparse format, which
+allows for efficient storage and retrieval of the coefficients. This
+
+\subsection{Parallelization}
+
+The software is parallelized using OpenMP, which is supported
+on all major platforms\footnote{Although overhead for creating
+  multiple threads is considerably more demanding on Windows}.
+Functions make use of heuristics to determine whether to
+spawn multiple threads depending on problem size, except for
+the embarassingly parallel case of cross-validation, which is always
+parallelized.
+
+\subsection{Out-of-Memory Support}
+
+% TODO: Should we implement this? would be nice.
+
+\subsection{Implementation}
 
 In this paper we present a collection of packages for solving SLOPE, currently
 with support for fitting SLOPE in \proglang{R}, \proglang{Python}, and
@@ -130,16 +172,6 @@ and is available on GitHub~(\Cref{tab:slope-packages}).
   \end{tabular}
 \end{table}
 
-The packages are
-available through the respective package managers for each language, and can be
-be installed using the following commands:
-
-\begin{description}[labelwidth=8ex]
-  \item[\proglang{R}] \code{install.packages("SLOPE")}
-  \item[\proglang{Python}] \code{pip install sortedl1}
-  \item[\proglang{Julia}] \code{using Pkg; Pkg.add("SLOPE")}
-\end{description}
-
 This is made possible via several pieces of software that enable us to link the
 API from our \proglang{C++} library to the high-level languages. This includes
 \pkg{Rcpp}~\citep{eddelbuettel2011} and \pkg{RcppEigen}~\citep{bates2013} for
@@ -150,6 +182,16 @@ API from our \proglang{C++} library to the high-level languages. This includes
 
 In this section we will show how to use the packages to fit SLOPE models in
 the different languages.
+
+The packages are
+available through the respective package managers for each language, and can be
+be installed using the following commands:
+
+\begin{description}[labelwidth=8ex]
+  \item[\proglang{R}] \code{install.packages("SLOPE")}
+  \item[\proglang{Python}] \code{pip install sortedl1}
+  \item[\proglang{Julia}] \code{using Pkg; Pkg.add("SLOPE")}
+\end{description}
 
 \section{Benchmarks}
 
