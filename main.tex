@@ -197,6 +197,40 @@ be installed using the following commands:
   \item[\proglang{Julia}] \code{using Pkg; Pkg.add("SLOPE")}
 \end{description}
 
+Assuming that we have loaded a data set consisting of a design
+matrix \code{x} and response vector \code{y}, we can fit the full regularization
+path for the SLOPE model using the
+\pkg{SLOPE} package in \proglang{R} using
+\begin{Code}
+  library(SLOPE)
+
+  fit <- SLOPE(x, y)
+\end{Code}
+
+In \proglang{Python}, the equivalent code would be:
+\begin{Code}
+  from sortedl1 import Slope
+
+  model = Slope()
+  model.fit(x, y)
+\end{Code}
+
+In Julia, the package can be loaded and run on a simple dataset as follows:
+\begin{Code}
+  using SLOPE
+
+  fit = slope(x, y)
+\end{Code}
+
+Meanwhile, if one wanted to use the C++ library directly, the following code
+would suffice:
+\begin{Code}
+  #include <slope/slope.h>
+
+  slope::Slope model;
+  auto path_result = model.path(x, y);
+\end{Code}
+
 \section{Benchmarks}
 
 \bibliography{main}
