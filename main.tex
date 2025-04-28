@@ -102,6 +102,27 @@ consequence of the sorted \(\ell_1\) norm.
 
 \section{Coordinate Descent for SLOPE}
 
+SLOPE is a convex but non-smooth optimization problem. And since there are
+algorithms for computing the proximal operator of the sorted \(\ell_1\), based
+on to the pool-adjacent-violators algorithm~(PAVA)~\citep{barlow1972}, it is
+possible to use proximal gradient descent, including accelerated versions such
+as FISTA~\citep{beck2009}. It is also possible to use the alternating direction
+method of multipliers (ADMM) method~\citep{boyd2010}. \citet{bogdan2015}, for
+instance, uses FISTA.
+
+These methods are well-studied and robust, yet have for related problems such
+as the lasso and elastic net been shown to be inferior to coordinate descent
+methods~\citep{friedman2007,friedman2010}. For SLOPE, however, coordinate
+descent cannot be used directly since the sorted \(\ell_1\) norm is not
+separable.
+
+This problem was, however, solved by \citet{larsson2023}, who used a hybrid
+combination of proximal gradient and coordinate descent. The idea of the
+algorithm is to take a full gradient descent step followed by several
+coordinate descent steps on the current cluster structure. The gradient descent
+steps allow the algorithm to eventually discover the true cluster structure,
+while the coordinate descent promote fast convergence.
+
 \section{Mathematical Details}
 
 \subsection{Solvers}
@@ -232,6 +253,30 @@ would suffice:
 \end{Code}
 
 \section{Benchmarks}
+
+As part of this project, as well as the work by \citet{larsson2023}, we have
+developed a benchmark for SLOPE using \pkg{benchopt}~\citep{moreau2022a}: a
+command-line interface and Python library for creating and managing
+benchmarks of algorithms for optimization. The benchmark for
+SLOPE is available at \myurl{github.com/benchopt/benchmark\_slope}, which
+currently features both the R and Python implementations of SLOPE.
+
+For this paper, we have run the benchmarks for some real data sets~\Cref{tab:real-datasets},
+as well as simulated data.
+
+\begin{table}[htpb]
+  \centering
+  \caption{}
+  \label{tab:real-datasets}
+  \begin{tabular}{ll}
+    \toprule
+    Column 1 & Column 2 \\
+    \midrule
+    a        & b        \\
+    c        & d        \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \bibliography{main}
 
