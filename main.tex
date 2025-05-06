@@ -15,6 +15,8 @@
 \usepackage{subcaption}
 \usepackage{siunitx}
 
+\usepackage[vlined]{algorithm2e}
+
 \usepackage{enumitem}
 
 \usepackage[capitalize,noabbrev]{cleveref}
@@ -69,38 +71,51 @@
 
 Sorted L-One Penalized Estimation
 (SLOPE)~\citep{bogdan2013,zeng2014,bogdan2015} is a type of
-regularized regression that consists of following convex optimization problem:
+regularized regression that consists of the following convex optimization problem:
 \begin{equation}
   \label{eq:slope}
-  \minimize_{\beta_0 \in \mathbb{R},\bm{\beta} \in \mathbb{R}^p} \left( P(\beta_0,\beta) =  \frac{1}{n} \sum_{i=1}^n f(\bm{y}_i, \beta_0 + \bm{\beta}^\intercal \bm{x}_i) + \alpha J_{\bm{\lambda}}(\bm{\beta})\right)
+  \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p}
+  \left(
+  P(\beta_0,\beta)
+  = \frac{1}{n} \sum_{i=1}^n f(y_i, \beta_0
+  + \beta^\intercal x_i) + \alpha J_{\lambda}(\beta)
+  \right)
 \end{equation}
-where \((\bm{y}_i, \bm{x}_i)\) is the \(i\)th observation, \(\alpha\) a parameter
-that controls the strength of regularization, and \(\bm{\lambda}\) a non-increasing sequence of penalty weights. \(J\) is the
+where \((y_i, x_i)\) is the \(i\)th observation, \(\alpha\) a parameter
+that controls the strength of regularization, and \(\lambda\) a non-increasing sequence of penalty weights. \(J\) is the
 \emph{sorted $\ell_1$ norm}, defined as
 \begin{equation}
   \label{eq:sl1}
-  J_{\bm{\lambda}}(\bm{\beta}) = \sum_{j=1}^p \lambda_j |\beta_{(j)}|, \quad
+  J_{\lambda}(\beta) = \sum_{j=1}^p \lambda_j |\beta_{(j)}|, \quad
   \text{where}\quad |\beta_{(1)}| \geq |\beta_{(2)}| \geq \ldots \geq
   |\beta_{(p)}|.
 \end{equation}
-We let \((\hat{\beta}_0, \hat{\bm{\beta}})\) denote a solution to the problem in \Cref{eq:slope}.
-
-We take \(\bm{X}\) to be the \(n \times p\) design matrix and \(\bm{Y}\) the
-\(n \times m\) response matrix.\footnote{For our case, \(m = 1\) unless
-  the model is multinomial logistic regression.}
+We let \((\hat{\beta}_0, \hat{\beta})\) denote a solution to the problem in \Cref{eq:slope}
+and take \(X\) to be the \(n \times p\) design matrix and \(Y\) the
+\(n \times m\) response matrix,\footnote{For our case, \(m = 1\) unless
+  the model is multinomial logistic regression.} using the convention
+of denoting a row of a matrix \(X\) as \(x_i\) and a column as \(x_j\).
 
 SLOPE is a generalization of OSCAR (octagonal shrinkage and clustering
-algorithm for regression)~\citep{bondell2008} and serves as an alternative to the
-lasso~\citep{santosa1986,donoho1994,donoho1995,tibshirani1996}, elastic
-net~\citep{zou2005}, the SCAD (smoothly clipped absolute deviation)
-penalty~\citep{fan2001}, and the MCP~(minimax concave
-penalty)~\citep{zhang2010} for sparse regression.
+algorithm for regression)~\citep{bondell2008}, which is attained by
+setting \(\lambda\) to be a linear sequence, which is typically parameterized as
+\(\lambda_j = \theta_1 + \theta_2(p - j)\),\footnote{We have used \(\theta_1,\theta_2\) in place of
+  \(\lambda_1,\lambda_2\), used in \citet{bondell2008}, to avoid abusing notation.} where \(\theta_1, \theta_2
+\geq 0\)~\citep{figueiredo2014}. It is also a special case of
+the lasso~\citep{santosa1986,donoho1994,donoho1995,tibshirani1996},
+which is obtained by taking a constant \(\lambda\).
 
-One of the main advantages of SLOPE is that it deals naturally with
-correlated predictors by clustering them together. This is a natural
-consequence of the sorted \(\ell_1\) norm.
+% SLOPE is a flexible method, which comes from the fact that the
+% \(\lambda\) sequence can be chosen in many different ways (including
+% the two mentioned above).
 
-\section{Coordinate Descent for SLOPE}
+% net~\citep{zou2005}, the SCAD (smoothly clipped absolute deviation)
+% penalty~\citep{fan2001}, and the MCP~(minimax concave
+% penalty)~\citep{zhang2010} for sparse regression.
+
+A special property of SLOPE is that it can clusters coefficients by
+setting them to the same magnitude~\citep{figueiredo2016,bogdan2022}. This is a natural
+consequence of the sorted \(\ell_1\) norm and stems from the fact that
 
 SLOPE is a convex but non-smooth optimization problem. And since there are
 algorithms for computing the proximal operator of the sorted \(\ell_1\), based
@@ -114,14 +129,27 @@ These methods are well-studied and robust, yet have for related problems such
 as the lasso and elastic net been shown to be inferior to coordinate descent
 methods~\citep{friedman2007,friedman2010}. For SLOPE, however, coordinate
 descent cannot be used directly since the sorted \(\ell_1\) norm is not
-separable.
-
-This problem was, however, solved by \citet{larsson2023}, who used a hybrid
-combination of proximal gradient and coordinate descent. The idea of the
-algorithm is to take a full gradient descent step followed by several
-coordinate descent steps on the current cluster structure. The gradient descent
+separable. This problem was, however, solved by \citet{larsson2023}, who invented a
+hybrid combination of proximal gradient and coordinate descent. The
+algorithm takes full gradient descent steps interspersed with multiple
+coordinate descent passes on the current cluster structure. The gradient descent
 steps allow the algorithm to eventually discover the true cluster structure,
 while the coordinate descent promote fast convergence.
+
+\section{Coordinate Descent for SLOPE}
+
+The primary algorithm of the \pkg{SLOPE} packages is the hybrid
+coordinate descent algorithm by \citet{larsson2023}. Since it is described in
+detail there, we will only give a brief overview of the algorithm here.
+
+\begin{algorithm}
+  \caption{caption}
+  \label{alg:label}
+  \KwData{data}
+  \KwResult{resul}
+
+  \caption{caption}
+\end{algorithm}
 
 \section{Mathematical Details}
 
@@ -212,26 +240,116 @@ where
 \]
 With this, we can obtain a duality gap:
 \[
-  P(\beta) - D(\delta)
+  P(\beta_0, \beta) - D(\delta)
 \]
 
-As a stopping criterion for the algorithm, we use
+As a stopping criterion for the algorithm, we use the relative duality gap
 \[
-  \frac{P(\beta) - D(\delta)}{\max(P(\beta), 10^{-\epsilon})}
+  \frac{P(\beta_0, \beta) - D(\delta)}{\max\big(P(\beta_0, \beta), 10^{-\kappa}\big)}
 \]
-with \(\epsilon\) set in a machine-dependent way.
+with \(\kappa\) set in a machine-dependent way.
 
-\section{Technical Details}
+\subsection{Relaxed SLOPE}
+
+\subsection{Cross-Validation}
+
+The packages support hyper-parameter tuning via iterated \(k\)-fold cross-validation,
+with parameterization over \(\alpha\), \(\lambda\) type (BH, Gaussian type, etc.), \(\gamma\) (SLOPE relaxation
+parameter) and the
+
+\subsection{Path Fitting}
+
+Our packages are designed to fit the full regularization path for SLOPE, which
+is the sequence of solutions to the problem in \Cref{eq:slope} as \(\alpha\) is varied
+from \(\alpha_\text{max}\), at which point the first cluster enters the model,
+to a small value of \(\alpha\) at which the model is almost saturated.
+We use the same criteria as \citet{friedman2010} for stopping the path early,
+except that we stop if the number of \emph{clusters} excluding the zero-cluster
+exceeds \(n + 1\) (by default), since the support of SLOPE is limited at \(n\) clusters,
+which can potentially exceed the number of non-zero coefficients.\footnote{In practice
+  this is quite rare since clusters do not form easily at low levels of regularization.}
+
+Fitting the full regularization path is a natural element of SLOPE and similar
+models since an optimal setting for \(\lambda\) is only available under
+strict and non-testable assumptions.
+
+\subsection{Screening Rules and Working Sets}
+
+Sparse models, like lasso, SCAD, MCP, and SLOPE, benefit greatly from
+so-called \emph{screening rules}, which are used to reduce the dimension of
+\(\beta\) in the optimization problem. The basic intuition for this is that
+it is possible to estimate the gradient \(\nabla F(\beta) \) for a given SLOPE problem
+and use this to determine, via the subdifferential, which coefficients are
+likely to be non-zero. This screening rule can either be heuristic or safe:
+in the latter case the rule guarantees that excluded features correspond
+to zero coefficients in the final model. Heuristic rules, on the other hand,
+do not guarantee this and therefore need to be complemented with a pass
+over all coefficients at the end to ensure that the optimality conditions
+are satisfied. Since they are less conservative, however, the cost of
+doing so is typically outweighed by the savings in computation time.
+Heuristic and safe rules can be combined, usually at no extra cost since
+they both rely on the same gradient information.
+
+In the SLOPE package, we use the strong screening rule for
+SLOPE~\citep{larsson2020a}, which is an extension of the working set strategy
+for the strong screening rule for the lasso~\citep{tibshirani2012}.
+
+\section{Implementation Details}
+
+\subsection{Clusters}
+
+There are multiple ways to handle the cluster structure for SLOPE.
+In theory, the most efficient solution would be to use a
+doubly-linked list, which offers \(O(1)\) deletion and insertion.
+This is a natural construct for the cluster structure, since we
+traverse the list linearly as part of the thresholding operator.
+
+Nevertheless, this turns out to be a poor choice in practice.
+The discussion is beyond the scope of this paper, but the main
+reason is that doubly-linked lists suffer from poor cache
+locality, which is a major bottleneck in modern processors.
+
+Instead, we use the following structure:
+
+\begin{description}
+  \item[\code{c}] The coefficients of the clusters
+  \item[\code{c\_idx}] Pointers to the coefficients in the cluster
+  \item[\code{c\_ptr}] Values of the cluster pointers
+\end{description}
+
+This structure bears semblance to typical implementations of
+sparse matrices.
+
+\subsection{Thresholding Operator}
+
+The SLOPE thresholding operator is the analogue to the
+soft-thresholding operator for the lasso. But unlike the
+latter, which is trivial to compute, the SLOPE thresholding operator
+needs to conduct a search over the clusters in order to find correct
+solution. This leads to a worst-case complexity of
+\(\mathcal{O}(K)\), which could be prohibitive in practice.
+Fortunately, the situation is much less dire in practice, since
+the order of the clusters typically stabilizes early. Instead, the
+bulk of the computational time is spent on computing the gradient.
+For this reason we use a linear search, which, although suboptimal
+theoretically, is faster than a binary search in practice.
+
+We have, however, improved the implementation of
+operator by \citet{larsson2023} significantly. In their implementation,
+partial \(\lambda\) sums were in each iteration of the search, which
+for some cases could lead to large overhead when updating
+a large cluster. In our implementation, we instead use a lazy
+evaluation strategy based on the cumulative sum of the \(\lambda\) array,
+which causes no additional overhead.
 
 \subsection{Sparsity}
 
-Our package is based on the Eigen C++ library and handles sparse
-design matrices in a natural fashion. These can be created directly through the
-\pkg{Matrix} through the \pkg{scipy} and \pkg{SparseArrays} packages in
-\proglang{R}, \proglang{Julia}, and \proglang{Python} respectively, and
-can be passed directly to the SLOPE solvers without any additional
-overhead. The returned coefficients are also stored in a sparse format, which
-allows for efficient storage and retrieval of the coefficients. This
+Our package is based on the Eigen C++ library and works naturally with sparse
+design matrices. These can be created directly through the
+\pkg{Matrix}~(\proglang{R}), \pkg{scipy}~(\proglang{Python}), and \pkg{SparseArrays}~(\proglang{Julia}) packages in
+and can be passed directly to the C++ API with negligible overhead
+and without copying. Coefficients are returned in a sparse format, which
+allows for efficient storage and retrieval of the coefficients.
 
 \subsection{Parallelization}
 
