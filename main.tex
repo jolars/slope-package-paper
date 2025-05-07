@@ -136,6 +136,51 @@ coordinate descent passes on the current cluster structure. The gradient descent
 steps allow the algorithm to eventually discover the true cluster structure,
 while the coordinate descent promote fast convergence.
 
+\section{Generalized Linear Models}
+
+The SLOPE packages are designed to support loss functions
+from the family of generalized linear models. We assume, therefore, that
+\[
+  F(\beta_0, \beta) = \frac{1}{n} \sum_{i=1}^n f(y_i, \beta_0 + x_i^\intercal \beta)
+\]
+and letting \(\eta_i = x_i^\intercal \beta + \beta_0\) be the
+linear predictor, so that the loss function is a sum of functions that depend
+on the response and the linear predictor. We then note that
+\[
+  \nabla_\beta F(\beta_0,\beta) = X^\intercal r
+\]
+where \(r_i = \ilink(\eta_i) - y_i\) is the generalized residual and
+\(\ilink\) is the inverse link function, also known as the \emph{mean}
+function.
+
+They also share the property that
+\[
+  \frac{\partial}{\partial \eta_i} f(y_i, \eta_i) = \ilink(\eta_i) - y_i
+\]
+
+\begin{table}[htpb]
+  \centering
+  \caption{Loss functions, link functions, and inverse link functions for
+    generalized linear models in the SLOPE package. Note that in the case of
+    multinomial logistic regression, the input vector-valued, and we allow
+    \(\log\) and \(\exp\) to be overloaded to apply element-wise in these cases.
+  }
+  \label{tab:glm}
+  \begin{tabular}{lccc}
+    \toprule
+    Model       & \(f(y, \eta)\)                                                                          & \(\link(\mu)\)                            & \(\ilink(\eta)\)                               \\
+    \midrule
+    Gaussian    & \(\frac{1}{2}(y - \eta)^2\)                                                             & \(\mu\)                                   & \(\eta\)                                       \\
+    \addlinespace
+    Binomial    & \(\log(1 + e^\eta) - \eta y\)                                                           & \(\log \left(\frac{\mu}{1 - \mu}\right)\) & \(\frac{e^\eta}{1 + e^\eta}\)                  \\
+    \addlinespace
+    Poisson     & \(e^\eta - \eta y\)                                                                     & \(\log(\mu)\)                             & \(e^\eta\)                                     \\
+    \addlinespace
+    Multinomial & \(\sum_{k=1}^m\left( \frac{e^{\eta_k}}{\sum_{j=1}^m e^{\eta_j}} - y_k \eta_k  \right)\) & \(\log\left(\frac{\mu}{1 - \mu}\right) \) & \(\frac{\exp(\eta)}{\sum_{j=1}^m e^{\eta_j}}\) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 \section{Coordinate Descent for SLOPE}
 
 The primary algorithm of the \pkg{SLOPE} packages is the hybrid
@@ -159,6 +204,14 @@ The packages feature multiple solvers, currently proximal gradient descent,
 FISTA (fast iterative thresholding algorithm), and the hybrid
 coordinate descent method. The codebase is modular by design, so
 adding new solvers is straightforward.
+
+\subsection{Intercept Updates}
+
+If we are in a PGD step, then the intercept is updated as part of the
+full gradient step.
+
+If we are in a coordinate descent step, then we can compute the intercept
+update at the end of a full pass over the clusters.
 
 \subsection{Convergence Criteria}
 
@@ -251,11 +304,21 @@ with \(\kappa\) set in a machine-dependent way.
 
 \subsection{Relaxed SLOPE}
 
+Unlike the lasso, the relaxed version of SLOPE has not been studied in much detail.
+There are at least two papers where it is described, but then typically it is
+called \emph{debiased} SLOPE. We prefer to use the term \emph{relaxed} here,
+since it corresponds closer to the terminology from the lasso literature and
+avoids confusion with the debiased lasso~\citep{geer2014}, which is a different
+model.
+
+In our packages, we support the relaxed version of SLOPE, and parameterize
+this relaxation with a parameter \(\gamma\).
+
 \subsection{Cross-Validation}
 
-The packages support hyper-parameter tuning via iterated \(k\)-fold cross-validation,
-with parameterization over \(\alpha\), \(\lambda\) type (BH, Gaussian type, etc.), \(\gamma\) (SLOPE relaxation
-parameter) and the
+The packages support hyper-parameter tuning via iterated \(k\)-fold
+cross-validation, with parameterization over \(\alpha\), \(\lambda\) type (BH,
+Gaussian type, etc.), \(\gamma\) (SLOPE relaxation parameter).
 
 \subsection{Path Fitting}
 
@@ -293,6 +356,23 @@ they both rely on the same gradient information.
 In the SLOPE package, we use the strong screening rule for
 SLOPE~\citep{larsson2020a}, which is an extension of the working set strategy
 for the strong screening rule for the lasso~\citep{tibshirani2012}.
+
+\subsection{Covariance Updates}
+
+\citet{friedman2010} present an alternative coordinate descent update that is
+based on pre-computing the Gram matrix \(X^\intercal X\) and then use this to
+speed up the updates. As the authors note, this can lead to dramatic speed-ups
+for the ordinary lasso (with least-squares loss), but not for other loss
+functions and not in the high-dimensional setting.
+
+For SLOPE, however, these covariance updates are not as useful. The
+reason for this is that the Gram matrix we need is the collapsed
+version \((XP)^\intercal XP\), where \(P\) is the pattern matrix.
+Throughout optimization, \(P\) changes, which means that the
+precomputed Gram matrix must be updated as well. Though this
+might be efficient in a few select cases where there are few
+changes in the clusters, we have chosen to avoid this
+functionality.
 
 \section{Implementation Details}
 
@@ -459,7 +539,7 @@ developed a benchmark for SLOPE using \pkg{benchopt}~\citep{moreau2022a}: a
 command-line interface and Python library for creating and managing
 benchmarks of algorithms for optimization. The benchmark for
 SLOPE is available at \myurl{github.com/benchopt/benchmark\_slope}, which
-currently features both the R and Python implementations of SLOPE.
+features all the SLOPE packages.
 
 For this paper, we have run the benchmarks for some real data sets~\Cref{tab:real-datasets},
 as well as simulated data.
@@ -477,6 +557,26 @@ as well as simulated data.
     \bottomrule
   \end{tabular}
 \end{table}
+
+\begin{description}
+  \item[sortedl1] The python package of our implementation of the hybrid
+        proximal gradient/coordinate descent algorithm described in this work and
+        \citet{larsson2023}.
+  \item[PGD] The proximal gradient descent algorithm, which is a standard
+        algorithm for solving convex optimization problems. We use a
+        analytical computation of the Lipschitz constant to pick the step size.
+  \item[PGD-Anderson] The PGD algorithm with Anderson acceleration, which is a
+        method for accelerating the convergence of fixed-point iterations.
+  \item[PGD-BB] The PGD algorithm with Barizilai--Borwein~\citep{barzilai1988} step sizes.
+  \item[FISTA] An accelerated version of PGD~\citep{beck2009}.
+  \item[ADMM] The alternating direction method of multipliers~\citep{boyd2010}, which is a
+        popular algorithm for solving convex optimization problems with
+        constraints.
+  \item[Newt-ALM] A semi-smooth Newton-based method~\citep{luo2019}.
+  \item[skglm] Another implementation of FISTA, but with working sets, from the
+        \pkg{skglm} package~\citep{bertrand2022}.
+  \item[SlopePath] A homotopy method, similar to lars~\citep{dupuis2024}.
+\end{description}
 
 \bibliography{main}
 
