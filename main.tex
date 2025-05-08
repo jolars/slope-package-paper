@@ -442,6 +442,8 @@ Instead, we use the following structure:
 This structure bears semblance to typical implementations of
 sparse matrices.
 
+Pattern~\citep{schneider2022}
+
 \subsection{Thresholding Operator}
 
 The SLOPE thresholding operator is the analogue to the
@@ -627,6 +629,7 @@ as well as simulated data.
         method for accelerating the convergence of fixed-point
         iterations~\citep{anderson1965,zhang2020}.
   \item[PGD-BB] The PGD algorithm with Barizilai--Borwein~\citep{barzilai1988} step sizes.
+  \item[PGD-Safe] A PGD-based algorithm using safe screening rules~\citep{elvira2023}.
   \item[FISTA] An accelerated version of PGD~\citep{beck2009}.
   \item[ADMM] The alternating direction method of
         multipliers~\citep{glowinski1975,boyd2010}, which is a popular algorithm
