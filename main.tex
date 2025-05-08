@@ -582,16 +582,19 @@ as well as simulated data.
         algorithm for solving convex optimization problems. We use a
         analytical computation of the Lipschitz constant to pick the step size.
   \item[PGD-Anderson] The PGD algorithm with Anderson acceleration, which is a
-        method for accelerating the convergence of fixed-point iterations.
+        method for accelerating the convergence of fixed-point
+        iterations~\citep{anderson1965,zhang2020}.
   \item[PGD-BB] The PGD algorithm with Barizilai--Borwein~\citep{barzilai1988} step sizes.
   \item[FISTA] An accelerated version of PGD~\citep{beck2009}.
-  \item[ADMM] The alternating direction method of multipliers~\citep{boyd2010}, which is a
-        popular algorithm for solving convex optimization problems with
-        constraints.
-  \item[Newt-ALM] A semi-smooth Newton-based method~\citep{luo2019}.
+  \item[ADMM] The alternating direction method of
+        multipliers~\citep{glowinski1975,boyd2010}, which is a popular algorithm
+        for solving convex optimization problems with constraints.
+  \item[Newt-ALM] A semi-smooth Newton-based method~\citep{luo2019}. We use the
+        implementation of this method from \citet{larsson2023}.
   \item[skglm] Another implementation of FISTA, but with working sets, from the
         \pkg{skglm} package~\citep{bertrand2022}.
-  \item[SlopePath] A homotopy method, similar to lars~\citep{dupuis2024}.
+  \item[SlopePath] An approximate homotopy method by \citet{dupuis2024},
+        which is similar to the lars algorithm for the lasso~\citep{efron2004}.
 \end{description}
 
 \bibliography{main}
