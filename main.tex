@@ -205,11 +205,20 @@ and \(\beta\) can be expressed as
   \end{tabular}
 \end{table}
 
-\section{Coordinate Descent for SLOPE}
+\subsection{Coordinate Descent for SLOPE}
 
 The primary algorithm of the \pkg{SLOPE} packages is the hybrid
 coordinate descent algorithm by \citet{larsson2023}. Since it is described in
-detail there, we will only give a brief overview of the algorithm here.
+detail there, we will only summarize its key points here.
+
+The basic idea of the algorithm is to perform the coordinate descent updates on
+the cluster coefficients, rather than directly on the clusters. In effect, we fix the
+current cluster and update all coefficients belong to it in a single step.
+On its own, this algorithm is not guaranteed to converge since it can only
+reorder or merge clusters. In order to guarantee converge, the algorithm must
+therefore be combined with proximal gradient descent steps. These steps
+are able to split the clusters, which eventually means that the full
+algorithm converges to the correct clusters and global minimum.
 
 \begin{algorithm}
   \caption{caption}
@@ -220,14 +229,16 @@ detail there, we will only give a brief overview of the algorithm here.
   \caption{caption}
 \end{algorithm}
 
-\section{Mathematical Details}
+The hybrid nature of the algorithm comes with boons of its own.
+Indeed, proximal gradient descent algorithms are known to converge under
+more general assumptions than coordinate descent algorithms. In effect,
+this means that the PGD steps act as a safeguard and fallback
+when coordinate descent struggles to converge.
 
-\subsection{Solvers}
-
-The packages feature multiple solvers, currently proximal gradient descent,
-FISTA (fast iterative thresholding algorithm), and the hybrid
-coordinate descent method. The codebase is modular by design, so
-adding new solvers is straightforward.
+One might imagine that this approach of hybrid algorithms could be
+extended to standard Newton methods as well and, moreover, include more
+refined heuristics in order to adapt naturally to problem structure.
+This, however, is beyond the scope of our current work.
 
 \subsection{Intercept Updates}
 
@@ -249,12 +260,11 @@ constrained problem:
 \begin{equation}
   \label{eq:slope-constrained}
   \begin{aligned}
-     & \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} &  & \frac{1}{n} \sum_{i=1}^n f(y_i, r_i) + \alpha J_{\lambda}(\beta)          \\
+     & \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} &  & \frac{1}{n} \sum_{i=1}^n f(y_i, \eta_i) + \alpha J_{\lambda}(\beta)       \\
     % & \text{subject to}                                              &  & r_i = \link(\bm{x}_i^\intercal \bm{\beta}) - y_i, \quad i = 1, \ldots, n                                            \\
      & \text{subject to}                                         &  & r_i = \ilink(\beta_0 + x_i^\intercal \beta) - y_i, \quad i = 1, \ldots, n \\
   \end{aligned}
 \end{equation}
-where \(\ilink\) is the inverse link function for the Generalized Linear Model (GLM).
 
 Since \(\beta_0 + x_i^\intercal \beta = g(r_i + y_i)\), we can write the Lagrangian as
 \[
@@ -270,14 +280,15 @@ This allows us to write the dual problem as
               & \phantom{={}} - \sup_{\beta_0} \left( \delta^\intercal \bm{1} \beta_0\right)                   \\
   \end{aligned}
 \]
-Here, we can begin by noting that \(\sup_\beta \big((X^\intercal \delta)^\intercal \beta -  J_\lambda(\beta) \big)\)
-is the Fenchel conjugate of the sorted \(\ell_1\) norm, which is the indicator function of the
-sorted \(\ell_1\) dual norm unit ball. Letting \(h
-_\lambda (z) = J_\lambda(z)\), the conjugate is
+Here, we begin by noting that \(\sup_\beta \big((X^\intercal
+\delta)^\intercal \beta -  J_\lambda(\beta) \big)\) is the Fenchel conjugate of
+the sorted \(\ell_1\) norm, which is the indicator function of the sorted
+\(\ell_1\) dual norm unit ball. Its value is
 \[
-  h_\lambda^*(z) = \begin{cases}
-    0,       & \text{if } J^*_\lambda(z) \leq 1 \\
-    +\infty, & \text{otherwise}.
+  \sup_\beta \big(z^\intercal \beta -  J_\lambda(\beta) \big) =
+  \begin{cases}
+    0      & \text{if } J^*_\lambda(z) \leq 1, \\
+    \infty & \text{otherwise}.
   \end{cases}
 \]
 Next, observe that \(\sup_{\beta_0} (\delta^\intercal \bm{1} \beta_0) = \infty\) unless
@@ -301,30 +312,37 @@ where  \(g_j = x_j^\intercal r\) is the \(j\)th component of the gradient of los
 with respect to \(\beta_j\)
 and \(r\) the generalized residual, for which \(r_i = \ilink(x_i^\intercal \beta + \beta_0) - y_i\).
 
-Therefore, a natural candidate is to take the generalized residual as
-a candidate for the dual point. To be a feasible point, however, we first
-center the point by
+Therefore, a natural candidate dual point is the generalized residual. To be a
+feasible point, however, we first center the point by its mean and scale it:
 \[
-  \tilde{\delta}_i  = r_i - \bar{r}
-\]
-and then scale it according to
-\[
-  \delta_j = \frac{r_i - \bar{r}}{\max\left(1, m^*(r - \bar{r}) \right)}.
+  \delta_j = \frac{r_i - \bar{r}}{\max\left(1, m^*(r - \bar{r}) \right)}
 \]
 where
 \[
-  m^*(r) = \max_{k=1,\ldots,p} \left(\sum_{j = 1}^k \frac{|g_{(k)}|}{\lambda_k} \right)
+  m^*(r) = \max_{k=1,\ldots,p} \left(\sum_{j = 1}^k \frac{|g_{(k)}|}{\lambda_k} \right),
 \]
-With this, we can obtain a duality gap:
+which guarantees feasibility. We then obtain the following duality gap:
 \[
   P(\beta_0, \beta) - D(\delta)
 \]
-
 As a stopping criterion for the algorithm, we use the relative duality gap
 \[
   \frac{P(\beta_0, \beta) - D(\delta)}{\max\big(P(\beta_0, \beta), 10^{-\kappa}\big)}
 \]
 with \(\kappa\) set in a machine-dependent way.
+
+The duality gap provides an upper bound on suboptimality for the problem, independent
+of solver and conditioning of the problem, which is not the case of
+convergence criteria based on changes in objective, gradients, or coefficients.
+
+The availability of the duality gap also allows us to employ
+duality-gap based safe screening rules~\citep{fercoq2015} and
+working set strategies derived from these~\citep{massias2018}, which
+could furthermore be used to enhance our strategy with look-ahead
+screening rules~\citep{larsson2021a}. However,
+as noted in \citet{larsson2022d}, the marginal improvement
+of using duality-based screening strategies is minor.
+% TODO: Maybe reconsider this!
 
 \subsection{Relaxed SLOPE}
 
