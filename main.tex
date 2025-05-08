@@ -288,9 +288,14 @@ the sorted \(\ell_1\) norm, which is the indicator function of the sorted
   \sup_\beta \big(z^\intercal \beta -  J_\lambda(\beta) \big) =
   \begin{cases}
     0      & \text{if } J^*_\lambda(z) \leq 1, \\
-    \infty & \text{otherwise}.
+    \infty & \text{otherwise},
   \end{cases}
 \]
+where \(J^*_\lambda(z)\) is the sorted \(\ell_1\) dual norm, defined as~\citep{negrinho2014}
+\begin{equation}
+  J^*_\lambda(z) = \max_{j=1,2,\dots,p}\left\{ \frac{\sum_{k=1}^j|z_{(k)}|}{\sum_{k=1}^j\lambda_k}\right\}
+\end{equation}
+
 Next, observe that \(\sup_{\beta_0} (\delta^\intercal \bm{1} \beta_0) = \infty\) unless
 \(\delta^\intercal \bm{1} = 0\).
 
@@ -315,11 +320,7 @@ and \(r\) the generalized residual, for which \(r_i = \ilink(x_i^\intercal \beta
 Therefore, a natural candidate dual point is the generalized residual. To be a
 feasible point, however, we first center the point by its mean and scale it:
 \[
-  \delta_j = \frac{r_i - \bar{r}}{\max\left(1, m^*(r - \bar{r}) \right)}
-\]
-where
-\[
-  m^*(r) = \max_{k=1,\ldots,p} \left(\sum_{j = 1}^k \frac{|g_{(k)}|}{\lambda_k} \right),
+  \delta_j = \frac{r_i - \bar{r}}{\max\left\{1, J_\lambda^*\left(X^\intercal(r - \bar{r})\right) \right\}}
 \]
 which guarantees feasibility. We then obtain the following duality gap:
 \[
