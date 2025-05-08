@@ -75,13 +75,12 @@ regularized regression that consists of the following convex optimization proble
 \begin{equation}
   \label{eq:slope}
   \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p}
-  \left(
+  \Big(
   P(\beta_0,\beta)
-  = \frac{1}{n} \sum_{i=1}^n f(y_i, \beta_0
-  + \beta^\intercal x_i) + \alpha J_{\lambda}(\beta)
-  \right)
+  = F(\beta_0, \beta) + \alpha J_{\lambda}(\beta)
+  \Big)
 \end{equation}
-where \((y_i, x_i)\) is the \(i\)th observation, \(\alpha\) a parameter
+\(P\) is the primal problem, \(F\) is the loss function, \(\alpha\) a parameter
 that controls the strength of regularization, and \(\lambda\) a non-increasing sequence of penalty weights. \(J\) is the
 \emph{sorted $\ell_1$ norm}, defined as
 \begin{equation}
@@ -90,6 +89,14 @@ that controls the strength of regularization, and \(\lambda\) a non-increasing s
   \text{where}\quad |\beta_{(1)}| \geq |\beta_{(2)}| \geq \ldots \geq
   |\beta_{(p)}|.
 \end{equation}
+
+We will assume that \(F\) takes the following form:
+\[
+  F(\beta_0, \beta) = \frac{1}{n} \sum_{i=1}^n f(y_i, \beta_0 + x_i^\intercal \beta),
+\]
+where \(f\) is a convex function, \(y_i\) is the response variable, and
+\(x_i\) is the \(i\)th row of the design matrix.
+
 We let \((\hat{\beta}_0, \hat{\beta})\) denote a solution to the problem in \Cref{eq:slope}
 and take \(X\) to be the \(n \times p\) design matrix and \(Y\) the
 \(n \times m\) response matrix,\footnote{For our case, \(m = 1\) unless
@@ -136,26 +143,43 @@ coordinate descent passes on the current cluster structure. The gradient descent
 steps allow the algorithm to eventually discover the true cluster structure,
 while the coordinate descent promote fast convergence.
 
-\section{Generalized Linear Models}
+\section{Mathematical Details}
 
-The SLOPE packages are designed to support loss functions
-from the family of generalized linear models. We assume, therefore, that
-\[
-  F(\beta_0, \beta) = \frac{1}{n} \sum_{i=1}^n f(y_i, \beta_0 + x_i^\intercal \beta)
-\]
-and letting \(\eta_i = x_i^\intercal \beta + \beta_0\) be the
-linear predictor, so that the loss function is a sum of functions that depend
-on the response and the linear predictor. We then note that
-\[
-  \nabla_\beta F(\beta_0,\beta) = X^\intercal r
-\]
-where \(r_i = \ilink(\eta_i) - y_i\) is the generalized residual and
-\(\ilink\) is the inverse link function, also known as the \emph{mean}
-function.
+\subsection{Generalized Linear Models}
+\label{sec:glm}
 
-They also share the property that
+In this section we provide a brief overview of generalized linear models (GLMs)
+and introduce the notation used in the following sections. We fist of all,
+we remind the reader that our loss function is defined as
 \[
-  \frac{\partial}{\partial \eta_i} f(y_i, \eta_i) = \ilink(\eta_i) - y_i
+  F(\beta_0, \beta) = \frac{1}{n} \sum_{i=1}^n f(y_i, \eta_i),
+\]
+letting \(\eta_i = x_i^\intercal \beta + \beta_0\) be the
+linear predictor.
+
+In a generalized linear model, the response variable \(y_i\) is modelled
+as a random variable from an exponential family, and is assumed to depend
+conditionally on the linear predictor \(\eta_i\) through
+\[
+  \E(y_i \mid \eta_i) = \ilink(\eta_i),
+\]
+whee \(\ilink\) is the inverse link function.
+
+To estimate the parameters of the model, \(\beta_0, \beta\), we form a loss
+function from the negative log-likelihood of the target distribution, modeling
+its mean parameter through the inverse link funktion applied to the linear
+predictor. A special attribute of resulting loss function is that its partial
+derivative with respect to \(\eta\) is the
+\emph{generalized residual}
+\[
+  \frac{\partial}{\partial \eta_i} f(y_i, \eta_i) = \ilink(\eta_i) - y_i = r_i.
+\]
+As a consequence, the gradient of the loss function with respect to \(\beta_0\)
+and \(\beta\) can be expressed as
+\[
+  \frac{\partial}{\partial \beta_j} F(\beta_0,\beta)
+  = \frac{1}{n} \sum_{i=1}^n x_{ij} \frac{\partial}{\partial \eta_i} f(y_i, \eta_i)
+  = \frac{1}{n} \sum_{i=1}^n x_{ij} r_i
 \]
 
 \begin{table}[htpb]
