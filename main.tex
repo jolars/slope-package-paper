@@ -441,6 +441,22 @@ spawn multiple threads depending on problem size, except for
 the embarassingly parallel case of cross-validation, which is always
 parallelized.
 
+\subsection{Feature Normalization}
+
+As shown by \citet{larsson2025}, feature normalization (centering and
+scaling the design matrix) can have large consequences for the
+solutions. In our packages, we provide multiple different options
+for centering and scaling, independently of one another.
+We also provide the possibility to manually supply centering
+and scaling vectors.
+
+We have also implemented just-in-time (JIT) normalization, which
+means that the design matrix does not need to be normalized
+in advance. Instead, normalization is performed on-the-fly during
+optimization, which means that we can allow arbitrary centering
+even of sparse design matrices. In addition, we can completely
+avoid copying the design matrix.
+
 \subsection{Out-of-Memory Support}
 
 % TODO: Should we implement this? would be nice.
