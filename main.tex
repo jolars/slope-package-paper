@@ -192,15 +192,15 @@ and \(\beta\) can be expressed as
   \label{tab:glm}
   \begin{tabular}{lccc}
     \toprule
-    Model       & \(f(y, \eta)\)                                                                          & \(\link(\mu)\)                            & \(\ilink(\eta)\)                               \\
+    Model       & \(f(y, \eta)\)                                                                                       & \(\link(\mu)\)                            & \(\ilink(\eta)\)                                       \\
     \midrule
-    Gaussian    & \(\frac{1}{2}(y - \eta)^2\)                                                             & \(\mu\)                                   & \(\eta\)                                       \\
+    Gaussian    & \(\frac{1}{2}(y - \eta)^2\)                                                                          & \(\mu\)                                   & \(\eta\)                                               \\
     \addlinespace
-    Binomial    & \(\log(1 + e^\eta) - \eta y\)                                                           & \(\log \left(\frac{\mu}{1 - \mu}\right)\) & \(\frac{e^\eta}{1 + e^\eta}\)                  \\
+    Binomial    & \(\log(1 + e^\eta) - \eta y\)                                                                        & \(\log \left(\frac{\mu}{1 - \mu}\right)\) & \(\frac{e^\eta}{1 + e^\eta}\)                          \\
     \addlinespace
-    Poisson     & \(e^\eta - \eta y\)                                                                     & \(\log(\mu)\)                             & \(e^\eta\)                                     \\
+    Poisson     & \(e^\eta - \eta y\)                                                                                  & \(\log(\mu)\)                             & \(e^\eta\)                                             \\
     \addlinespace
-    Multinomial & \(\sum_{k=1}^m\left( \frac{e^{\eta_k}}{\sum_{j=1}^m e^{\eta_j}} - y_k \eta_k  \right)\) & \(\log\left(\frac{\mu}{1 - \mu}\right) \) & \(\frac{\exp(\eta)}{\sum_{j=1}^m e^{\eta_j}}\) \\
+    Multinomial & \(\sum_{k=1}^{m-1}\left( \log \left( 1 +  \sum_{j=1}^{m-1} e^{\eta_j}\right) - y_k \eta_k  \right)\) & \(\log\left(\frac{\mu}{1 - \mu}\right) \) & \(\frac{\exp(\eta)}{1 + \sum_{j=1}^{m-1} e^{\eta_j}}\) \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -255,32 +255,32 @@ bound on suboptimality at convergence. To achieve this, we rely
 on dual variable centering and scaling in order to obtain a feasible dual
 point.
 
-In detail, we transform the primal problem, \(P\), defined in \Cref{eq:slope}, into a
-constrained problem:
+In detail, we transform the primal problem \(P\), defined in \Cref{eq:slope}, into a
+constrained problem, taking \(\alpha = 1\) without loss of generality:
 \begin{equation}
   \label{eq:slope-constrained}
   \begin{aligned}
-     & \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} &  & \frac{1}{n} \sum_{i=1}^n f(y_i, \eta_i) + \alpha J_{\lambda}(\beta)       \\
+     & \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} &  & \frac{1}{n} \sum_{i=1}^n f(y_i, x_i^\intercal \beta + \beta_0) + J_{\lambda}(\beta) \\
     % & \text{subject to}                                              &  & r_i = \link(\bm{x}_i^\intercal \bm{\beta}) - y_i, \quad i = 1, \ldots, n                                            \\
-     & \text{subject to}                                         &  & r_i = \ilink(\beta_0 + x_i^\intercal \beta) - y_i, \quad i = 1, \ldots, n \\
+     & \text{subject to}                                         &  & r_i = \ilink(\beta_0 + x_i^\intercal \beta) - y_i, \quad i = 1, \ldots, n           \\
   \end{aligned}
 \end{equation}
 
 Since \(\beta_0 + x_i^\intercal \beta = g(r_i + y_i)\), we can write the Lagrangian as
 \[
-  L(\beta_0,\beta,r,\delta) = \frac{1}{n} \sum_{i=1}^n f\big(y_i, g(r_i + y_i)\big) + \alpha J_{\lambda}(\beta) + \sum_{i=1}^n \delta_i \left(g(r_i + y_i) - x_i^\intercal \beta - \beta_0 \right).
+  L(\beta_0,\beta,r,\delta) = \frac{1}{n} \sum_{i=1}^n f\big(y_i, g(r_i + y_i)\big) + J_{\lambda}(\beta) - \sum_{i=1}^n \delta_i \left(g(r_i + y_i) - x_i^\intercal \beta - \beta_0 \right).
 \]
 This allows us to write the dual problem as
 \[
   \begin{aligned}
-    D(\delta) & = \inf_r\left( \frac{1}{n} f\left(y_i, g(r_i+y_i)\right) - \delta_i g(r_i+ y_i)\right)         \\
+    D(\delta) & = \inf_r\left( \frac{1}{n} \sum_{i=1}^n f\left(y_i, g(r_i+y_i)\right) - \delta_i g(r_i+ y_i)\right) \\
     % & \phantom{={}} + \inf_\beta \left(J_\lambda(\beta) - \delta^\intercal X\beta\right)   \\
     % & \phantom{={}} + \inf_{\beta_0} \left( -\delta^\intercal \bm{1} \beta_0\right)        \\
-              & \phantom{={}} - \sup_\beta \big((X^\intercal \delta)^\intercal \beta -  J_\lambda(\beta) \big) \\
-              & \phantom{={}} - \sup_{\beta_0} \left( \delta^\intercal \bm{1} \beta_0\right)                   \\
+              & \phantom{={}} - \sup_\beta \big((-X^\intercal \delta)^\intercal \beta -  J_\lambda(\beta) \big)     \\
+              & \phantom{={}} - \sup_{\beta_0} \left( \delta^\intercal \bm{1} \beta_0\right)                        \\
   \end{aligned}
 \]
-Here, we begin by noting that \(\sup_\beta \big((X^\intercal
+Here, we begin by noting that \(\sup_\beta \big((-X^\intercal
 \delta)^\intercal \beta -  J_\lambda(\beta) \big)\) is the Fenchel conjugate of
 the sorted \(\ell_1\) norm, which is the indicator function of the sorted
 \(\ell_1\) dual norm unit ball. Its value is
@@ -302,23 +302,32 @@ Next, observe that \(\sup_{\beta_0} (\delta^\intercal \bm{1} \beta_0) = \infty\)
 Taken together, this means that we have the following dual function:
 \begin{equation}
   D(\delta) = \begin{cases}
-    \frac{1}{n} \sum_{i=1}^n f\left(y_i, g(r_i+y_i)\right) - \delta_i g(r_i+ y_i) & \text{if } J^*_\lambda(X^\intercal \delta) \leq 1 \text{ and } \delta^\intercal \bm{1} = 0 \\
+    \frac{1}{n} \sum_{i=1}^n f\left(y_i, g(r_i+y_i)\right) - \delta_i g(r_i+ y_i) & \text{if } J^*_\lambda(-X^\intercal \delta) \leq 1 \text{ and } \delta^\intercal \bm{1} = 0 \\
     -\infty,                                                                      & \text{otherwise}.
   \end{cases}
 \end{equation}
 
-To obtain a feasible dual point for this problem, we can use the
-following fact about the stationarity condition of the primal problem,
-namely that
+A natural dual point candidate for this problem is to pick
+\(\delta = r\), since
+at the optimum we have
 \[
-  \sum_{j=1}^k | g_{(j)} | \leq \sum_{j=1}^k \lambda_j |\beta_{(j)}| \quad \forall\; k = 1,2,\dots,p.
+  \bm{0} \in X^\intercal r + \partial J_\lambda(X^\intercal r)
 \]
-where  \(g_j = x_j^\intercal r\) is the \(j\)th component of the gradient of loss function
-with respect to \(\beta_j\)
-and \(r\) the generalized residual, for which \(r_i = \ilink(x_i^\intercal \beta + \beta_0) - y_i\).
+and, in addition require that the signs between agree.
+% TODO: Hand-wavy, clean up later.
 
-Therefore, a natural candidate dual point is the generalized residual. To be a
-feasible point, however, we first center the point by its mean and scale it:
+% To obtain a feasible dual point for this problem, we can use the
+% following fact about the stationarity condition of the primal problem,
+% namely that
+% \[
+%   \sum_{j=1}^k | g_{(j)} | \leq \sum_{j=1}^k \lambda_j |\beta_{(j)}| \quad \forall\; k = 1,2,\dots,p.
+% \]
+% where  \(g_j = x_j^\intercal r\) is the \(j\)th component of the gradient of loss function
+% with respect to \(\beta_j\)
+% and \(r\) the generalized residual, for which \(r_i = \ilink(x_i^\intercal \beta + \beta_0) - y_i\).
+
+To be a feasible point, however, we first center the point by its mean and
+scale it:
 \[
   \delta_j = \frac{r_i - \bar{r}}{\max\left\{1, J_\lambda^*\left(X^\intercal(r - \bar{r})\right) \right\}}
 \]
