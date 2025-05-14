@@ -205,6 +205,25 @@ and \(\beta\) can be expressed as
   \end{tabular}
 \end{table}
 
+A particular case of interest is the multinomial logistic regression model.
+Many implementations of regularized multinomial logistic regression models, such
+as those by \citet{friedman2010} and \citet{fercoq2015} use the \emph{redundant}
+\(m\)-class formulation. Here, however, we have opted to use the non-redundant
+formulation of the loss function, with the last class serving as the reference
+category. This choice complicates notation slightly and leads to a more
+complicated formulation for the dual problem. For SLOPE, however, this is a
+more natural choice since it generalizes to the binary case as well (in which
+the last class is also implicit). SLOPE needs a \(\lambda\) sequence of length
+\(mp\), so the loss function for the multinomial case would not be equivalent
+to the binary case if we used the redundant formulation. Furthermore, the
+redundant formulation is not estimable in the absence of regularization, which
+is not the case for the non-redundant formulation. This fact also means that a
+coordinate descent algorithm needs bounds checks to handle the parameter
+ambiguity~\citep{friedman2010}. This is not especially difficult to implement
+for the lasso, but is more complicated in the case of SLOPE since rows of the
+coefficient matrix cannot be arbitrarily shifted since that would alter the
+overall cluster structure.
+
 \subsection{Coordinate Descent for SLOPE}
 
 The primary algorithm of the \pkg{SLOPE} packages is the hybrid
@@ -280,7 +299,15 @@ This allows us to write the dual problem as
               & \phantom{={}} - \sup_{\beta_0} \left( \delta^\intercal \bm{1} \beta_0\right)                        \\
   \end{aligned}
 \]
-Here, we begin by noting that \(\sup_\beta \big((-X^\intercal
+Here, we begin by noting that the infimum is attained at the point where
+\(r = \delta\)~\citep{fercoq2015}, which means that the value is
+\[
+  \frac{1}{n} \sum_{i=1}^n f\left(y_i, g(\delta_i+y_i)\right) - \delta_i g(\delta_i + y_i)
+\]
+in general, although loss-specific simplifications can be made. For instance, in the case of
+quadratic loss the expression evaluates to \(\frac{1}{2} \lVert y \rVert_2^2 - \frac{1}{2} \lVert \delta + y \lVert^2_2 \).
+
+Next, we observe that \(\sup_\beta \big((-X^\intercal
 \delta)^\intercal \beta -  J_\lambda(\beta) \big)\) is the Fenchel conjugate of
 the sorted \(\ell_1\) norm, which is the indicator function of the sorted
 \(\ell_1\) dual norm unit ball. Its value is
@@ -302,8 +329,8 @@ Next, observe that \(\sup_{\beta_0} (\delta^\intercal \bm{1} \beta_0) = \infty\)
 Taken together, this means that we have the following dual function:
 \begin{equation}
   D(\delta) = \begin{cases}
-    \frac{1}{n} \sum_{i=1}^n f\left(y_i, g(r_i+y_i)\right) - \delta_i g(r_i+ y_i) & \text{if } J^*_\lambda(-X^\intercal \delta) \leq 1 \text{ and } \delta^\intercal \bm{1} = 0 \\
-    -\infty,                                                                      & \text{otherwise}.
+    \frac{1}{n} \sum_{i=1}^n f\left(y_i, g(\delta_i+y_i)\right) - \delta_i g(\delta_i+ y_i) & \text{if } J^*_\lambda(-X^\intercal \delta) \leq 1 \text{ and } \delta^\intercal \bm{1} = 0 \\
+    -\infty,                                                                                & \text{otherwise}.
   \end{cases}
 \end{equation}
 
@@ -333,7 +360,7 @@ scale it:
 \]
 which guarantees feasibility. We then obtain the following duality gap:
 \[
-  P(\beta_0, \beta) - D(\delta)
+  P(\beta_0, \beta) - D(\delta).
 \]
 As a stopping criterion for the algorithm, we use the relative duality gap
 \[
