@@ -143,9 +143,9 @@ coordinate descent passes on the current cluster structure. The gradient descent
 steps allow the algorithm to eventually discover the true cluster structure,
 while the coordinate descent promote fast convergence.
 
-\section{Mathematical Details}
+\section{Mathematical details}
 
-\subsection{Generalized Linear Models}
+\subsection{Generalized linear models}
 \label{sec:glm}
 
 In this section we provide a brief overview of generalized linear models (GLMs)
@@ -182,13 +182,8 @@ and \(\beta\) can be expressed as
   = \frac{1}{n} \sum_{i=1}^n x_{ij} r_i
 \]
 
-\begin{table}[htpb]
+\begin{table}[t!]
   \centering
-  \caption{Loss functions, link functions, and inverse link functions for
-    generalized linear models in the SLOPE package. Note that in the case of
-    multinomial logistic regression, the input vector-valued, and we allow
-    \(\log\) and \(\exp\) to be overloaded to apply element-wise in these cases.
-  }
   \label{tab:glm}
   \begin{tabular}{lccc}
     \toprule
@@ -203,6 +198,11 @@ and \(\beta\) can be expressed as
     Multinomial & \(\sum_{k=1}^{m-1}\left( \log \left( 1 +  \sum_{j=1}^{m-1} e^{\eta_j}\right) - y_k \eta_k  \right)\) & \(\log\left(\frac{\mu}{1 - \mu}\right) \) & \(\frac{\exp(\eta)}{1 + \sum_{j=1}^{m-1} e^{\eta_j}}\) \\
     \bottomrule
   \end{tabular}
+  \caption{Loss functions, link functions, and inverse link functions for
+    generalized linear models in the SLOPE package. Note that in the case of
+    multinomial logistic regression, the input vector-valued, and we allow
+    \(\log\) and \(\exp\) to be overloaded to apply element-wise in these cases.
+  }
 \end{table}
 
 A particular case of interest is the multinomial logistic regression model.
@@ -224,7 +224,7 @@ for the lasso, but is more complicated in the case of SLOPE since rows of the
 coefficient matrix cannot be arbitrarily shifted since that would alter the
 overall cluster structure.
 
-\subsection{Coordinate Descent for SLOPE}
+\subsection{Coordinate descent for SLOPE}
 
 The primary algorithm of the \pkg{SLOPE} packages is the hybrid
 coordinate descent algorithm by \citet{larsson2023}. Since it is described in
@@ -259,7 +259,7 @@ extended to standard Newton methods as well and, moreover, include more
 refined heuristics in order to adapt naturally to problem structure.
 This, however, is beyond the scope of our current work.
 
-\subsection{Intercept Updates}
+\subsection{Intercept updates}
 
 If we are in a PGD step, then the intercept is updated as part of the
 full gradient step.
@@ -267,7 +267,7 @@ full gradient step.
 If we are in a coordinate descent step, then we can compute the intercept
 update at the end of a full pass over the clusters.
 
-\subsection{Convergence Criteria}
+\subsection{Convergence criteria}
 
 Our packages use a duality-based stopping criterion, providing an upper
 bound on suboptimality at convergence. To achieve this, we rely
@@ -393,13 +393,13 @@ model.
 In our packages, we support the relaxed version of SLOPE, and parameterize
 this relaxation with a parameter \(\gamma\).
 
-\subsection{Cross-Validation}
+\subsection{Cross-validation}
 
 The packages support hyper-parameter tuning via iterated \(k\)-fold
 cross-validation, with parameterization over \(\alpha\), \(\lambda\) type (BH,
 Gaussian type, etc.), \(\gamma\) (SLOPE relaxation parameter).
 
-\subsection{Path Fitting}
+\subsection{Path fitting}
 
 Our packages are designed to fit the full regularization path for SLOPE, which
 is the sequence of solutions to the problem in \Cref{eq:slope} as \(\alpha\) is varied
@@ -415,7 +415,7 @@ Fitting the full regularization path is a natural element of SLOPE and similar
 models since an optimal setting for \(\lambda\) is only available under
 strict and non-testable assumptions.
 
-\subsection{Screening Rules and Working Sets}
+\subsection{Screening rules and working sets}
 
 Sparse models, like lasso, SCAD, MCP, and SLOPE, benefit greatly from
 so-called \emph{screening rules}, which are used to reduce the dimension of
@@ -436,7 +436,7 @@ In the SLOPE package, we use the strong screening rule for
 SLOPE~\citep{larsson2020a}, which is an extension of the working set strategy
 for the strong screening rule for the lasso~\citep{tibshirani2012}.
 
-\subsection{Covariance Updates}
+\subsection{Covariance updates}
 
 \citet{friedman2010} present an alternative coordinate descent update that is
 based on pre-computing the Gram matrix \(X^\intercal X\) and then use this to
@@ -453,7 +453,7 @@ might be efficient in a few select cases where there are few
 changes in the clusters, we have chosen to avoid this
 functionality.
 
-\section{Implementation Details}
+\section{Implementation details}
 
 \subsection{Clusters}
 
@@ -481,7 +481,7 @@ sparse matrices.
 
 Pattern~\citep{schneider2022}
 
-\subsection{Thresholding Operator}
+\subsection{Thresholding operator}
 
 The SLOPE thresholding operator is the analogue to the
 soft-thresholding operator for the lasso. But unlike the
@@ -522,7 +522,7 @@ spawn multiple threads depending on problem size, except for
 the embarassingly parallel case of cross-validation, which is always
 parallelized.
 
-\subsection{Feature Normalization}
+\subsection{Feature normalization}
 
 As shown by \citet{larsson2025}, feature normalization (centering and
 scaling the design matrix) can have large consequences for the
@@ -538,7 +538,7 @@ optimization, which means that we can allow arbitrary centering
 even of sparse design matrices. In addition, we can completely
 avoid copying the design matrix.
 
-\subsection{Out-of-Memory Support}
+\subsection{Out-of-memory support}
 
 % TODO: Should we implement this? would be nice.
 
@@ -558,10 +558,8 @@ advantage of the latest developments.
 The entire suite of packages is open source and licensed under the GPL-3.0 license,
 and is available on GitHub~(\Cref{tab:slope-packages}).
 
-\begin{table}[htpb]
+\begin{table}[t!]
   \centering
-  \caption{SLOPE packages}
-  \label{tab:slope-packages}
   \begin{tabular}{llll}
     \toprule
     Language          & Package        & Repository                         & Documentation                     \\
@@ -572,6 +570,8 @@ and is available on GitHub~(\Cref{tab:slope-packages}).
     \proglang{C++}    & \pkg{slope}    & \myurl{github.com/jolars/libslope} & \myurl{jolars.github.io/libslope} \\
     \bottomrule
   \end{tabular}
+  \caption{SLOPE packages}
+  \label{tab:slope-packages}
 \end{table}
 
 This is made possible via several pieces of software that enable us to link the
@@ -600,24 +600,22 @@ matrix \code{x} and response vector \code{y}, we can fit the full regularization
 path for the SLOPE model using the
 \pkg{SLOPE} package in \proglang{R} using
 \begin{Code}
-  library(SLOPE)
-
-  fit <- SLOPE(x, y)
+  R> library(SLOPE)
+  R> fit <- SLOPE(x, y)
 \end{Code}
 
 In \proglang{Python}, the equivalent code would be:
 \begin{Code}
-  from sortedl1 import Slope
-
-  model = Slope()
-  model.fit(x, y)
+  >>> from sortedl1 import Slope
+  >>>
+  >>> model = Slope()
+  >>> model.fit(x, y)
 \end{Code}
 
 In Julia, the package can be loaded and run on a simple dataset as follows:
 \begin{Code}
-  using SLOPE
-
-  fit = slope(x, y)
+  julia> using SLOPE
+  julia> fit = slope(x, y)
 \end{Code}
 
 Meanwhile, if one wanted to use the C++ library directly, the following code
