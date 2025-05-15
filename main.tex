@@ -291,13 +291,11 @@ Since \(\beta_0 + x_i^\intercal \beta = g(r_i + y_i)\), we can write the Lagrang
 \]
 This allows us to write the dual problem as
 \[
-  \begin{aligned}
-    D(\delta) & = \inf_r\left( \frac{1}{n} \sum_{i=1}^n f\left(y_i, g(r_i+y_i)\right) - \delta_i g(r_i+ y_i)\right) \\
-    % & \phantom{={}} + \inf_\beta \left(J_\lambda(\beta) - \delta^\intercal X\beta\right)   \\
-    % & \phantom{={}} + \inf_{\beta_0} \left( -\delta^\intercal \bm{1} \beta_0\right)        \\
-              & \phantom{={}} - \sup_\beta \big((-X^\intercal \delta)^\intercal \beta -  J_\lambda(\beta) \big)     \\
-              & \phantom{={}} - \sup_{\beta_0} \left( \delta^\intercal \bm{1} \beta_0\right)                        \\
-  \end{aligned}
+  D(\delta)  = \inf_r\left( \frac{1}{n} \sum_{i=1}^n f\left(y_i, g(r_i+y_i)\right) - \delta_i g(r_i+ y_i)\right)
+  % & \phantom{={}} + \inf_\beta \left(J_\lambda(\beta) - \delta^\intercal X\beta\right)   \\
+  % & \phantom{={}} + \inf_{\beta_0} \left( -\delta^\intercal \bm{1} \beta_0\right)        \\
+  - \sup_\beta \big((-X^\intercal \delta)^\intercal \beta -  J_\lambda(\beta) \big)
+  - \sup_{\beta_0} \left( \delta^\intercal \bm{1} \beta_0\right).
 \]
 Here, we begin by noting that the infimum is attained at the point where
 \(r = \delta\)~\citep{fercoq2015}, which means that the value is
@@ -590,42 +588,57 @@ available through the respective package managers for each language, and can be
 be installed using the following commands:
 
 \begin{description}[labelwidth=8ex]
-  \item[\proglang{R}] \code{install.packages("SLOPE")}
-  \item[\proglang{Python}] \code{pip install sortedl1}
-  \item[\proglang{Julia}] \code{using Pkg; Pkg.add("SLOPE")}
+  \item[\proglang{R}] \code{R> install.packages("SLOPE")}
+  \item[\proglang{Python}] \code{$ pip install sortedl1}
+  \item[\proglang{Julia}] \code{]add SLOPE}
 \end{description}
+
+Installing the \proglang{C++} library is slightly more involved, and requires
+\pkg{CMake}~\citep{kitware2025} together with a working \proglang{C++} toolchain, including
+the \pkg{Eigen} library~\citep{guennebaud2010a} and \pkg{OpenMP}~\citep{dagum1998}.
 
 Assuming that we have loaded a data set consisting of a design
 matrix \code{x} and response vector \code{y}, we can fit the full regularization
-path for the SLOPE model using the
-\pkg{SLOPE} package in \proglang{R} using
+path for the SLOPE model using the following commands for the different languages:
+
+\begin{minipage}[t]{0.25\textwidth}%
+  \proglang{R}
+  \begin{Code}
+R> library(SLOPE)
+R> fit <- SLOPE(x, y)
+  \end{Code}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.32\textwidth}
+  \proglang{Python}
+  \begin{Code}
+>>> import sortedl1
+>>> model = sorted1.Slope()
+>>> model.fit(x, y)
+  \end{Code}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.32\textwidth}
+  \proglang{Julia}
+  \begin{Code}
+julia> using SLOPE
+julia> fit = slope(x, y)
+  \end{Code}
+\end{minipage}
+
+\medskip
+
+You can also use the C++ library directly, in
+which case the above would translate into the
+following:
 \begin{Code}
-  R> library(SLOPE)
-  R> fit <- SLOPE(x, y)
+#include <slope/slope.h>
+
+slope::Slope model;
+auto path_result = model.path(x, y);
 \end{Code}
 
-In \proglang{Python}, the equivalent code would be:
-\begin{Code}
-  >>> from sortedl1 import Slope
-  >>>
-  >>> model = Slope()
-  >>> model.fit(x, y)
-\end{Code}
-
-In Julia, the package can be loaded and run on a simple dataset as follows:
-\begin{Code}
-  julia> using SLOPE
-  julia> fit = slope(x, y)
-\end{Code}
-
-Meanwhile, if one wanted to use the C++ library directly, the following code
-would suffice:
-\begin{Code}
-  #include <slope/slope.h>
-
-  slope::Slope model;
-  auto path_result = model.path(x, y);
-\end{Code}
+From now on, we will switch
 
 \section{Benchmarks}
 
