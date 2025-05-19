@@ -391,11 +391,27 @@ model.
 In our packages, we support the relaxed version of SLOPE, and parameterize
 this relaxation with a parameter \(\gamma\).
 
+\subsection{Memory management}
+\label{sec:memory-management}
+
+For dense matrices, the packages implement memory-efficient views of
+the input matrices in order to avoid copies of the data.\footnote{This is technically achievable for sparse matrices too, but
+  would mean heavy overhead since we would need to iterate over all nonzero
+  elements for each view. We have thus decided against implementing this.}
+This means, for instance, that no copies need to be made when separating
+data sets into training and test data.
+
 \subsection{Cross-validation}
 
 The packages support hyper-parameter tuning via iterated \(k\)-fold
 cross-validation, with parameterization over \(\alpha\), \(\lambda\) type (BH,
 Gaussian type, etc.), \(\gamma\) (SLOPE relaxation parameter).
+
+Due to the memory-efficient implementation of view~\Cref{sec:memory-management}, we provide
+an option to altogether avoid copying the data during cross-validation.
+This means that we parallelize the cross-validation procedure over
+arbitrarily many folds and repetitions, yet still completely
+avoid the need to copy the data.
 
 \subsection{Path fitting}
 
@@ -590,7 +606,7 @@ be installed using the following commands:
 \begin{description}[labelwidth=8ex]
   \item[\proglang{R}] \code{R> install.packages("SLOPE")}
   \item[\proglang{Python}] \code{$ pip install sortedl1}
-  \item[\proglang{Julia}] \code{]add SLOPE}
+  \item[\proglang{Julia}] \code{julia> using Pkg; Pkg.add("SLOPE")}
 \end{description}
 
 Installing the \proglang{C++} library is slightly more involved, and requires
