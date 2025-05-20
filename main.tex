@@ -554,7 +554,16 @@ avoid copying the design matrix.
 
 \subsection{Out-of-memory support}
 
-% TODO: Should we implement this? would be nice.
+The SLOPE packages support out-of-memory storage for the design matrix, which
+means that users can fit SLOPE models on data sets that are larger than the
+available memory. Storage in RAM is therefore limited to the order of \(O(n) +
+O(p)\), which means that the packages can be used on huge data sets.
+
+This is supported via the generic \code{Eigen::Map} class, which allows
+arbitrary data to be mapped into \pkg{Eigen} data structures. At the
+time of writing, this is only supported for \proglang{R},
+which is possible via the \pkg{bigmemory} package~\citep{kane2013},
+and currently only for dense designs.
 
 \subsection{Implementation}
 
