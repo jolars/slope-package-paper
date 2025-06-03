@@ -28,6 +28,11 @@
 
 \usepackage{todonotes}
 
+% Workaround for Gin settings
+\makeatletter
+\let\ginnatwidth\Gin@nat@width
+\makeatother
+
 \input{tex/macros}
 
 % setup url command for hyperref
@@ -80,7 +85,7 @@ regularized regression that consists of the following convex optimization proble
   = F(\beta_0, \beta) + \alpha J_{\lambda}(\beta)
   \Big)
 \end{equation}
-\(P\) is the primal problem, \(F\) is the loss function, \(\alpha\) a parameter
+where \(P\) is the primal problem, \(F\) is the loss function, \(\alpha\) a parameter
 that controls the strength of regularization, and \(\lambda\) a non-increasing sequence of penalty weights. \(J\) is the
 \emph{sorted $\ell_1$ norm}, defined as
 \begin{equation}
@@ -103,6 +108,8 @@ and take \(X\) to be the \(n \times p\) design matrix and \(Y\) the
   the model is multinomial logistic regression.} using the convention
 of denoting a row of a matrix \(X\) as \(x_i\) and a column as \(x_j\).
 
+\subsection{SLOPE}
+
 SLOPE is a generalization of OSCAR (octagonal shrinkage and clustering
 algorithm for regression)~\citep{bondell2008}, which is attained by
 setting \(\lambda\) to be a linear sequence, which is typically parameterized as
@@ -124,26 +131,50 @@ A special property of SLOPE is that it can clusters coefficients by
 setting them to the same magnitude~\citep{figueiredo2016,bogdan2022}. This is a natural
 consequence of the sorted \(\ell_1\) norm and stems from the fact that
 
-SLOPE is a convex but non-smooth optimization problem. And since there are
-algorithms for computing the proximal operator of the sorted \(\ell_1\), based
-on to the pool-adjacent-violators algorithm~(PAVA)~\citep{barlow1972}, it is
-possible to use proximal gradient descent, including accelerated versions such
-as FISTA~\citep{beck2009}. It is also possible to use the alternating direction
-method of multipliers (ADMM) method~\citep{boyd2010}. \citet{bogdan2015}, for
-instance, uses FISTA.
+\subsection{Solving the SLOPE optimization problem}
 
-These methods are well-studied and robust, yet have for related problems such
-as the lasso and elastic net been shown to be inferior to coordinate descent
-methods~\citep{friedman2007,friedman2010}. For SLOPE, however, coordinate
-descent cannot be used directly since the sorted \(\ell_1\) norm is not
-separable. This problem was, however, solved by \citet{larsson2023}, who invented a
-hybrid combination of proximal gradient and coordinate descent. The
-algorithm takes full gradient descent steps interspersed with multiple
-coordinate descent passes on the current cluster structure. The gradient descent
-steps allow the algorithm to eventually discover the true cluster structure,
-while the coordinate descent promote fast convergence.
+SLOPE is a convex but non-smooth optimization problem. But since the
+pool-adjacent-violators algorithm~(PAVA)~\citep{barlow1972} can be used to
+efficiently\footnote{At an average \(p \log p\) rate, due to the limiting
+  sorting operation.} compute the proximal operator of the sorted \(\ell_1\)
+norm, it is possible to use a wide range of proximal algorithms, such
+as proximal gradient descent, to solve SLOPE. This also includes accelerated
+methods such as FISTA~\citep{beck2009}, which is used in the original
+implementation of SLOPE by \citet{bogdan2015}. Other possibilities include
+proximal Newton~\citep{lee2014} and the alternating direction method of
+multipliers (ADMM) method~\citep{boyd2010}.
 
-\section{Mathematical details}
+Although all of aforementioned methods are important and typically robust, they
+have for related problems such as the lasso and elastic net been shown to be
+inferior to coordinate descent methods~\citep{friedman2007,friedman2010}. For
+SLOPE, however, coordinate descent cannot be used directly since the sorted
+\(\ell_1\) norm is not separable. This problem was, however, solved by
+\citet{larsson2023}, who invented a hybrid combination of proximal gradient and
+coordinate descent. The algorithm alternates between full gradient descent
+steps and coordinate descent on current cluster structure to achieve robust and
+fast convergence.
+
+In this paper, we present a collection of packages (in \proglang{R},
+\proglang{Python}, \proglang{Julia}, and \proglang{C++}) that implement an
+improved version of this algorithm, which makes this fast and robust algorithm
+available to a wide audience.
+
+\subsection{Outline of the paper}
+
+In \Cref{sec:math-details}, we introduce the statistical problem that our
+packages solve, namely generalized linear models (GLMs) regularized with the sorted
+\(\ell_1\) norm (SLOPE)\footnote{SLOPE is sometimes used only as the procedure
+  that uses quadratic loss, but here we adopt a more general terminology and
+  let SLOPE be defined for any loss function.}, and provide a brief overview of
+the mathematical properties of GLMs and the particular properties of SLOPE.
+We also discuss the optimization problem and describe the hybrid
+coordinate descent algorithm we use for solving SLOPE.
+
+In \Cref{sec:implementation-details}, we provide a detailed overview of the
+software implementations, focusing on technical aspects such as
+memory management, parallelization, and convergence criteria.
+
+\section{Mathematical details}\label{sec:math-details}
 
 \subsection{Generalized linear models}
 \label{sec:glm}
@@ -224,7 +255,7 @@ for the lasso, but is more complicated in the case of SLOPE since rows of the
 coefficient matrix cannot be arbitrarily shifted since that would alter the
 overall cluster structure.
 
-\subsection{Coordinate descent for SLOPE}
+\subsection{SLOPE}
 
 The primary algorithm of the \pkg{SLOPE} packages is the hybrid
 coordinate descent algorithm by \citet{larsson2023}. Since it is described in
@@ -269,115 +300,18 @@ update at the end of a full pass over the clusters.
 
 \subsection{Convergence criteria}
 
+Our packages use a duality-based stopping criterion, providing an upper bound on suboptimality at convergence. We transform the primal problem into a constrained formulation and derive a dual problem that allows us to compute a duality gap. As a stopping criterion, we use the relative duality gap:
+\[
+  P(\beta_0, \beta) - D(\delta) \leq \varepsilon P(\beta_0, \beta),
+\]
+where \(\varepsilon >0\) is the user-defined tolerance level. This provides a reliable, solver-independent measure of convergence. The complete derivation of the dual problem and the calculation of the duality gap is provided in \Cref{sec:convergence-criteria-details}.
+
+\subsection{Convergence criteria}
+
 Our packages use a duality-based stopping criterion, providing an upper
 bound on suboptimality at convergence. To achieve this, we rely
 on dual variable centering and scaling in order to obtain a feasible dual
 point.
-
-In detail, we transform the primal problem \(P\), defined in \Cref{eq:slope}, into a
-constrained problem, taking \(\alpha = 1\) without loss of generality:
-\begin{equation}
-  \label{eq:slope-constrained}
-  \begin{aligned}
-     & \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} &  & \frac{1}{n} \sum_{i=1}^n f(y_i, x_i^\intercal \beta + \beta_0) + J_{\lambda}(\beta) \\
-    % & \text{subject to}                                              &  & r_i = \link(\bm{x}_i^\intercal \bm{\beta}) - y_i, \quad i = 1, \ldots, n                                            \\
-     & \text{subject to}                                         &  & r_i = \ilink(\beta_0 + x_i^\intercal \beta) - y_i, \quad i = 1, \ldots, n           \\
-  \end{aligned}
-\end{equation}
-
-Since \(\beta_0 + x_i^\intercal \beta = g(r_i + y_i)\), we can write the Lagrangian as
-\[
-  L(\beta_0,\beta,r,\delta) = \frac{1}{n} \sum_{i=1}^n f\big(y_i, g(r_i + y_i)\big) + J_{\lambda}(\beta) - \sum_{i=1}^n \delta_i \left(g(r_i + y_i) - x_i^\intercal \beta - \beta_0 \right).
-\]
-This allows us to write the dual problem as
-\[
-  D(\delta)  = \inf_r\left( \frac{1}{n} \sum_{i=1}^n f\left(y_i, g(r_i+y_i)\right) - \delta_i g(r_i+ y_i)\right)
-  % & \phantom{={}} + \inf_\beta \left(J_\lambda(\beta) - \delta^\intercal X\beta\right)   \\
-  % & \phantom{={}} + \inf_{\beta_0} \left( -\delta^\intercal \bm{1} \beta_0\right)        \\
-  - \sup_\beta \big((-X^\intercal \delta)^\intercal \beta -  J_\lambda(\beta) \big)
-  - \sup_{\beta_0} \left( \delta^\intercal \bm{1} \beta_0\right).
-\]
-Here, we begin by noting that the infimum is attained at the point where
-\(r = \delta\)~\citep{fercoq2015}, which means that the value is
-\[
-  \frac{1}{n} \sum_{i=1}^n f\left(y_i, g(\delta_i+y_i)\right) - \delta_i g(\delta_i + y_i)
-\]
-in general, although loss-specific simplifications can be made. For instance, in the case of
-quadratic loss the expression evaluates to \(\frac{1}{2} \lVert y \rVert_2^2 - \frac{1}{2} \lVert \delta + y \lVert^2_2 \).
-
-Next, we observe that \(\sup_\beta \big((-X^\intercal
-\delta)^\intercal \beta -  J_\lambda(\beta) \big)\) is the Fenchel conjugate of
-the sorted \(\ell_1\) norm, which is the indicator function of the sorted
-\(\ell_1\) dual norm unit ball. Its value is
-\[
-  \sup_\beta \big(z^\intercal \beta -  J_\lambda(\beta) \big) =
-  \begin{cases}
-    0      & \text{if } J^*_\lambda(z) \leq 1, \\
-    \infty & \text{otherwise},
-  \end{cases}
-\]
-where \(J^*_\lambda(z)\) is the sorted \(\ell_1\) dual norm, defined as~\citep{negrinho2014}
-\begin{equation}
-  J^*_\lambda(z) = \max_{j=1,2,\dots,p}\left\{ \frac{\sum_{k=1}^j|z_{(k)}|}{\sum_{k=1}^j\lambda_k}\right\}
-\end{equation}
-
-Next, observe that \(\sup_{\beta_0} (\delta^\intercal \bm{1} \beta_0) = \infty\) unless
-\(\delta^\intercal \bm{1} = 0\).
-
-Taken together, this means that we have the following dual function:
-\begin{equation}
-  D(\delta) = \begin{cases}
-    \frac{1}{n} \sum_{i=1}^n f\left(y_i, g(\delta_i+y_i)\right) - \delta_i g(\delta_i+ y_i) & \text{if } J^*_\lambda(-X^\intercal \delta) \leq 1 \text{ and } \delta^\intercal \bm{1} = 0 \\
-    -\infty,                                                                                & \text{otherwise}.
-  \end{cases}
-\end{equation}
-
-A natural dual point candidate for this problem is to pick
-\(\delta = r\), since
-at the optimum we have
-\[
-  \bm{0} \in X^\intercal r + \partial J_\lambda(X^\intercal r)
-\]
-and, in addition require that the signs between agree.
-% TODO: Hand-wavy, clean up later.
-
-% To obtain a feasible dual point for this problem, we can use the
-% following fact about the stationarity condition of the primal problem,
-% namely that
-% \[
-%   \sum_{j=1}^k | g_{(j)} | \leq \sum_{j=1}^k \lambda_j |\beta_{(j)}| \quad \forall\; k = 1,2,\dots,p.
-% \]
-% where  \(g_j = x_j^\intercal r\) is the \(j\)th component of the gradient of loss function
-% with respect to \(\beta_j\)
-% and \(r\) the generalized residual, for which \(r_i = \ilink(x_i^\intercal \beta + \beta_0) - y_i\).
-
-To be a feasible point, however, we first center the point by its mean and
-scale it:
-\[
-  \delta_j = \frac{r_i - \bar{r}}{\max\left\{1, J_\lambda^*\left(X^\intercal(r - \bar{r})\right) \right\}}
-\]
-which guarantees feasibility. We then obtain the following duality gap:
-\[
-  P(\beta_0, \beta) - D(\delta).
-\]
-As a stopping criterion for the algorithm, we use the relative duality gap
-\[
-  \frac{P(\beta_0, \beta) - D(\delta)}{\max\big(P(\beta_0, \beta), 10^{-\kappa}\big)}
-\]
-with \(\kappa\) set in a machine-dependent way.
-
-The duality gap provides an upper bound on suboptimality for the problem, independent
-of solver and conditioning of the problem, which is not the case of
-convergence criteria based on changes in objective, gradients, or coefficients.
-
-The availability of the duality gap also allows us to employ
-duality-gap based safe screening rules~\citep{fercoq2015} and
-working set strategies derived from these~\citep{massias2018}, which
-could furthermore be used to enhance our strategy with look-ahead
-screening rules~\citep{larsson2021a}. However,
-as noted in \citet{larsson2022d}, the marginal improvement
-of using duality-based screening strategies is minor.
-% TODO: Maybe reconsider this!
 
 \subsection{Relaxed SLOPE}
 
@@ -639,7 +573,7 @@ R> fit <- SLOPE(x, y)
   \begin{Code}
 >>> import sortedl1
 >>> model = sorted1.Slope()
->>> model.fit(x, y)
+>>> res = model.path(x, y)
   \end{Code}
 \end{minipage}
 \hfill
@@ -663,7 +597,51 @@ slope::Slope model;
 auto path_result = model.path(x, y);
 \end{Code}
 
-From now on, we will switch
+In the sequel, we will focus our examples on the \proglang{R} package, but
+note that the API is very similar in all of the languages.
+
+\subsection{First steps}
+
+We start with a simple example of fitting a full SLOPE path to the diabetes
+data set~\citep{efron2004}, including plotting it.
+
+\begin{Code}
+R> library(SLOPE)
+
+R> data("diabetes", package = "lars")
+ 
+R> x <- scale(diabetes$x)
+R> y <- diabetes$y
+ 
+R> fit_slope <- SLOPE(x, y, q = 0.1)
+R> plot(fit_slope)
+\end{Code}
+
+To facilitate a comparison with the lasso, 
+we also fit the lasso path.
+
+\begin{Code}
+R> fit_lasso <- SLOPE(x, y, lambda = "lasso")
+R> plot(fit_lasso)
+\end{Code}
+
+The resulting paths are plotted in \Cref{fig:diabetes}.
+We can see that the paths are mostly
+similar, but that the paths of some
+of the predictors join in the SLOPE
+path, indicating that they've been 
+\emph{clustered}.
+
+\begin{figure}[t]
+  \centering
+  \subcaptionbox{The SLOPE path}{\includegraphics[width=\ginnatwidth]{images/diabetes-slope.pdf}}
+  \subcaptionbox{The lasso path}{\includegraphics[width=\ginnatwidth]{images/diabetes-lasso.pdf}}
+  \caption{%
+    SLOPE and lasso paths on the diabetes
+    data set.
+  }
+  \label{fig:diabetes}
+\end{figure}
 
 \section{Benchmarks}
 
@@ -720,6 +698,114 @@ as well as simulated data.
 \newpage
 
 \begin{appendix}
+
+  \section{Duality gap and convergence criteria}
+  \label{sec:convergence-criteria-details}
+
+  In detail, we transform the primal problem \(P\), defined in \Cref{eq:slope}, into a
+  constrained problem, taking \(\alpha = 1\) without loss of generality:
+  \begin{equation}
+    \label{eq:slope-constrained}
+    \begin{aligned}
+       & \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} &  & \frac{1}{n} \sum_{i=1}^n f(y_i, x_i^\intercal \beta + \beta_0) + J_{\lambda}(\beta) \\
+      % & \text{subject to}                                              &  & r_i = \link(\bm{x}_i^\intercal \bm{\beta}) - y_i, \quad i = 1, \ldots, n                                            \\
+       & \text{subject to}                                         &  & r_i = \ilink(\beta_0 + x_i^\intercal \beta) - y_i, \quad i = 1, \ldots, n           \\
+    \end{aligned}
+  \end{equation}
+
+  Since \(\beta_0 + x_i^\intercal \beta = g(r_i + y_i)\), we can write the Lagrangian as
+  \[
+    L(\beta_0,\beta,r,\delta) = \frac{1}{n} \sum_{i=1}^n f\big(y_i, g(r_i + y_i)\big) + J_{\lambda}(\beta) - \sum_{i=1}^n \delta_i \left(g(r_i + y_i) - x_i^\intercal \beta - \beta_0 \right).
+  \]
+  This allows us to write the dual problem as
+  \[
+    D(\delta)  = \inf_r\left( \frac{1}{n} \sum_{i=1}^n f\left(y_i, g(r_i+y_i)\right) - \delta_i g(r_i+ y_i)\right)
+    % & \phantom{={}} + \inf_\beta \left(J_\lambda(\beta) - \delta^\intercal X\beta\right)   \\
+    % & \phantom{={}} + \inf_{\beta_0} \left( -\delta^\intercal \bm{1} \beta_0\right)        \\
+    - \sup_\beta \big((-X^\intercal \delta)^\intercal \beta -  J_\lambda(\beta) \big)
+    - \sup_{\beta_0} \left( \delta^\intercal \bm{1} \beta_0\right).
+  \]
+  Here, we begin by noting that the infimum is attained at the point where
+  \(r = \delta\)~\citep{fercoq2015}, which means that the value is
+  \[
+    \frac{1}{n} \sum_{i=1}^n f\left(y_i, g(\delta_i+y_i)\right) - \delta_i g(\delta_i + y_i)
+  \]
+  in general, although loss-specific simplifications can be made. For instance, in the case of
+  quadratic loss the expression evaluates to \(\frac{1}{2} \lVert y \rVert_2^2 - \frac{1}{2} \lVert \delta + y \lVert^2_2 \).
+
+  Next, we observe that \(\sup_\beta \big((-X^\intercal
+  \delta)^\intercal \beta -  J_\lambda(\beta) \big)\) is the Fenchel conjugate of
+  the sorted \(\ell_1\) norm, which is the indicator function of the sorted
+  \(\ell_1\) dual norm unit ball. Its value is
+  \[
+    \sup_\beta \big(z^\intercal \beta -  J_\lambda(\beta) \big) =
+    \begin{cases}
+      0      & \text{if } J^*_\lambda(z) \leq 1, \\
+      \infty & \text{otherwise},
+    \end{cases}
+  \]
+  where \(J^*_\lambda(z)\) is the sorted \(\ell_1\) dual norm, defined as~\citep{negrinho2014}
+  \begin{equation}
+    J^*_\lambda(z) = \max_{j=1,2,\dots,p}\left\{ \frac{\sum_{k=1}^j|z_{(k)}|}{\sum_{k=1}^j\lambda_k}\right\}
+  \end{equation}
+
+  Next, observe that \(\sup_{\beta_0} (\delta^\intercal \bm{1} \beta_0) = \infty\) unless
+  \(\delta^\intercal \bm{1} = 0\).
+
+  Taken together, this means that we have the following dual function:
+  \begin{equation}
+    D(\delta) = \begin{cases}
+      \frac{1}{n} \sum_{i=1}^n f\left(y_i, g(\delta_i+y_i)\right) - \delta_i g(\delta_i+ y_i) & \text{if } J^*_\lambda(-X^\intercal \delta) \leq 1 \text{ and } \delta^\intercal \bm{1} = 0 \\
+      -\infty,                                                                                & \text{otherwise}.
+    \end{cases}
+  \end{equation}
+
+  A natural dual point candidate for this problem is to pick
+  \(\delta = r\), since
+  at the optimum we have
+  \[
+    \bm{0} \in X^\intercal r + \partial J_\lambda(X^\intercal r)
+  \]
+  and, in addition require that the signs between agree.
+  % TODO: Hand-wavy, clean up later.
+
+  % To obtain a feasible dual point for this problem, we can use the
+  % following fact about the stationarity condition of the primal problem,
+  % namely that
+  % \[
+  %   \sum_{j=1}^k | g_{(j)} | \leq \sum_{j=1}^k \lambda_j |\beta_{(j)}| \quad \forall\; k = 1,2,\dots,p.
+  % \]
+  % where  \(g_j = x_j^\intercal r\) is the \(j\)th component of the gradient of loss function
+  % with respect to \(\beta_j\)
+  % and \(r\) the generalized residual, for which \(r_i = \ilink(x_i^\intercal \beta + \beta_0) - y_i\).
+
+  To be a feasible point, however, we first center the point by its mean and
+  scale it:
+  \[
+    \delta_j = \frac{r_i - \bar{r}}{\max\left\{1, J_\lambda^*\left(X^\intercal(r - \bar{r})\right) \right\}}
+  \]
+  which guarantees feasibility. We then obtain the following duality gap:
+  \[
+    P(\beta_0, \beta) - D(\delta).
+  \]
+  As a stopping criterion for the algorithm, we use the relative duality gap
+  \[
+    P(\beta_0, \beta) - D(\delta) \leq \varepsilon P(\beta_0),
+  \]
+  where \(\varepsilon >0\) is the user-defined tolerance level.
+  The duality gap provides an upper bound on suboptimality for the problem, independent
+  of solver and conditioning of the problem, which is not the case of
+  convergence criteria based on changes in objective, gradients, or coefficients.
+
+  The availability of the duality gap would also allow us to employ
+  duality-gap based safe screening rules~\citep{fercoq2015} and
+  working set strategies derived from these~\citep{massias2018}, which
+  could furthermore be used to enhance our strategy with look-ahead
+  screening rules~\citep{larsson2021a}. However,
+  as noted in \citet{larsson2022d}, the marginal improvement
+  of using duality-based screening strategies is minor, so we have
+  opted not to implement these in our packages.
+  % TODO: Maybe reconsider this!
 
 \end{appendix}
 
