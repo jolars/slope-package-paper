@@ -1,0 +1,6 @@
+[submodule "benchmark_slope"]
+	path = benchmark_slope
+	url = https://github.com/benchopt/benchmark_slope
+[submodule "benchmark_slope_path"]
+	path = benchmark_slope_path
+	url = https://github.com/jolars/benchmark_slope_path
