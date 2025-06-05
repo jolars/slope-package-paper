@@ -38,7 +38,7 @@ echo "Run the benchmark"
 apptainer run \
   --underlay \
   --bind $RESULTS_DIR:/opt/app/outputs,$PBS_O_WORKDIR/scratch:/opt/app/__cache__ \
-  mycontainer.sif \
+  container_single.sif \
   "$SOLVER" "$DATASET" "$OBJECTIVE"
 
 echo "Benchmark completed for solver: $SOLVER, dataset: $DATASET, and objective: $OBJECTIVE"

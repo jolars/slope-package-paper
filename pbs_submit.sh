@@ -2,8 +2,8 @@
 
 TIMESTAMP=$(date +%m%d_%H%M%S)
 
-RESULTS_DIR="$PWD/results/$TIMESTAMP"
-LOGS_DIR="$PWD/logs/$TIMESTAMP"
+RESULTS_DIR="$PWD/results/single_$TIMESTAMP"
+LOGS_DIR="$PWD/logs/single_$TIMESTAMP"
 mkdir -p "$RESULTS_DIR" "$LOGS_DIR"
 
 source pbs_config.sh
