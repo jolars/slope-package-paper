@@ -306,6 +306,8 @@ algorithm converges to the correct clusters and global minimum.
         \(\tilde{r} \gets X \beta + \beta_0 - z\)\;
         \(\gamma \gets \frac{1}{n} \sum_{i=1}^n w_i \tilde{x}_i \tilde{r}_i \)\;
         \(\xi \gets \frac{1}{n} \sum_{i=1}^n w_i \tilde{x}_i^2 \)\;
+        % TODO: THe thresholding operator here is defined differently
+        % compared to the cd slope paper. Is this bad?
         \(\tilde {c} \gets T\left(c_k - \gamma/\xi, \lambda / \xi, k, c, \cC \right)\)\;
         \(\beta_{\cC_k} \gets \tilde{c} \sign(\beta_{\cC_k})\)\;
         Update \(c\), \(\mathcal{C}\)\;
@@ -320,6 +322,8 @@ algorithm converges to the correct clusters and global minimum.
   }
 
 \end{algorithm}
+%
+% TODO: We need to define the thresholding operator.
 %
 % \begin{algorithm}[hbt]
 %   \SetKwInOut{Input}{input}
