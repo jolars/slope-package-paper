@@ -15,7 +15,7 @@
 \usepackage{subcaption}
 \usepackage{siunitx}
 
-\usepackage[vlined]{algorithm2e}
+\usepackage[linesnumbered,vlined,ruled]{algorithm2e}
 
 \usepackage{enumitem}
 
@@ -270,14 +270,95 @@ therefore be combined with proximal gradient descent steps. These steps
 are able to split the clusters, which eventually means that the full
 algorithm converges to the correct clusters and global minimum.
 
-\begin{algorithm}
-  \caption{caption}
+\begin{algorithm}[t]
+  \caption{The Hybrid coordinate descent algorithm for generalized linear models, using
+    the IRLS where weights \(w\) and a working response \(z\) are computed after
+    a proximal gradient descent step.}
   \label{alg:label}
-  \KwData{data}
-  \KwResult{resul}
+  \SetKwInOut{Input}{input}
 
-  \caption{caption}
+  \Input{%
+    \(X \in \mathbb{R}^{n\times p}\),
+    \(y\in \mathbb{R}^n\),
+    \(\lambda \in \{\mathbb{R}^p : \lambda_1 \geq \lambda_2 \geq \cdots > 0\}\),
+    \(v \in \mathbb{N}\)
+  }
+
+  \Repeat{\(P(\beta_0, \beta) - D(\theta) \leq \varepsilon\)}{
+
+    Set \(t\) with backtracking line search\;
+
+    \(\beta \gets \beta - t \nabla F(\beta_0, \beta)\)\; \label{alg:hybrid-istastep}
+
+    \For{\(i \gets 1,\dots,n\)}{
+
+      \(\eta_i \gets x_i^T \beta + \beta_0 \)\;
+      \(w_i \gets \frac{\partial}{\partial \eta_i} f(\eta_i, y_i) \)\;
+      \(z_i \gets \eta_i - \frac{r_i(\eta_i, y_i)}{w_i} \)\;
+    }
+    Update \(c\), \(\mathcal{C}\)\;
+    \For{\texttt{it} \(\gets 1,\dots,\)\texttt{cd\_maxit}}{
+      \(k \gets 1\)\;
+      \(\beta^\text{old} \gets \beta\)\;
+
+      \While{\(k \leq \lvert \mathcal{C} \rvert\)}{
+        \(\tilde x \gets \sum_{j \in \cC_k} x_j \sign \beta_j \)\;
+        \(\tilde{r} \gets X \beta + \beta_0 - z\)\;
+        \(\gamma \gets \frac{1}{n} \sum_{i=1}^n w_i \tilde{x}_i \tilde{r}_i \)\;
+        \(\xi \gets \frac{1}{n} \sum_{i=1}^n w_i \tilde{x}_i^2 \)\;
+        \(\tilde {c} \gets T\left(c_k - \gamma/\xi, \lambda / \xi, k, c, \cC \right)\)\;
+        \(\beta_{\cC_k} \gets \tilde{c} \sign(\beta_{\cC_k})\)\;
+        Update \(c\), \(\mathcal{C}\)\;
+        \(k \gets k + 1\)\;
+      }
+
+      \If{\(P(\beta) \geq P(\beta^\text{old})\)}{
+        \(\beta \gets \beta^\text{old}\)\;
+        break\;
+      }
+    }
+  }
+
 \end{algorithm}
+%
+% \begin{algorithm}[hbt]
+%   \SetKwInOut{Input}{input}
+%   \caption{%
+%     Hybrid coordinate descent and proximal gradient descent algorithm
+%     for SLOPE\label{alg:hybrid}}
+%   \Input{%
+%     \(X \in \mathbb{R}^{n\times p}\),
+%     \(y\in \mathbb{R}^n\),
+%     \(\lambda \in \{\mathbb{R}^p : \lambda_1 \geq \lambda_2 \geq \cdots > 0\}\),
+%     \(v \in \mathbb{N}\),
+%     \(\beta \in \mathbb{R}^p\)
+%   }
+%
+%   \For{\(t \gets 0,1,\dots\)}{
+%
+%   \If{\(t \bmod v = 0\)}{
+%   \(\beta \leftarrow \prox_{J/{\norm{X}^2_2}}\Big(\beta - \frac{1}{\norm{X}_2^2}X^T(X \beta - y)\Big)\) \label{alg:hybrid-istastep}
+%
+%   Update \(c\), \(\mathcal{C}\)
+%   }
+%   \Else{
+%     \(k \gets 1\)
+%
+%     \While{\(k \leq \lvert \mathcal{C} \rvert\)}{
+%       \(\tilde x_k \gets X_{\mathcal{C}_k} \sign(\beta_{\cC_k}) \)
+%
+%       \(z \gets T(c_k\norm{\tilde x}^2 - \tilde x^T(X\beta - y); \norm{x}^2, c^{\setminus k}, \lambda)\)
+%
+%       \(\beta_{\cC_k} \gets z \sign(\beta_{\cC_k})\)
+%
+%       Update \(c\), \(\mathcal{C}\)
+%
+%       \(k \gets k + 1\)
+%     }
+%   }
+%   }
+%   \Return{\(\beta\)}
+% \end{algorithm}
 
 The hybrid nature of the algorithm comes with boons of its own.
 Indeed, proximal gradient descent algorithms are known to converge under
@@ -617,7 +698,7 @@ R> fit_slope <- SLOPE(x, y, q = 0.1)
 R> plot(fit_slope)
 \end{Code}
 
-To facilitate a comparison with the lasso, 
+To facilitate a comparison with the lasso,
 we also fit the lasso path.
 
 \begin{Code}
@@ -629,7 +710,7 @@ The resulting paths are plotted in \Cref{fig:diabetes}.
 We can see that the paths are mostly
 similar, but that the paths of some
 of the predictors join in the SLOPE
-path, indicating that they've been 
+path, indicating that they've been
 \emph{clustered}.
 
 \begin{figure}[t]
