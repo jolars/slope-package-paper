@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: continuumio/miniconda3
+From: continuumio/miniconda3:25.3.1-1
 
 %files
     ./benchmark_slope_path/solvers/ /opt/app/
