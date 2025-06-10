@@ -6,7 +6,7 @@ data("diabetes", package = "lars")
 x <- scale(diabetes$x)
 y <- diabetes$y
 
-q <- 0.05
+# Basic Use
 
 fit_slope <- SLOPE(x, y, q = 0.1)
 fit_lasso <- SLOPE(x, y, lambda = "lasso")
@@ -27,3 +27,5 @@ dev.off()
 
 knitr::plot_crop(lasso_file)
 knitr::plot_crop(slope_file)
+
+# Cross-Validation
