@@ -108,8 +108,6 @@ and take \(X\) to be the \(n \times p\) design matrix and \(Y\) the
   the model is multinomial logistic regression.} using the convention
 of denoting a row of a matrix \(X\) as \(x_i\) and a column as \(x_j\).
 
-\subsection{SLOPE}
-
 SLOPE is a generalization of OSCAR (octagonal shrinkage and clustering
 algorithm for regression)~\citep{bondell2008}, which is attained by
 setting \(\lambda\) to be a linear sequence, which is typically parameterized as
@@ -130,8 +128,6 @@ which is obtained by taking a constant \(\lambda\).
 A special property of SLOPE is that it can clusters coefficients by
 setting them to the same magnitude~\citep{figueiredo2016,bogdan2022}. This is a natural
 consequence of the sorted \(\ell_1\) norm and stems from the fact that
-
-\subsection{Solving the SLOPE optimization problem}
 
 SLOPE is a convex but non-smooth optimization problem. But since the
 pool-adjacent-violators algorithm~(PAVA)~\citep{barlow1972} can be used to
@@ -274,7 +270,7 @@ algorithm converges to the correct clusters and global minimum.
   \caption{The Hybrid coordinate descent algorithm for generalized linear models, using
     the IRLS where weights \(w\) and a working response \(z\) are computed after
     a proximal gradient descent step.}
-  \label{alg:label}
+  \label{alg:hybrid}
   \SetKwInOut{Input}{input}
 
   \Input{%
@@ -323,7 +319,7 @@ algorithm converges to the correct clusters and global minimum.
 
 \end{algorithm}
 %
-% TODO: We need to define the thresholding operator.
+% TODO: We need to define the thresholding operator. Maybe even plot it?
 %
 % \begin{algorithm}[hbt]
 %   \SetKwInOut{Input}{input}
@@ -477,18 +473,18 @@ speed up the updates. As the authors note, this can lead to dramatic speed-ups
 for the ordinary lasso (with least-squares loss), but not for other loss
 functions and not in the high-dimensional setting.
 
-For SLOPE, however, these covariance updates are not as useful. The
-reason for this is that the Gram matrix we need is the collapsed
-version \((XP)^\intercal XP\), where \(P\) is the pattern matrix.
-Throughout optimization, \(P\) changes, which means that the
-precomputed Gram matrix must be updated as well. Though this
-might be efficient in a few select cases where there are few
-changes in the clusters, we have chosen to avoid this
-functionality.
+Yet, although this type of update would be useful for SLOPE as well, it is not
+implemented in our packages. The main reason for this is that the Gram matrix
+we need is the collapsed version \((XP)^\intercal XP\), where \(P\) is the
+pattern matrix, which cannot be derived from \(X^\intercal X\). \(P\) typically
+changes continuously throughout optimization, which means that the precomputed
+Gram matrix must be updated as well, and this would invoke additional cost.
 
 \section{Implementation details}
+\label{sec:implementation-details}
 
 \subsection{Clusters}
+\label{sec:clusters}
 
 There are multiple ways to handle the cluster structure for SLOPE.
 In theory, the most efficient solution would be to use a
@@ -496,7 +492,7 @@ doubly-linked list, which offers \(O(1)\) deletion and insertion.
 This is a natural construct for the cluster structure, since we
 traverse the list linearly as part of the thresholding operator.
 
-Nevertheless, this turns out to be a poor choice in practice.
+In practice, however, this turns out to be a poor choice.
 The discussion is beyond the scope of this paper, but the main
 reason is that doubly-linked lists suffer from poor cache
 locality, which is a major bottleneck in modern processors.
@@ -509,10 +505,16 @@ Instead, we use the following structure:
   \item[\code{c\_ptr}] Values of the cluster pointers
 \end{description}
 
-This structure bears semblance to typical implementations of
-sparse matrices.
+Compared to the implementation from \citet{larsson2023}, we use
+an implicit representation of the cluster of zero coefficients due to
+the fact that this cluster is not used during the hybrid CD step.
 
-Pattern~\citep{schneider2022}
+Our representation of clusters closely resembles the sparse matrix
+representation of the SLOPE pattern~\citep{schneider2022}. \(P\) is the pattern
+matrix, \(X P\) is the collapsed design matrix. \(P\) contains only
+zeros and signed ones. This means that we can obtain \(\tilde{x}\) in
+\Cref{alg:hybrid} by multiplying the design matrix \(X\) with
+a column of \(P\).
 
 \subsection{Thresholding operator}
 
@@ -585,6 +587,7 @@ which is possible via the \pkg{bigmemory} package~\citep{kane2013},
 and currently only for dense designs.
 
 \subsection{Implementation}
+\label{sec:implementation}
 
 In this paper we present a collection of packages for solving SLOPE, currently
 with support for fitting SLOPE in \proglang{R}, \proglang{Python}, and
@@ -777,6 +780,22 @@ as well as simulated data.
   \item[SlopePath] An approximate homotopy method by \citet{dupuis2024},
         which is similar to the lars algorithm for the lasso~\citep{efron2004}.
 \end{description}
+
+\begin{figure}[htpb]
+  \centering
+  \includegraphics[width=\ginnatwidth]{images/benchmark_single_simulated.pdf}
+  \caption{%
+  }
+  % \label{fig:}
+\end{figure}
+
+\begin{figure}[htpb]
+  \centering
+  \includegraphics[width=\ginnatwidth]{images/benchmark_single_real.pdf}
+  \caption{%
+  }
+  % \label{fig:}
+\end{figure}
 
 \bibliography{main}
 
