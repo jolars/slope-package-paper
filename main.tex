@@ -30,7 +30,7 @@
 
 % Workaround for Gin settings
 \makeatletter
-\let\ginnatwidth\Gin@nat@width
+\let\natwidth\Gin@nat@width
 \makeatother
 
 \input{tex/macros}
@@ -505,9 +505,14 @@ Instead, we use the following structure:
   \item[\code{c\_ptr}] Values of the cluster pointers
 \end{description}
 
+In this representation, the indices for the \(k\)th cluster
+are given by \code{ c_idx[c_ptr[k] : c_ptr[k+1]]} and the coefficient is simply \code{c[k]}.
+
 Compared to the implementation from \citet{larsson2023}, we use
 an implicit representation of the cluster of zero coefficients due to
 the fact that this cluster is not used during the hybrid CD step.
+In high-dimensional settings, this typically leads to major savings in
+memory usage.
 
 Our representation of clusters closely resembles the sparse matrix
 representation of the SLOPE pattern~\citep{schneider2022}. \(P\) is the pattern
@@ -722,14 +727,20 @@ path, indicating that they've been
 
 \begin{figure}[t]
   \centering
-  \subcaptionbox{The SLOPE path}{\includegraphics[width=\ginnatwidth]{images/diabetes-slope.pdf}}
-  \subcaptionbox{The lasso path}{\includegraphics[width=\ginnatwidth]{images/diabetes-lasso.pdf}}
+  \subcaptionbox{The SLOPE path}{\includegraphics[width=\natwidth]{images/diabetes-slope.pdf}}
+  \subcaptionbox{The lasso path}{\includegraphics[width=\natwidth]{images/diabetes-lasso.pdf}}
   \caption{%
     SLOPE and lasso paths on the diabetes
     data set.
   }
   \label{fig:diabetes}
 \end{figure}
+
+We can also plot the pattern of the SLOPE solution.
+
+% TODO: We first need to implement this in the package.
+
+\subsection{Cross-validation}
 
 \section{Benchmarks}
 
@@ -743,18 +754,22 @@ features all the SLOPE packages.
 For this paper, we have run the benchmarks for some real data sets~\Cref{tab:real-datasets},
 as well as simulated data.
 
-\begin{table}[htpb]
+\begin{table}[t]
   \centering
-  \caption{}
   \label{tab:real-datasets}
-  \begin{tabular}{ll}
+  \begin{tabular}{llll}
     \toprule
-    Column 1 & Column 2 \\
+    Dataset & \(n\) & \(p\) & \(s\) \\
     \midrule
-    a        & b        \\
-    c        & d        \\
+    a       & b     & e     & g     \\
+    c       & d     & f     & h     \\
     \bottomrule
   \end{tabular}
+  \caption{
+    Real datasets used in the benchmarks. The columns \(n\), \(p\), and \(s\)
+    denote the number of observations, number of features, and number of
+    non-zero coefficients, respectively.
+  }
 \end{table}
 
 \begin{description}
@@ -783,7 +798,7 @@ as well as simulated data.
 
 \begin{figure}[htpb]
   \centering
-  \includegraphics[width=\ginnatwidth]{images/benchmark_single_simulated.pdf}
+  \includegraphics[width=\natwidth]{images/benchmark_single_simulated.pdf}
   \caption{%
   }
   % \label{fig:}
@@ -791,11 +806,54 @@ as well as simulated data.
 
 \begin{figure}[htpb]
   \centering
-  \includegraphics[width=\ginnatwidth]{images/benchmark_single_real.pdf}
+  \includegraphics[width=\natwidth]{images/benchmark_single_real.pdf}
   \caption{%
   }
   % \label{fig:}
 \end{figure}
+
+\section{Discussion}
+
+SLOPE is an appealing model for high-dimensional regression problems that is
+able to provide sparse solutions with a cluster structure, which sets it apart
+from similar models such as the lasso and elastic net. Unlike these models,
+however, SLOPE represents a more challenging optimization problem since the
+penalty term is inseparable. In spite of this, we have shown that it is
+possible to solve SLOPE efficiently and have, in paper, presented a collection
+of packages (in \proglang{R}, \proglang{Python}, and \proglang{Julia}) that do
+so. In so doing, we hope to have made SLOPE accessible to a wider audience.
+Ours are the first packages that implement SLOPE in these languages and
+are still unmatched in terms of features. We know only of one other
+implementation of SLOPE in \proglang{Python}, and none in \proglang{Julia} and
+\proglang{R}.
+
+We have shown that the performance of our software is unparalleled
+compared to other algorithms and implementations, both for for fitting
+the full regularization path as well as for single solution, and
+have shown these in a series of benchmarks on both real and simulated
+data. We have also made these benchmarks available publicly
+to facilitate further research and development of SLOPE.
+
+Although our packages are full-fledged implementations of SLOPE, there are
+still some features that are missing. For instance, we do not yet support
+observation weights, nor some of the more advanced features of similar packages
+such as \pkg{glmnet}~\citep{friedman2010}, which allow for a larger variety of
+loss functions, including Cox proportional hazards models and multivariate
+linear regression. We also do not yet support the group sorted \(\ell_1\) norm,
+which would allow an alternative penalization scheme for multivariate response
+problems. In addition, several possible improvements to the hybrid method
+could be considered, such as accelerated and parallelized coordinate
+steps. We leave these as future work, but note that
+the packages are modular and have been designed with extensibility in mind,
+which we hope will facilitate the addition of new features in the future.
+Because all of the packages rely on the same \proglang{C++} library, contributions
+will propagate quickly to all of the packages.
+
+We hope that our packages will be useful for researchers and
+practitioners alike and that the design of our software suite
+might inspire others to more closely couple the available features
+of \proglang{R}, \proglang{Python}, and \proglang{Julia} and avoid
+redundant implementations of the same algorithms in each language.
 
 \bibliography{main}
 
