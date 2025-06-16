@@ -368,6 +368,12 @@ extended to standard Newton methods as well and, moreover, include more
 refined heuristics in order to adapt naturally to problem structure.
 This, however, is beyond the scope of our current work.
 
+In addition to the implementation from \citet{larsson2023}, we have also
+implemented a randomized\footnote{In actuality we use random permutations and
+  not true random sampling with replacement.} version of the algorithm, which is
+slightly more robust to numerical issues (at the cost of slightly slower
+convergence).
+
 \subsection{Intercept updates}
 
 If we are in a PGD step, then the intercept is updated as part of the
