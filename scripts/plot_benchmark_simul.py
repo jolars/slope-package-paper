@@ -6,48 +6,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from slopeutils import FULL_WIDTH, merge_parquet_files, set_plot_defaults
 
-def merge_parquet_files(directory_path):
-    """
-    Merge all parquet files in a directory into a single pandas DataFrame.
-
-    Parameters:
-    -----------
-    directory_path : str
-        Path to the directory containing parquet files
-
-    Returns:
-    --------
-    pandas.DataFrame
-        Combined DataFrame from all parquet files
-    """
-    # Find all parquet files in the specified directory
-    parquet_files = glob.glob(os.path.join(directory_path, "*.parquet"))
-    print(f"Found {len(parquet_files)} parquet files to merge")
-
-    if not parquet_files:
-        print("No parquet files found in the specified directory.")
-        return None
-
-    # Read and concatenate all parquet files
-    dfs = []
-    for file in parquet_files:
-        try:
-            df = pd.read_parquet(file)
-            dfs.append(df)
-            print(f"Read {file}: {len(df)} rows")
-        except Exception as e:
-            print(f"Error reading {file}: {e}")
-
-    if not dfs:
-        print("No valid DataFrames found.")
-        return None
-
-    # Combine all DataFrames
-    combined_df = pd.concat(dfs, ignore_index=True)
-    print(f"Created combined DataFrame with {len(combined_df)} rows")
-
-    return combined_df
+set_plot_defaults()
 
 
 def extract_reg_param(df):
@@ -63,10 +24,15 @@ def extract_reg_param(df):
     return df
 
 
-# Apply the function to your DataFrame
+# Extract dataset specifics from data_name to create shorter labels
+def extract_dataset_name(data_name):
+    # Extract n_features and n_samples
+    n_features = re.search(r"n_features=(\d+)", data_name).group(1)
+    n_samples = re.search(r"n_samples=(\d+)", data_name).group(1)
+    return rf"$n={n_samples}$, $p={n_features}$"
 
 
-results_dir = "results/single_0606_144135"
+results_dir = "results/single_0612"
 df = merge_parquet_files(results_dir)
 df = extract_reg_param(df)
 
@@ -85,20 +51,11 @@ df_subset = df[
 
 simulated_df = df_subset[df_subset["data_name"].str.contains("Simulated")]
 
-
-# Extract dataset specifics from data_name to create shorter labels
-def extract_dataset_name(data_name):
-    # Extract n_features and n_samples
-    n_features = re.search(r"n_features=(\d+)", data_name).group(1)
-    n_samples = re.search(r"n_samples=(\d+)", data_name).group(1)
-    return f"n_feat={n_features}, n_samp={n_samples}"
-
-
 # Apply the function to create a shorter dataset identifier
-simulated_df["dataset"] = simulated_df["data_name"].apply(extract_dataset_name)
+simulated_df.loc[:, "dataset"] = simulated_df["data_name"].apply(extract_dataset_name)
 
 # Get unique values for facets
-reg_values = sorted(simulated_df["reg"].unique())
+reg_values = np.flip(sorted(simulated_df["reg"].unique()))
 dataset_values = sorted(simulated_df["dataset"].unique())
 solver_values = sorted(simulated_df["solver_name"].unique())
 
@@ -107,21 +64,30 @@ solver_values = sorted(simulated_df["solver_name"].unique())
 colors = plt.cm.tab10(np.linspace(0, 1, len(solver_values)))
 solver_colors = dict(zip(solver_values, colors))
 
+ymax_def = 2
+ymin_def = 1e-7
+
 custom_limits = {
-    # (0.1, "n_feat=200, n_samp=500"): (0, 0.5, 1e-7, 1e1),
-    # Add more combinations as needed:
-    # (0.01, "n_feat=1000, n_samp=2000"): (0, 10, 1e-8, 1e0),
+    (0.5, "$n=200$, $p=20000$"): (-0.05, 0.7, ymin_def, ymax_def),
+    (0.1, "$n=200$, $p=20000$"): (-0.5, 5.5, ymin_def, ymax_def),
+    (0.02, "$n=200$, $p=20000$"): (-1, 21, ymin_def, ymax_def),
+    (0.5, "$n=200$, $p=200000$"): (-0.1, 4, ymin_def, ymax_def),
+    (0.1, "$n=200$, $p=200000$"): (-0.5, 11, ymin_def, ymax_def),
+    (0.02, "$n=200$, $p=200000$"): (-2, 81, ymin_def, ymax_def),
+    (0.5, "$n=20000$, $p=200$"): (-0.05, 0.41, ymin_def, ymax_def),
+    (0.1, "$n=20000$, $p=200$"): (-0.05, 0.61, ymin_def, ymax_def),
+    (0.02, "$n=20000$, $p=200$"): (-0.05, 0.71, ymin_def, ymax_def),
 }
 
 # Create markers for solvers
-markers = ["o", "s", "^", "D", "*", "x", "+", "v", "<", ">"]
+markers = ["o", "s", "^", "D", "*", "x", "+", "v", "<", ">", "p", "h", "H", "d"]
 solver_markers = dict(zip(solver_values, markers[: len(solver_values)]))
 
 # Set up the matplotlib figure and axes grid
 fig, axes = plt.subplots(
     len(dataset_values),
     len(reg_values),
-    figsize=(4 * len(reg_values), 3 * len(dataset_values)),
+    figsize=(FULL_WIDTH, 5.5),
     sharex=False,
     sharey=True,
     constrained_layout=True,
@@ -153,17 +119,20 @@ for i, dataset in enumerate(dataset_values):
                 # Sort by time to ensure proper line order
                 solver_data = solver_data.sort_values("time")
 
+                dual_gap = solver_data["objective_duality_gap"]
+                primal = solver_data["objective_value"]
+                rel_gap = dual_gap / primal
+
                 # Plot line with markers
                 ax.semilogy(
                     solver_data["time"],
-                    solver_data["objective_duality_gap"],
+                    rel_gap,
                     marker=solver_markers[solver],
                     linestyle="-",
                     color=solver_colors[solver],
                     label=solver,
                     markerfacecolor="white",
                     markeredgecolor=solver_colors[solver],
-                    markersize=6,
                 )
 
         # Set y-axis to log scale
@@ -235,7 +204,7 @@ fig.legend(
     handles,
     labels,
     loc="outside upper center",
-    ncol=min(4, len(solver_values)),
+    ncol=min(3, len(solver_values)),
 )
 
 save_fig = True

@@ -1,9 +1,6 @@
 \documentclass[article]{jss}
 
 \usepackage{orcidlink,thumbpdf,lmodern}
-\newcommand{\class}[1]{`\code{#1}'}
-\newcommand{\fct}[1]{\code{#1()}}
-
 \usepackage{amssymb,amsmath,amsthm,mathtools,bm}
 \usepackage{upquote}
 
@@ -394,18 +391,6 @@ bound on suboptimality at convergence. To achieve this, we rely
 on dual variable centering and scaling in order to obtain a feasible dual
 point.
 
-\subsection{Relaxed SLOPE}
-
-Unlike the lasso, the relaxed version of SLOPE has not been studied in much detail.
-There are at least two papers where it is described, but then typically it is
-called \emph{debiased} SLOPE. We prefer to use the term \emph{relaxed} here,
-since it corresponds closer to the terminology from the lasso literature and
-avoids confusion with the debiased lasso~\citep{geer2014}, which is a different
-model.
-
-In our packages, we support the relaxed version of SLOPE, and parameterize
-this relaxation with a parameter \(\gamma\).
-
 \subsection{Memory management}
 \label{sec:memory-management}
 
@@ -417,10 +402,6 @@ This means, for instance, that no copies need to be made when separating
 data sets into training and test data.
 
 \subsection{Cross-validation}
-
-The packages support hyper-parameter tuning via iterated \(k\)-fold
-cross-validation, with parameterization over \(\alpha\), \(\lambda\) type (BH,
-Gaussian type, etc.), \(\gamma\) (SLOPE relaxation parameter).
 
 Due to the memory-efficient implementation of view~\Cref{sec:memory-management}, we provide
 an option to altogether avoid copying the data during cross-validation.
@@ -654,7 +635,7 @@ matrix \code{x} and response vector \code{y}, we can fit the full regularization
 path for the SLOPE model using the following commands for the different languages:
 
 \begin{minipage}[t]{0.25\textwidth}%
-  \proglang{R}
+  \textbf{\proglang{R}}
   \begin{Code}
 R> library(SLOPE)
 R> fit <- SLOPE(x, y)
@@ -662,7 +643,8 @@ R> fit <- SLOPE(x, y)
 \end{minipage}
 \hfill
 \begin{minipage}[t]{0.32\textwidth}
-  \proglang{Python}
+
+  \textbf{\proglang{Python}}
   \begin{Code}
 >>> import sortedl1
 >>> model = sorted1.Slope()
@@ -671,7 +653,7 @@ R> fit <- SLOPE(x, y)
 \end{minipage}
 \hfill
 \begin{minipage}[t]{0.32\textwidth}
-  \proglang{Julia}
+  \textbf{\proglang{Julia}}
   \begin{Code}
 julia> using SLOPE
 julia> fit = slope(x, y)
@@ -685,7 +667,6 @@ which case the above would translate into the
 following:
 \begin{Code}
 #include <slope/slope.h>
-
 slope::Slope model;
 auto path_result = model.path(x, y);
 \end{Code}
@@ -700,35 +681,47 @@ data set~\citep{efron2004}, including plotting it.
 
 \begin{Code}
 R> library(SLOPE)
-
 R> data("diabetes", package = "lars")
- 
 R> x <- scale(diabetes$x)
 R> y <- diabetes$y
- 
 R> fit_slope <- SLOPE(x, y, q = 0.1)
 R> plot(fit_slope)
 \end{Code}
 
-To facilitate a comparison with the lasso,
-we also fit the lasso path.
+The \code{q} parameter is a parameter of the sequence of \(\lambda\) values,
+which by default~(\code{lambda = "bh"}) is the Benjamini--Hochberg (BH)
+sequence~\citep{bogdan2015}. If the design matrix is orthogonal, then the
+\code{q} parameter will decide the expected false discovery rate (FDR) in terms
+of the identification of true signals (nonzero coefficients), provided
+that this sequence is used.
+
+Other types of sequences are also supported,
+including \code{lambda = "lasso"} for the lasso
+\code{lambda = "oscar"} for the OSCAR sequence~\citep{bondell2008}, and
+\code{lambda = "gaussian"} for the Gaussian-type sequence~\citep{bogdan2015},
+which is a modification of the BH sequence that has been empirically shown to
+provide similar FDR control in non-orthogonal and low-dimensional settings.
+
+To show how the choice of the \(\lambda\) sequence affects the
+results, we will refit the diabetes data using the lasso sequence.
 
 \begin{Code}
 R> fit_lasso <- SLOPE(x, y, lambda = "lasso")
 R> plot(fit_lasso)
 \end{Code}
 
-The resulting paths are plotted in \Cref{fig:diabetes}.
-We can see that the paths are mostly
-similar, but that the paths of some
-of the predictors join in the SLOPE
-path, indicating that they've been
-\emph{clustered}.
+The resulting paths are plotted in \Cref{fig:diabetes}. Observe that the
+paths are overall similar but that the SLOPE path has clustered
+some coefficients for parts of the path. Predictors 3 and 9, for instance,
+enter the path together and remain clustered at the beginning, then
+split apart and again cluster together briefly, before diverging again.
+We also see that predictor 6 joins the path briefly together
+with predictor 5 on the SLOPE path, but then return to zero until
+it later enters again on its own.
 
 \begin{figure}[t]
   \centering
-  \subcaptionbox{The SLOPE path}{\includegraphics[width=\natwidth]{images/diabetes-slope.pdf}}
-  \subcaptionbox{The lasso path}{\includegraphics[width=\natwidth]{images/diabetes-lasso.pdf}}
+  {\includegraphics[width=\natwidth]{images/diabetes-slope-lasso.pdf}}
   \caption{%
     SLOPE and lasso paths on the diabetes
     data set.
@@ -736,11 +729,91 @@ path, indicating that they've been
   \label{fig:diabetes}
 \end{figure}
 
-We can also plot the pattern of the SLOPE solution.
-
 % TODO: We first need to implement this in the package.
 
+\subsection{Relaxed SLOPE}
+
+Unlike the lasso, the relaxed version of SLOPE has not been studied in much detail.
+There are at least two papers where it is described, but then typically it is
+called \emph{debiased} SLOPE. We prefer to use the term \emph{relaxed} here,
+since it corresponds closer to the terminology from the lasso literature and
+avoids confusion with the debiased lasso~\citep{geer2014}, which is a different
+model.
+
+In our packages, we support the relaxed version of SLOPE, and parameterize
+this relaxation with a parameter \(\gamma\).
+
+The relaxation parameter \(\gamma\) controls the mix between the
+original SLOPE solution (\(\gamma = 1\) and the fully relaxed
+solution (\(\gamma = 0\)), so that
+the end result is given by
+\[
+  \hat{\beta} = \gamma \hat{\beta}_\text{SLOPE} + (1 - \gamma) \hat{\beta}_\text{relaxed}.
+\]
+
+Here, we fit two models, one that is fully relaxed
+(\(\gamma = 0\)) and one that is semi-relaxed (\(\gamma = 0.5\)).
+
+\begin{Code}
+R> fit_relaxed <- SLOPE(x, y, q = 0.1, gamma = 0)
+R> fit_semirelaxed <- SLOPE(x, y, q = 0.1, gamma = 0.5)
+\end{Code}
+
+We fit the result in \Cref{fig:relaxed-slope}.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\natwidth]{images/slope-relaxed.pdf}
+  \caption{%
+    SLOPE with various level of relaxation \(\gamma\), with
+    \(\gamma = 0\) (fully relaxed), \(\gamma = 0.5\) (semi-relaxed),
+    and \(\gamma = 1\) (standard SLOPE).
+  }
+  \label{fig:relaxed-slope}
+\end{figure}
+
 \subsection{Cross-validation}
+
+Our packages support hyper-parameter tuning via iterated \(k\)-fold
+cross-validation, with parameterization over \(\alpha\), \(\lambda\) type (BH,
+Gaussian type, etc.), \(\gamma\) (SLOPE relaxation parameter).
+
+Here, we show the CV functionality by cross-validating across
+to values of the \(q\) parameter.
+
+\begin{CodeChunk}
+  \begin{CodeInput}
+R> set.seed(48)
+R> fit_cv <- cvSLOPE(x, y, q = c(0.1, 0.2))
+R> plot(fit_cv)
+\end{CodeInput}
+  \begin{CodeOutput}
+Call:
+cvSLOPE(x = x, y = y, q = c(0.1, 0.2))
+
+Optimum values:
+      q gamma     alpha measure     mean       se      lo       hi
+129 0.2     0 0.3379402     mse 3013.065 234.6321 2482.29 3543.839
+\end{CodeOutput}
+\end{CodeChunk}
+
+It is also easy to plot the cross-validation results~\Cref{fig:cv}.
+
+\begin{Code}
+R> plot(fit_cv)
+\end{Code}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\natwidth]{images/slope-cv.pdf}
+  \caption{%
+    Mean-squared error (MSE) from cross-validation of
+    \(q\) and \(\alpha\) for SLOPE fit to the diabetes data set.
+    The dashed line marks the optimal value of \(\alpha\) in the
+    panel corresponding to the optimal value of \(q\).
+  }
+  \label{fig:cv}
+\end{figure}
 
 \section{Benchmarks}
 
@@ -749,27 +822,58 @@ developed a benchmark for SLOPE using \pkg{benchopt}~\citep{moreau2022a}: a
 command-line interface and Python library for creating and managing
 benchmarks of algorithms for optimization. The benchmark for
 SLOPE is available at \myurl{github.com/benchopt/benchmark\_slope}, which
-features all the SLOPE packages.
+featres the \proglang{Python} implementation of SLOPE, \pkg{sortedl1}, as well as the
+\proglang{R} implementation, \pkg{SLOPE}.
 
-For this paper, we have run the benchmarks for some real data sets~\Cref{tab:real-datasets},
-as well as simulated data.
+For this paper, we have run the benchmarks for some real data sets~\Cref{tab:real-data},
+as well as simulated data\Cref{tab:simulated-data}.
+
+\begin{table}[hbt]
+  \centering
+  \label{tab:real-data}
+  \begin{tabular}{
+      l
+      S[table-format=5.0]
+      S[table-format=7.0]
+      S[table-format=1.5,round-mode=figures,round-precision=2]
+      p{5cm}
+    }
+    \toprule
+    Dataset                    & {\(n\)} & {\(p\)} & {\(X\) density} & {References}                        \\
+    \midrule
+    \dataset{Koussounadis2014} & 101     & 34694   & 1               & \citet{koussounadis2014}            \\
+    \dataset{brca1}            & 536     & 17322   & 1               & \citet{nationalcancerinstitute2022} \\
+    \dataset{news20}           & 19996   & 1355191 & 0.0003357       & \citet{keerthi2005}                 \\
+    \dataset{rcv1}             & 20242   & 44504   & 0.00166         & \citet{lewis2004}                   \\
+    \dataset{Rhee2006}         & 842     & 360     & 0.02469         & \citet{rhee2006}                    \\
+    \bottomrule
+  \end{tabular}
+  \caption{%
+    List of real datasets used in our experiments.
+    x were obtained from \citet{breheny2022}  and the rest from \citet{chang2016}.
+  }
+\end{table}
 
 \begin{table}[t]
   \centering
-  \label{tab:real-datasets}
-  \begin{tabular}{llll}
+  \label{tab:simulated-data}
+  \begin{tabular}{
+      l
+      S[table-format=5.0]
+      S[table-format=7.0]
+      S[table-format=2.0]
+      S[table-format=1.3]
+      S[table-format=0.1]
+    }
     \toprule
-    Dataset & \(n\) & \(p\) & \(s\) \\
+    {Scenario} & {\(n\)} & {\(p\)} & {\(k\)} & {\(X\) density} & {\(\rho\)} \\
     \midrule
-    a       & b     & e     & g     \\
-    c       & d     & f     & h     \\
+    1          & 200     & 20000   & 20      & 1               & 0.6        \\
+    3          & 200     & 200000  & 20      & 0.001           & 0.6        \\
+    2          & 20000   & 200     & 40      & 1               & 0.6        \\
     \bottomrule
   \end{tabular}
-  \caption{
-    Real datasets used in the benchmarks. The columns \(n\), \(p\), and \(s\)
-    denote the number of observations, number of features, and number of
-    non-zero coefficients, respectively.
-  }
+  \caption{Scenarios for the simulated data in our benchmarks}
 \end{table}
 
 \begin{description}
@@ -801,7 +905,7 @@ as well as simulated data.
   \includegraphics[width=\natwidth]{images/benchmark_single_simulated.pdf}
   \caption{%
   }
-  % \label{fig:}
+  \label{fig:simulated-data-single}
 \end{figure}
 
 \begin{figure}[htpb]
@@ -809,7 +913,19 @@ as well as simulated data.
   \includegraphics[width=\natwidth]{images/benchmark_single_real.pdf}
   \caption{%
   }
-  % \label{fig:}
+  % \label{fig:real-data-single}
+\end{figure}
+
+We have created a separate benchmark for fitting the full regularization path,
+which is available at \myurl{github.com/benchopt/benchmark\_slope\_path}. This
+
+\begin{figure}[htpb]
+  \centering
+  \includegraphics[width=\natwidth]{images/benchmark_path_real.pdf}
+  \caption{%
+    Benchmark for fitting the full regularization path on real data sets.
+  }
+  \label{fig:real-data-path}
 \end{figure}
 
 \section{Discussion}
