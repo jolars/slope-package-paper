@@ -495,11 +495,10 @@ Instead, we use the following structure:
 In this representation, the indices for the \(k\)th cluster
 are given by \code{ c_idx[c_ptr[k] : c_ptr[k+1]]} and the coefficient is simply \code{c[k]}.
 
-Compared to the implementation from \citet{larsson2023}, we use
-an implicit representation of the cluster of zero coefficients due to
-the fact that this cluster is not used during the hybrid CD step.
-In high-dimensional settings, this typically leads to major savings in
-memory usage.
+Compared to the implementation from \citet{larsson2023}, we
+have developed a much more efficient representatioon of the
+cluster structure which updates the cluster structure
+without copying the coefficients.
 
 Our representation of clusters closely resembles the sparse matrix
 representation of the SLOPE pattern~\citep{schneider2022}. \(P\) is the pattern
