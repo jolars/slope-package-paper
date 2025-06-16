@@ -60,8 +60,8 @@
             src = pkgs.fetchFromGitHub {
               owner = "jolars";
               repo = "SLOPE";
-              rev = "0007c493ad961d87d10c3781e2711ba543835103";
-              hash = "sha256-TEcm+iIaOqoFgmK2/S9DJNFsvV2s+q3hHal/w9UdPwQ=";
+              rev = "566d29d850bbd3095b6e6f20e9c2d54a1927650d";
+              hash = "sha256-KGj6dza+k/mZh9lVNWUcq1AMjI8ZWzfpcPuqX7nPORE=";
             };
             propagatedBuildInputs = with pkgs.rPackages; [
               Matrix
@@ -93,6 +93,8 @@
               ps.matplotlib
               ps.numpy
               ps.pandas
+              ps.pyarrow
+              ps.fastparquet
               sortedl1
             ]))
           ];
