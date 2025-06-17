@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from slopeutils import FULL_WIDTH, merge_parquet_files, set_plot_defaults
+from slopeutils import FULL_WIDTH, legend_labels, merge_parquet_files, set_plot_defaults
 
 set_plot_defaults()
 
@@ -74,9 +74,9 @@ custom_limits = {
     (0.5, "$n=200$, $p=200000$"): (-0.1, 4, ymin_def, ymax_def),
     (0.1, "$n=200$, $p=200000$"): (-0.5, 11, ymin_def, ymax_def),
     (0.02, "$n=200$, $p=200000$"): (-2, 81, ymin_def, ymax_def),
-    (0.5, "$n=20000$, $p=200$"): (-0.05, 0.41, ymin_def, ymax_def),
-    (0.1, "$n=20000$, $p=200$"): (-0.05, 0.61, ymin_def, ymax_def),
-    (0.02, "$n=20000$, $p=200$"): (-0.05, 0.71, ymin_def, ymax_def),
+    (0.5, "$n=200000$, $p=200$"): (-0.05, 1.6, ymin_def, ymax_def),
+    (0.1, "$n=200000$, $p=200$"): (-0.05, 3.1, ymin_def, ymax_def),
+    (0.02, "$n=200000$, $p=200$"): (-0.05, 5.1, ymin_def, ymax_def),
 }
 
 # Create markers for solvers
@@ -157,7 +157,7 @@ for i, dataset in enumerate(dataset_values):
 
 
 fig.supxlabel("Time (s)")
-fig.supylabel("Duality Gap")
+fig.supylabel("Relative Duality Gap")
 
 # Create a single legend for all subplots
 handles, labels = [], []
@@ -170,32 +170,11 @@ for solver in solver_values:
         linestyle="-",
         markerfacecolor="white",
         markeredgecolor=solver_colors[solver],
-        markersize=6,
+        markersize=5,
     )
     handles.append(line)
 
-    # Create shorter solver labels by extracting key info
-    if "[" in solver:
-        # Extract the acceleration and prox method if available
-        acceleration = re.search(r"acceleration=(\w+)", solver)
-        acceleration = acceleration.group(1) if acceleration else ""
-
-        prox = re.search(r"prox=(\w+)", solver)
-        prox = prox.group(1) if prox else ""
-
-        # Get the base solver name (before the bracket)
-        base_solver = solver.split("[")[0]
-
-        if acceleration and prox:
-            short_label = f"{base_solver}[{acceleration},{prox.replace('prox_', '')}]"
-        elif acceleration:
-            short_label = f"{base_solver}[{acceleration}]"
-        elif prox:
-            short_label = f"{base_solver}[{prox.replace('prox_', '')}]"
-        else:
-            short_label = solver
-    else:
-        short_label = solver
+    short_label = legend_labels(solver)
 
     labels.append(short_label)
 

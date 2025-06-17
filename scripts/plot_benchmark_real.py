@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from slopeutils import FULL_WIDTH, merge_parquet_files, set_plot_defaults
+from slopeutils import FULL_WIDTH, legend_labels, merge_parquet_files, set_plot_defaults
 
 set_plot_defaults()
 
@@ -23,8 +23,6 @@ def extract_reg_param(df):
 
     return df
 
-
-# Apply the function to your DataFrame
 
 results_dir = "results/single_0612"
 df = merge_parquet_files(results_dir)
@@ -71,19 +69,19 @@ ymin_def = 1e-7
 custom_limits = {
     (0.5, "Koussounadis2014"): (-0.1, 2.6, ymin_def, ymax_def),
     (0.1, "Koussounadis2014"): (-0.1, 6, ymin_def, ymax_def),
-    (0.02, "Koussounadis2014"): (-0.5, 33, ymin_def, ymax_def),
-    (0.5, "Rhee2006"): (-0.001, 0.011, ymin_def, ymax_def),
-    (0.1, "Rhee2006"): (-0.001, 0.021, ymin_def, ymax_def),
-    (0.02, "Rhee2006"): (-0.001, 0.045, ymin_def, ymax_def),
-    (0.5, "brca1"): (-0.1, 2.6, ymin_def, ymax_def),
+    (0.02, "Koussounadis2014"): (-0.5, 23, ymin_def, ymax_def),
+    (0.5, "Scheetz2006"): (-0.01, 0.6, ymin_def, ymax_def),
+    (0.1, "Scheetz2006"): (-0.1, 3.2, ymin_def, ymax_def),
+    (0.02, "Scheetz2006"): (-0.1, 3.2, ymin_def, ymax_def),
+    (0.5, "brca1"): (-0.1, 2.9, ymin_def, ymax_def),
     (0.1, "brca1"): (-0.2, 9.1, ymin_def, ymax_def),
-    (0.02, "brca1"): (-1, 31, ymin_def, ymax_def),
-    (0.5, "news20.binary"): (-2, 41, ymin_def, ymax_def),
-    (0.1, "news20.binary"): (-3, 81, ymin_def, ymax_def),
-    (0.02, "news20.binary"): (-4, 101, ymin_def, ymax_def),
+    (0.02, "brca1"): (-1, 16, ymin_def, ymax_def),
     (0.5, "rcv1.binary"): (-0.1, 2.1, ymin_def, ymax_def),
     (0.1, "rcv1.binary"): (-0.5, 11, ymin_def, ymax_def),
     (0.02, "rcv1.binary"): (-2, 31, ymin_def, ymax_def),
+    (0.5, "real-sim"): (-0.02, 0.3, ymin_def, ymax_def),
+    (0.1, "real-sim"): (-0.1, 2.6, ymin_def, ymax_def),
+    (0.02, "real-sim"): (-1, 11, ymin_def, ymax_def),
 }
 
 # Create markers for solvers
@@ -179,32 +177,11 @@ for solver in solver_values:
         linestyle="-",
         markerfacecolor="white",
         markeredgecolor=solver_colors[solver],
-        markersize=6,
+        markersize=5,
     )
     handles.append(line)
 
-    # Create shorter solver labels by extracting key info
-    if "[" in solver:
-        # Extract the acceleration and prox method if available
-        acceleration = re.search(r"acceleration=(\w+)", solver)
-        acceleration = acceleration.group(1) if acceleration else ""
-
-        prox = re.search(r"prox=(\w+)", solver)
-        prox = prox.group(1) if prox else ""
-
-        # Get the base solver name (before the bracket)
-        base_solver = solver.split("[")[0]
-
-        if acceleration and prox:
-            short_label = f"{base_solver}[{acceleration},{prox.replace('prox_', '')}]"
-        elif acceleration:
-            short_label = f"{base_solver}[{acceleration}]"
-        elif prox:
-            short_label = f"{base_solver}[{prox.replace('prox_', '')}]"
-        else:
-            short_label = solver
-    else:
-        short_label = solver
+    short_label = legend_labels(solver)
 
     labels.append(short_label)
 

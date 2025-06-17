@@ -390,24 +390,6 @@ reliable, solver-independent measure of convergence. The complete derivation of
 the dual problem and the calculation of the duality gap is provided in
 \Cref{sec:convergence-criteria-details}.
 
-\subsection{Memory management}
-\label{sec:memory-management}
-
-For dense matrices, the packages implement memory-efficient views of
-the input matrices in order to avoid copies of the data.\footnote{This is technically achievable for sparse matrices too, but
-  would mean heavy overhead since we would need to iterate over all nonzero
-  elements for each view. We have thus decided against implementing this.}
-This means, for instance, that no copies need to be made when separating
-data sets into training and test data.
-
-\subsection{Cross-validation}
-
-Due to the memory-efficient implementation of view~\Cref{sec:memory-management}, we provide
-an option to altogether avoid copying the data during cross-validation.
-This means that we parallelize the cross-validation procedure over
-arbitrarily many folds and repetitions, yet still completely
-avoid the need to copy the data.
-
 \subsection{Path fitting}
 
 Our packages are designed to fit the full regularization path for SLOPE, which
@@ -466,18 +448,10 @@ Gram matrix must be updated as well, and this would invoke additional cost.
 \subsection{Clusters}
 \label{sec:clusters}
 
-There are multiple ways to handle the cluster structure for SLOPE.
-In theory, the most efficient solution would be to use a
-doubly-linked list, which offers \(O(1)\) deletion and insertion.
-This is a natural construct for the cluster structure, since we
-traverse the list linearly as part of the thresholding operator.
-
-In practice, however, this turns out to be a poor choice.
-The discussion is beyond the scope of this paper, but the main
-reason is that doubly-linked lists suffer from poor cache
-locality, which is a major bottleneck in modern processors.
-
-Instead, we use the following structure:
+Handling the cluster structure of SLOPE is a key part of the algorithm since we
+will both be iterating over the clusters as part of the coordinate descent
+updates as well as updating the clusters after each update. In our
+implementation, we represent the clusters as a collection of three vectors:
 
 \begin{description}
   \item[\code{c}] The coefficients of the clusters
@@ -485,15 +459,14 @@ Instead, we use the following structure:
   \item[\code{c\_ptr}] Values of the cluster pointers
 \end{description}
 
-In this representation, the indices for the \(k\)th cluster
-are given by \code{ c_idx[c_ptr[k] : c_ptr[k+1]]} and the coefficient is simply \code{c[k]}.
+In this representation, the indices for the \(k\)th cluster are given by \code{
+c_idx[c_ptr[k] : c_ptr[k+1]]} and the coefficient is simply \code{c[k]}.
 
-Compared to the implementation from \citet{larsson2023}, we
-have developed a more efficient representation of the
-cluster structure. In particular, cluster updates (merging,
-reordering, removal) can now be performed with negligible
-overhead and with minimal copying due to the use of
-\fct{std::rotate}a
+This structure is the same basic setup as in \citet{larsson2023}. Unlike
+their implementation, however, we have made improvements to the
+handling of updating the clusters (merging,
+reordering, removal), which can now be performed with negligible
+overhead and with minimal copying.
 
 Our representation of clusters closely resembles the sparse matrix
 representation of the SLOPE pattern~\citep{schneider2022}. \(P\) is the pattern
@@ -559,6 +532,24 @@ optimization, which means that we can allow arbitrary centering
 even of sparse design matrices. In addition, we can completely
 avoid copying the design matrix.
 
+\subsection{Memory management}
+\label{sec:memory-management}
+
+For dense matrices, the packages implement memory-efficient views of
+the input matrices in order to avoid copies of the data.\footnote{This is technically achievable for sparse matrices too, but
+  would mean heavy overhead since we would need to iterate over all nonzero
+  elements for each view. We have thus decided against implementing this.}
+This means, for instance, that no copies need to be made when separating
+data sets into training and test data.
+
+\subsection{Cross-validation}
+
+Due to the memory-efficient implementation of view~\Cref{sec:memory-management}, we provide
+an option to altogether avoid copying the data during cross-validation.
+This means that we parallelize the cross-validation procedure over
+arbitrarily many folds and repetitions, yet still completely
+avoid the need to copy the data.
+
 \subsection{Out-of-memory support}
 
 The SLOPE packages support out-of-memory storage for the design matrix, which
@@ -572,7 +563,7 @@ time of writing, this is only supported for \proglang{R},
 which is possible via the \pkg{bigmemory} package~\citep{kane2013},
 and currently only for dense designs.
 
-\subsection{Implementation}
+\subsection{Software}
 \label{sec:implementation}
 
 In this paper we present a collection of packages for solving SLOPE, currently
