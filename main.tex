@@ -822,12 +822,13 @@ R> plot(fit_cv)
 
 \section{Benchmarks}
 
-As part of this project, as well as the work by \citet{larsson2023}, we have
-developed a benchmark for SLOPE using \pkg{benchopt}~\citep{moreau2022a}: a
-command-line interface and Python library for creating and managing
-benchmarks of algorithms for optimization. The benchmark for
-SLOPE is available at \myurl{github.com/benchopt/benchmark\_slope}, which
-featres the \proglang{Python} implementation of SLOPE, \pkg{sortedl1}, as well as the
+\citet{larsson2023} developed a benchmark for SLOPE using
+\pkg{benchopt}~\citep{moreau2022a}: a command-line interface and Python library
+for creating and managing benchmarks of algorithms for optimization. As part of
+our work, we have extended this benchmark to include additional solvers. The
+benchmark for SLOPE is available at
+\myurl{github.com/benchopt/benchmark\_slope}, which featres the
+\proglang{Python} implementation of SLOPE, \pkg{sortedl1}, as well as the
 \proglang{R} implementation, \pkg{SLOPE}.
 
 For this paper, we have run the benchmarks for some real data sets~\Cref{tab:real-data},
@@ -921,8 +922,17 @@ as well as simulated data\Cref{tab:simulated-data}.
   % \label{fig:real-data-single}
 \end{figure}
 
-We have created a separate benchmark for fitting the full regularization path,
-which is available at \myurl{github.com/benchopt/benchmark\_slope\_path}. This
+We have also created a separate benchmark for fitting the full regularization
+path, which is available at \myurl{github.com/benchopt/benchmark\_slope\_path}.
+Here, we present benchmarks on a subset of the real data sets
+from \Cref{tab:real-data}. We parameterize the benchmark using
+the lenth of the path, using 50, 100, and 200 steps. We present the results
+as the maximum relative duality gap along the path.
+
+The results are presented in \Cref{fig:real-data-path}. Note the interpretation
+as progress towards convergence does not hold quite the same way as for the single
+solution benchmarks since we fit a full path. Nevertheless, we note that our
+implementation is the fastest by a large margin.
 
 \begin{figure}[htpb]
   \centering
@@ -954,6 +964,16 @@ the full regularization path as well as for single solution, and
 have shown these in a series of benchmarks on both real and simulated
 data. We have also made these benchmarks available publicly
 to facilitate further research and development of SLOPE.
+
+\citet{dupuis2024} benchmarked the Python implementation of the hybrid
+algorithm from \citet{larsson2023} against their approximate homotopy method
+and showed that their method performed better in certain cases. We have not
+seen this result in our benchmarks even when fitting the full regularization path.
+Besides the fact that the current implementation of our algorithm
+is more efficient than the one from \citet{larsson2023}, we believe that
+this may also be due to the smaller problem sizes in \citet{dupuis2024}'s
+work as well as the fact that they compared times at convergence to
+a duality gpa of \(10^{-10}\), which is more stringent than our results.
 
 Although our packages are full-fledged implementations of SLOPE, there are
 still some features that are missing. For instance, we do not yet support
