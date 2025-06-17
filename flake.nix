@@ -94,6 +94,7 @@
               ps.numpy
               ps.pandas
               ps.pyarrow
+              ps.scipy
               ps.fastparquet
               sortedl1
             ]))
