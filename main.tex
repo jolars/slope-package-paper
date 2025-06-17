@@ -369,33 +369,26 @@ refined heuristics in order to adapt naturally to problem structure.
 This, however, is beyond the scope of our current work.
 
 In addition to the implementation from \citet{larsson2023}, we have also
-implemented a randomized\footnote{In actuality we use random permutations and
-  not true random sampling with replacement.} version of the algorithm, which is
-slightly more robust to numerical issues (at the cost of slightly slower
-convergence).
+implemented a randomized\footnote{Using random permutations.} version
+of the algorithm, which we have found to be more robust to numerical issues (at the
+cost of slightly slower convergence).
 
-\subsection{Intercept updates}
-
-If we are in a PGD step, then the intercept is updated as part of the
-full gradient step.
-
-If we are in a coordinate descent step, then we can compute the intercept
-update at the end of a full pass over the clusters.
+Regarding updates of the intercepts, if we are in a PGD step, then the
+intercept is updated as part of the full gradient step. If we are in a
+coordinate descent step, then we can compute the intercept update at the end of
+a full pass over the clusters.
 
 \subsection{Convergence criteria}
 
-Our packages use a duality-based stopping criterion, providing an upper bound on suboptimality at convergence. We transform the primal problem into a constrained formulation and derive a dual problem that allows us to compute a duality gap. As a stopping criterion, we use the relative duality gap:
-\[
-  P(\beta_0, \beta) - D(\delta) \leq \varepsilon P(\beta_0, \beta),
-\]
-where \(\varepsilon >0\) is the user-defined tolerance level. This provides a reliable, solver-independent measure of convergence. The complete derivation of the dual problem and the calculation of the duality gap is provided in \Cref{sec:convergence-criteria-details}.
-
-\subsection{Convergence criteria}
-
-Our packages use a duality-based stopping criterion, providing an upper
-bound on suboptimality at convergence. To achieve this, we rely
-on dual variable centering and scaling in order to obtain a feasible dual
-point.
+Our packages use a duality-based stopping criterion, providing an upper bound
+on suboptimality at convergence. We transform the primal problem into a
+constrained formulation and derive a dual problem that allows us to compute a
+duality gap. As a stopping criterion, we use the relative duality gap: \[
+  P(\beta_0, \beta) - D(\delta) \leq \varepsilon P(\beta_0, \beta), \] where
+\(\varepsilon >0\) is the user-defined tolerance level. This provides a
+reliable, solver-independent measure of convergence. The complete derivation of
+the dual problem and the calculation of the duality gap is provided in
+\Cref{sec:convergence-criteria-details}.
 
 \subsection{Memory management}
 \label{sec:memory-management}
@@ -496,9 +489,11 @@ In this representation, the indices for the \(k\)th cluster
 are given by \code{ c_idx[c_ptr[k] : c_ptr[k+1]]} and the coefficient is simply \code{c[k]}.
 
 Compared to the implementation from \citet{larsson2023}, we
-have developed a much more efficient representatioon of the
-cluster structure which updates the cluster structure
-without copying the coefficients.
+have developed a more efficient representation of the
+cluster structure. In particular, cluster updates (merging,
+reordering, removal) can now be performed with negligible
+overhead and with minimal copying due to the use of
+\fct{std::rotate}a
 
 Our representation of clusters closely resembles the sparse matrix
 representation of the SLOPE pattern~\citep{schneider2022}. \(P\) is the pattern
@@ -820,6 +815,9 @@ R> plot(fit_cv)
   \label{fig:cv}
 \end{figure}
 
+It is also possible to cross-validate over the \(\gamma\) parameter, to
+find the optimal level of relaxation for SLOPE.
+
 \section{Benchmarks}
 
 \citet{larsson2023} developed a benchmark for SLOPE using
@@ -906,7 +904,7 @@ as well as simulated data\Cref{tab:simulated-data}.
         which is similar to the lars algorithm for the lasso~\citep{efron2004}.
 \end{description}
 
-\begin{figure}[htpb]
+\begin{figure}[t]
   \centering
   \includegraphics[width=\natwidth]{images/benchmark_single_simulated.pdf}
   \caption{%
@@ -914,7 +912,7 @@ as well as simulated data\Cref{tab:simulated-data}.
   \label{fig:simulated-data-single}
 \end{figure}
 
-\begin{figure}[htpb]
+\begin{figure}[tp]
   \centering
   \includegraphics[width=\natwidth]{images/benchmark_single_real.pdf}
   \caption{%
@@ -934,7 +932,7 @@ as progress towards convergence does not hold quite the same way as for the sing
 solution benchmarks since we fit a full path. Nevertheless, we note that our
 implementation is the fastest by a large margin.
 
-\begin{figure}[htpb]
+\begin{figure}[t]
   \centering
   \includegraphics[width=\natwidth]{images/benchmark_path_real.pdf}
   \caption{%
