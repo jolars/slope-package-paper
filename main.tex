@@ -139,20 +139,25 @@ implementation of SLOPE by \citet{bogdan2015}. Other possibilities include
 proximal Newton~\citep{lee2014} and the alternating direction method of
 multipliers (ADMM) method~\citep{boyd2010}.
 
-Although all of aforementioned methods are important and typically robust, they
-have for related problems such as the lasso and elastic net been shown to be
-inferior to coordinate descent methods~\citep{friedman2007,friedman2010}. For
-SLOPE, however, coordinate descent cannot be used directly since the sorted
-\(\ell_1\) norm is not separable. This problem was, however, solved by
-\citet{larsson2023}, who invented a hybrid combination of proximal gradient and
-coordinate descent. The algorithm alternates between full gradient descent
-steps and coordinate descent on current cluster structure to achieve robust and
-fast convergence.
+For related problems such as the lasso and elastic net, however, these
+aforementioned methods have typically been shown to be inferior to coordinate
+descent methods~\citep{friedman2007,friedman2010}, which optimize one
+coefficient at a time. Unfortunately, coordinate descent requires that the
+objective is separable in \(\beta_0, \beta\), which is not the case in SLOPE
+due to the permutations involved in the sorted \(\ell_1\) norm, which means
+that coordinate descent cannot be used directly. This problem was, however,
+overcome by \citet{larsson2023}, who invented a hybrid combination of proximal
+gradient and coordinate descent. The algorithm alternates between full gradient
+descent steps and coordinate descent on current cluster structure to achieve
+robust and fast convergence. So far, however, this algorithm has only
+been available in the form of a experimental Python module, packaged
+in the supplemental code of \citet{larsson2023}.
 
-In this paper, we present a collection of packages (in \proglang{R},
-\proglang{Python}, \proglang{Julia}, and \proglang{C++}) that implement an
-improved version of this algorithm, which makes this fast and robust algorithm
-available to a wide audience.
+In this paper we make this algorithm available to a wide audience, by
+presenting a collection of packages in \proglang{R}, \proglang{Python},
+\proglang{Julia}, and \proglang{C++}, which both improves upon the original
+implementation in terms of performance, robustness, and memory efficiency
+as well as greatly expands its feature set.
 
 \subsection{Outline of the paper}
 
@@ -162,12 +167,19 @@ packages solve, namely generalized linear models (GLMs) regularized with the sor
   that uses quadratic loss, but here we adopt a more general terminology and
   let SLOPE be defined for any loss function.}, and provide a brief overview of
 the mathematical properties of GLMs and the particular properties of SLOPE.
-We also discuss the optimization problem and describe the hybrid
-coordinate descent algorithm we use for solving SLOPE.
+We discuss the optimization problem and describe the hybrid
+coordinate descent algorithm we use for solving SLOPE, focusing on the
+improvements we have made to the original algorithm by \citet{larsson2023}.
 
 In \Cref{sec:implementation-details}, we provide a detailed overview of the
-software implementations, focusing on technical aspects such as
+software implementations, highlighting technical aspects such as
 memory management, parallelization, and convergence criteria.
+
+In \Cref{sec:examples}, we showcase how our packages work in practice,
+providing examples of fitting models, plotting, and cross-validation.
+
+Finally, in \Cref{sec:discussion}, we summarize the contributions of this paper
+and discuss future work.
 
 \section{Mathematical details}\label{sec:math-details}
 
@@ -572,7 +584,7 @@ API from our \proglang{C++} library to the high-level languages. This includes
 \proglang{R}, \pkg{pybind11}~\citep{jakob2025}, and \pkg{CxxWrap}~\citep{janssens2020} for
 \proglang{Julia}.
 
-\section{Examples}
+\section{Examples}\label{sec:examples}
 
 In this section we will show how to use the packages to fit SLOPE models in
 the different languages.
@@ -902,7 +914,7 @@ implementation is the fastest by a large margin.
   \label{fig:real-data-path}
 \end{figure}
 
-\section{Discussion}
+\section{Discussion}\label{sec:discussion}
 
 SLOPE is an appealing model for high-dimensional regression problems that is
 able to provide sparse solutions with a cluster structure, which sets it apart
