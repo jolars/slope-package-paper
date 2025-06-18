@@ -170,25 +170,27 @@ the mathematical properties of GLMs and the particular properties of SLOPE.
 We discuss the optimization problem and describe the hybrid
 coordinate descent algorithm we use for solving SLOPE, focusing on the
 improvements we have made to the original algorithm by \citet{larsson2023}.
-
 In \Cref{sec:implementation-details}, we provide a detailed overview of the
 software implementations, highlighting technical aspects such as
 memory management, parallelization, and convergence criteria.
-
 In \Cref{sec:examples}, we showcase how our packages work in practice,
 providing examples of fitting models, plotting, and cross-validation.
-
 Finally, in \Cref{sec:discussion}, we summarize the contributions of this paper
 and discuss future work.
 
 \section{Mathematical details}\label{sec:math-details}
 
+In this section, we provide a brief overview of the mathematical
+details of the SLOPE optimization problem, including the objective and
+the hybrid coordinate descent algorithm used to solve it. We also discuss the
+convergence criteria used to determine when the algorithm has converged, and
+the path fitting procedure used to compute the full regularization path for SLOPE.
+
 \subsection{Generalized linear models}
 \label{sec:glm}
 
-In this section we provide a brief overview of generalized linear models (GLMs)
-and introduce the notation used in the following sections. We fist of all,
-we remind the reader that our loss function is defined as
+Our packages are designed to solve SLOPE for generalized linear models (GLMs),
+in which the loss function is defined as
 \[
   F(\beta_0, \beta) = \frac{1}{n} \sum_{i=1}^n f(y_i, \eta_i),
 \]
@@ -249,7 +251,7 @@ as those by \citet{friedman2010} and \citet{fercoq2015} use the \emph{redundant}
 \(m\)-class formulation. Here, however, we have opted to use the non-redundant
 formulation of the loss function, with the last class serving as the reference
 category. This choice complicates notation slightly and leads to a more
-complicated formulation for the dual problem. For SLOPE, however, this is a
+complex formulation for the dual problem. For SLOPE, however, this is a
 more natural choice since it generalizes to the binary case as well (in which
 the last class is also implicit). SLOPE needs a \(\lambda\) sequence of length
 \(mp\), so the loss function for the multinomial case would not be equivalent
@@ -259,28 +261,44 @@ is not the case for the non-redundant formulation. This fact also means that a
 coordinate descent algorithm needs bounds checks to handle the parameter
 ambiguity~\citep{friedman2010}. This is not especially difficult to implement
 for the lasso, but is more complicated in the case of SLOPE since rows of the
-coefficient matrix cannot be arbitrarily shifted since that would alter the
+coefficient matrix cannot be arbitrarily shifted because it would alter the
 overall cluster structure.
 
-\subsection{Hybrid Algorithm}
+\subsection{Hybrid algorithm}
 
-The primary algorithm of the \pkg{SLOPE} packages is the hybrid
-coordinate descent algorithm by \citet{larsson2023}. Since it is described in
-detail there, we will only summarize its key points here.
-
+The primary algorithm of the \pkg{SLOPE} packages is the hybrid coordinate
+descent algorithm by \citet{larsson2023}. Since it is described in detail
+there, we will only summarize its key points here and highlight
+some of the differences between that implementation and the one presented here.
 The basic idea of the algorithm is to perform the coordinate descent updates on
 the cluster coefficients, rather than directly on the clusters. In effect, we fix the
 current cluster and update all coefficients belong to it in a single step.
 On its own, this algorithm is not guaranteed to converge since it can only
-reorder or merge clusters. In order to guarantee converge, the algorithm must
+reorder or merge clusters. In order to circumvent this, the algorithm must
 therefore be combined with proximal gradient descent steps. These steps
 are able to split the clusters, which eventually means that the full
 algorithm converges to the correct clusters and global minimum.
 
+We have outlined the algorithm in \Cref{alg:hybrid}. Unlike the implementation
+in \citet{larsson2023}, this algorithm can be used to solve
+any generalized linear model---not just the Gaussian case. To do so,
+we use a iteratively reweighted least-squares (IRLS) approach, determining
+weights \(w\) and a working response \(z\) after each proximal gradient descent step.
+We then run the coordinate descent algorithm for a fixed number of iterations.
+Convergence is monitored using a duality-based stopping criterion, which
+we check after each gradient is computed. In order to avoid complicating
+the presentation, we have omitted the details of the screening rules and duality
+gap calculations here.
+
 \begin{algorithm}[t]
-  \caption{The Hybrid coordinate descent algorithm for generalized linear models, using
-    the IRLS where weights \(w\) and a working response \(z\) are computed after
-    a proximal gradient descent step.}
+  \caption{
+    The Hybrid coordinate descent algorithm for generalized linear models, using
+    the IRLS where weights \(w\) and a working response \(z\) are computed
+    after a proximal gradient descent step. We describe the cyclical version of
+    the algorithm here. \(c^{\setminus k}\) is a version of the vector \(c\)
+    with the \(k\)th coefficient omitted and \(T\) is the SLOPE thresholding
+    operator, which we have illustrated in \Cref{fig:slope-thresholding}.
+  }
   \label{alg:hybrid}
   \SetKwInOut{Input}{input}
   \SetKwComment{tcc}{$\triangleright$ }{}
@@ -333,33 +351,32 @@ algorithm converges to the correct clusters and global minimum.
 \begin{figure}[t]
   \centering
   \includegraphics[width=\natwidth]{images/slope-thresholding.pdf}
-  \caption{%
-  The SLOPE thresholding operator. We define
-  \(S(x) = \sum_{j \in C(x)}\lambda_{(j)^-_{x}}\)
+  \caption{
+  An illustration of the SLOPE thresholding operator, adapted from
+  \citet{larsson2023}. We define \(S(x) = \sum_{j \in
+    C(x)}\lambda_{(j)^-_{x}}\) and let \(\varepsilon_c > 0\) be defined such that
+  \(\varepsilon_c < \big| c_i - c_j\big|\;\forall\, i \neq j\) and
+  \(\varepsilon_c < c_m\) if \(c_m \neq 0\).
   }
   \label{fig:slope-thresholding}
 \end{figure}
 
-The hybrid nature of the algorithm comes with boons of its own.
-Indeed, proximal gradient descent algorithms are known to converge under
-more general assumptions than coordinate descent algorithms. In effect,
-this means that the PGD steps act as a safeguard and fallback
-when coordinate descent struggles to converge.
+The hybrid nature of the algorithm comes with benefits of its own. One such is
+that proximal gradient descent algorithms are known to converge under more
+general assumptions than coordinate descent algorithms~\citep{wright2015},
+which means that the PGD part of the algorithm can serve as a fallback in case
+the coordinate descent part does not converge. In practice, we store the
+current solution before updating and revert to it if the coordinate descent
+step does not improve the primal objective.
 
-One might imagine that this approach of hybrid algorithms could be
-extended to standard Newton methods as well and, moreover, include more
-refined heuristics in order to adapt naturally to problem structure.
-This, however, is beyond the scope of our current work.
-
-In addition to the implementation from \citet{larsson2023}, we have also
-implemented a randomized\footnote{Using random permutations.} version
-of the algorithm, which we have found to be more robust to numerical issues (at the
-cost of slightly slower convergence).
-
-Regarding updates of the intercepts, if we are in a PGD step, then the
-intercept is updated as part of the full gradient step. If we are in a
-coordinate descent step, then we can compute the intercept update at the end of
-a full pass over the clusters.
+The implementation in \citet{larsson2023} used a type of cyclical coordinate
+descent in which the algorithm iterated over the clusters in descending order
+by their coefficients' magnitudes. Although simple to implement
+and efficient for many problems, we have found this
+algorithm to suffer under convergence issues in a few cases.
+For the current implementation, we have therefore also
+implemented a version using random permutations, which we have found to be more
+robust at little extra cost.
 
 \subsection{Convergence criteria}
 
@@ -385,44 +402,31 @@ exceeds \(n + 1\) (by default), since the support of SLOPE is limited at \(n\) c
 which can potentially exceed the number of non-zero coefficients.\footnote{In practice
   this is quite rare since clusters do not form easily at low levels of regularization.}
 
-Since an optimal setting for \(\lambda\) is only available under
-strict assumptions that are typically hard to test, it
+Since optimal settings of \(\alpha\) are only available under
+strict assumptions that are typically hard to test, it is common to
+instead use cross-validation to tune \(\alpha\) over a grid of values.
+In practice, this means that we repeatedly have to fit the full SLOPE
+path, which makes path-fitting a key part of the implementation.
 
-\subsection{Screening rules and working sets}
+\subsection{Screening rules}
 
-Sparse models, like lasso, SCAD, MCP, and SLOPE, benefit greatly from
-so-called \emph{screening rules}, which are used to reduce the dimension of
-\(\beta\) in the optimization problem. The basic intuition for this is that
-it is possible to estimate the gradient \(\nabla F(\beta) \) for a given SLOPE problem
-and use this to determine, via the subdifferential, which coefficients are
-likely to be non-zero. This screening rule can either be heuristic or safe:
-in the latter case the rule guarantees that excluded features correspond
-to zero coefficients in the final model. Heuristic rules, on the other hand,
-do not guarantee this and therefore need to be complemented with a pass
-over all coefficients at the end to ensure that the optimality conditions
-are satisfied. Since they are less conservative, however, the cost of
-doing so is typically outweighed by the savings in computation time.
-Heuristic and safe rules can be combined, usually at no extra cost since
-they both rely on the same gradient information.
+Sparse models like lasso and SLOPE are well-known to benefit from
+\emph{screening rules}, which are used to reduce the dimension of \(\beta\) in
+the optimization problem and thereby speed up optimization. The intuition for
+this is that it is possible to estimate the gradient \(\nabla F(\beta) \) for a
+given SLOPE problem and, via the subdifferential, estimate the support of the
+solution: the identity of the nonzero coefficients. Screening rules are
+either \emph{heuristic} or \emph{safe}. In the latter case the rule guarantees that
+excluded predictors correspond to zero coefficients in the final model. Heuristic
+rules, on the other hand, do not guarantee this and therefore need to be
+complemented with a pass over all coefficients at the end to ensure that the
+optimality conditions are satisfied. Since they are less conservative, however,
+the cost of doing so is typically outweighed by the savings in computation
+time.
 
 In the SLOPE package, we use the strong screening rule for
 SLOPE~\citep{larsson2020a}, which is an extension of the working set strategy
 for the strong screening rule for the lasso~\citep{tibshirani2012}.
-
-\subsection{Covariance updates}
-
-\citet{friedman2010} present an alternative coordinate descent update that is
-based on pre-computing the Gram matrix \(X^\intercal X\) and then use this to
-speed up the updates. As the authors note, this can lead to dramatic speed-ups
-for the ordinary lasso (with least-squares loss), but not for other loss
-functions and not in the high-dimensional setting.
-
-Yet, although this type of update would be useful for SLOPE as well, it is not
-implemented in our packages. The main reason for this is that the Gram matrix
-we need is the collapsed version \((XP)^\intercal XP\), where \(P\) is the
-pattern matrix, which cannot be derived from \(X^\intercal X\). \(P\) typically
-changes continuously throughout optimization, which means that the precomputed
-Gram matrix must be updated as well, and this would invoke additional cost.
 
 \section{Implementation details}
 \label{sec:implementation-details}
@@ -498,7 +502,7 @@ spawn multiple threads depending on problem size, except for
 the embarassingly parallel case of cross-validation, which is always
 parallelized.
 
-\subsection{Feature normalization}
+\subsection{Normalization}
 
 As shown by \citet{larsson2025}, feature normalization (centering and
 scaling the design matrix) can have large consequences for the
@@ -592,7 +596,6 @@ the different languages.
 The packages are
 available through the respective package managers for each language, and can be
 be installed using the following commands:
-
 \begin{description}[labelwidth=8ex]
   \item[\proglang{R}] \code{R> install.packages("SLOPE")}
   \item[\proglang{Python}] \code{$ pip install sortedl1}
@@ -697,7 +700,8 @@ it later enters again on its own.
   {\includegraphics[width=\natwidth]{images/diabetes-slope-lasso.pdf}}
   \caption{%
     SLOPE and lasso paths on the diabetes
-    data set.
+    data set. Note that the \(x\) axis is reversed. Numbers indicate
+    the indices of the predictors.
   }
   \label{fig:diabetes}
 \end{figure}
@@ -960,6 +964,18 @@ the packages are modular and have been designed with extensibility in mind,
 which we hope will facilitate the addition of new features in the future.
 Because all of the packages rely on the same \proglang{C++} library, contributions
 will propagate quickly to all of the packages.
+
+\citet{friedman2010} present an alternative coordinate descent update that is
+based on pre-computing the Gram matrix \(X^\intercal X\) and then use this to
+speed up the updates. As the authors note, this can lead to dramatic speed-ups
+for the ordinary lasso (with least-squares loss), but not for other loss
+functions and not in the high-dimensional setting. Yet, although this type of
+update would be useful for SLOPE as well, it is not implemented in our
+packages. The main reason for this is that the Gram matrix we need is the
+collapsed version \((XP)^\intercal XP\), where \(P\) is the pattern matrix,
+which cannot be derived from \(X^\intercal X\). \(P\) typically changes
+continuously throughout optimization, which means that the precomputed Gram
+matrix must be updated as well, and this would invoke additional cost.
 
 We hope that our packages will be useful for researchers and
 practitioners alike and that the design of our software suite
