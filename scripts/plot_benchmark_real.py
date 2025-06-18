@@ -6,22 +6,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from slopeutils import FULL_WIDTH, legend_labels, merge_parquet_files, set_plot_defaults
+from slopeutils import (
+    FULL_WIDTH,
+    extract_reg_param,
+    legend_labels,
+    merge_parquet_files,
+    reg_labels,
+    set_plot_defaults,
+)
 
 set_plot_defaults()
-
-
-def extract_reg_param(df):
-    # Use regex to extract the reg parameter value
-    import re
-
-    # Extract the reg value from strings like "SLOPE[fit_intercept=True,q=0.2,reg=0.1]"
-    df["reg"] = df["objective_name"].str.extract(r"reg=([0-9.]+)")
-
-    # Convert to numeric type
-    df["reg"] = pd.to_numeric(df["reg"])
-
-    return df
 
 
 results_dir = "results/single_0612"
@@ -47,14 +41,23 @@ real_df = df_subset[df_subset["data_name"].str.contains("breheny|libsvm")]
 # Extract dataset specifics from data_name to create shorter labels
 def extract_dataset_name(data_name):
     match = re.search(r"dataset=([^,\]]+)", data_name)
-    return match.group(1) if match else "unknown"
+    x = match.group(1) if match else "unknown"
+
+    if x == "brca1":
+        return "BRCA1"
+    elif x == "rcv1.binary":
+        return "RCV1"
+    elif x == "real-sim":
+        return "Real-Sim"
+    else:
+        return x
 
 
 # Apply the function to create a shorter dataset identifier
 real_df["dataset"] = real_df["data_name"].apply(extract_dataset_name)
 
 # Get unique values for facets
-reg_values = np.flip(sorted(real_df["reg"].unique()))
+reg_values = np.asarray(np.flip(sorted(real_df["reg"].unique())), dtype="float64")
 dataset_values = sorted(real_df["dataset"].unique())
 solver_values = sorted(real_df["solver_name"].unique())
 
@@ -73,15 +76,15 @@ custom_limits = {
     (0.5, "Scheetz2006"): (-0.01, 0.6, ymin_def, ymax_def),
     (0.1, "Scheetz2006"): (-0.1, 3.2, ymin_def, ymax_def),
     (0.02, "Scheetz2006"): (-0.1, 3.2, ymin_def, ymax_def),
-    (0.5, "brca1"): (-0.1, 2.9, ymin_def, ymax_def),
-    (0.1, "brca1"): (-0.2, 9.1, ymin_def, ymax_def),
-    (0.02, "brca1"): (-1, 16, ymin_def, ymax_def),
-    (0.5, "rcv1.binary"): (-0.1, 2.1, ymin_def, ymax_def),
-    (0.1, "rcv1.binary"): (-0.5, 11, ymin_def, ymax_def),
-    (0.02, "rcv1.binary"): (-2, 31, ymin_def, ymax_def),
-    (0.5, "real-sim"): (-0.02, 0.3, ymin_def, ymax_def),
-    (0.1, "real-sim"): (-0.1, 2.6, ymin_def, ymax_def),
-    (0.02, "real-sim"): (-1, 11, ymin_def, ymax_def),
+    (0.5, "BRCA1"): (-0.1, 2.9, ymin_def, ymax_def),
+    (0.1, "BRCA1"): (-0.2, 9.1, ymin_def, ymax_def),
+    (0.02, "BRCA1"): (-1, 16, ymin_def, ymax_def),
+    (0.5, "RCV1"): (-0.1, 2.1, ymin_def, ymax_def),
+    (0.1, "RCV1"): (-0.5, 11, ymin_def, ymax_def),
+    (0.02, "RCV1"): (-2, 31, ymin_def, ymax_def),
+    (0.5, "Real-Sim"): (-0.02, 0.3, ymin_def, ymax_def),
+    (0.1, "Real-Sim"): (-0.1, 2.6, ymin_def, ymax_def),
+    (0.02, "Real-Sim"): (-1, 11, ymin_def, ymax_def),
 }
 
 # Create markers for solvers
@@ -92,7 +95,7 @@ solver_markers = dict(zip(solver_values, markers[: len(solver_values)]))
 fig, axes = plt.subplots(
     len(dataset_values),
     len(reg_values),
-    figsize=(FULL_WIDTH, 8.5),
+    figsize=(FULL_WIDTH, 8),
     sharex=False,
     sharey=True,
     constrained_layout=True,
@@ -151,7 +154,7 @@ for i, dataset in enumerate(dataset_values):
 
         # Set titles and labels
         if i == 0:
-            ax.set_title(f"Reg: {reg_values[j]}")
+            ax.set_title(reg_labels(reg))
 
         # Apply custom limits if defined for this facet
         facet_key = (reg, dataset)
@@ -192,9 +195,6 @@ fig.legend(
     loc="outside upper center",
     ncol=min(3, len(solver_values)),
 )
-
-# plt.subplots_adjust(top=0.85)  # Make room for the legend at the top
-# plt.show()
 
 save_fig = True
 

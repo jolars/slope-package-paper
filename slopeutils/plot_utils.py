@@ -1,6 +1,22 @@
 import matplotlib.pyplot as plt
+import pandas as pd
 
 FULL_WIDTH = 6
+
+
+def reg_labels(reg):
+    """Create a label for the regularization parameter."""
+    reg_frac = int(1 / reg)
+    return r"$\alpha_\text{max}" + " / " + str(reg_frac) + r"$"
+
+
+def extract_reg_param(df):
+    import re
+
+    df["reg"] = df["objective_name"].str.extract(r"reg=([0-9.]+)")
+    df["reg"] = pd.to_numeric(df["reg"])
+
+    return df
 
 
 def set_plot_defaults():

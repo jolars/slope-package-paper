@@ -1,27 +1,18 @@
-import glob
-import os
 import re
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 
-from slopeutils import FULL_WIDTH, legend_labels, merge_parquet_files, set_plot_defaults
+from slopeutils import (
+    FULL_WIDTH,
+    extract_reg_param,
+    legend_labels,
+    merge_parquet_files,
+    reg_labels,
+    set_plot_defaults,
+)
 
 set_plot_defaults()
-
-
-def extract_reg_param(df):
-    # Use regex to extract the reg parameter value
-    import re
-
-    # Extract the reg value from strings like "SLOPE[fit_intercept=True,q=0.2,reg=0.1]"
-    df["reg"] = df["objective_name"].str.extract(r"reg=([0-9.]+)")
-
-    # Convert to numeric type
-    df["reg"] = pd.to_numeric(df["reg"])
-
-    return df
 
 
 # Extract dataset specifics from data_name to create shorter labels
@@ -29,7 +20,18 @@ def extract_dataset_name(data_name):
     # Extract n_features and n_samples
     n_features = re.search(r"n_features=(\d+)", data_name).group(1)
     n_samples = re.search(r"n_samples=(\d+)", data_name).group(1)
-    return rf"$n={n_samples}$, $p={n_features}$"
+
+    n_features = int(n_features)
+    n_samples = int(n_samples)
+
+    if n_samples == 200 and n_features == 20000:
+        return "High Dim"
+    elif n_samples == 200 and n_features == 200000:
+        return "High Dim, Sparse"
+    elif n_samples == 200000 and n_features == 200:
+        return "Low Dim"
+
+    return "Unknown Scenario"
 
 
 results_dir = "results/single_0612"
@@ -55,7 +57,7 @@ simulated_df = df_subset[df_subset["data_name"].str.contains("Simulated")]
 simulated_df.loc[:, "dataset"] = simulated_df["data_name"].apply(extract_dataset_name)
 
 # Get unique values for facets
-reg_values = np.flip(sorted(simulated_df["reg"].unique()))
+reg_values = np.asarray(np.flip(sorted(simulated_df["reg"].unique())), dtype="float64")
 dataset_values = sorted(simulated_df["dataset"].unique())
 solver_values = sorted(simulated_df["solver_name"].unique())
 
@@ -68,15 +70,15 @@ ymax_def = 2
 ymin_def = 1e-7
 
 custom_limits = {
-    (0.5, "$n=200$, $p=20000$"): (-0.05, 0.7, ymin_def, ymax_def),
-    (0.1, "$n=200$, $p=20000$"): (-0.5, 5.5, ymin_def, ymax_def),
-    (0.02, "$n=200$, $p=20000$"): (-1, 21, ymin_def, ymax_def),
-    (0.5, "$n=200$, $p=200000$"): (-0.1, 4, ymin_def, ymax_def),
-    (0.1, "$n=200$, $p=200000$"): (-0.5, 11, ymin_def, ymax_def),
-    (0.02, "$n=200$, $p=200000$"): (-2, 81, ymin_def, ymax_def),
-    (0.5, "$n=200000$, $p=200$"): (-0.05, 1.6, ymin_def, ymax_def),
-    (0.1, "$n=200000$, $p=200$"): (-0.05, 3.1, ymin_def, ymax_def),
-    (0.02, "$n=200000$, $p=200$"): (-0.05, 5.1, ymin_def, ymax_def),
+    (0.5, "High Dim"): (-0.05, 0.7, ymin_def, ymax_def),
+    (0.1, "High Dim"): (-0.5, 5.5, ymin_def, ymax_def),
+    (0.02, "High Dim"): (-1, 21, ymin_def, ymax_def),
+    (0.5, "High Dim, Sparse"): (-0.1, 4, ymin_def, ymax_def),
+    (0.1, "High Dim, Sparse"): (-0.5, 11, ymin_def, ymax_def),
+    (0.02, "High Dim, Sparse"): (-2, 81, ymin_def, ymax_def),
+    (0.5, "Low Dim"): (-0.05, 1.6, ymin_def, ymax_def),
+    (0.1, "Low Dim"): (-0.05, 3.1, ymin_def, ymax_def),
+    (0.02, "Low Dim"): (-0.05, 5.1, ymin_def, ymax_def),
 }
 
 # Create markers for solvers
@@ -144,7 +146,7 @@ for i, dataset in enumerate(dataset_values):
 
         # Set titles and labels
         if i == 0:
-            ax.set_title(f"Reg: {reg_values[j]}")
+            ax.set_title(reg_labels(reg))
 
         # Apply custom limits if defined for this facet
         facet_key = (reg, dataset)
