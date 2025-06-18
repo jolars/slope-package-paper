@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 
+from slopeutils import FULL_WIDTH, set_plot_defaults
+
 
 def dual_norm_slope(X, theta, alphas):
     """Dual slope norm of X.T @ theta"""
@@ -23,7 +25,9 @@ def get_clusters(w):
     return clusters[::-1], counts[::-1], indices[::-1], unique[::-1]
 
 
-savefig = False
+set_plot_defaults()
+
+savefig = True
 
 np.random.seed(10)
 
@@ -113,7 +117,7 @@ res = np.asarray(res, dtype="object")
 
 plt.rcParams["text.usetex"] = True
 
-fig, ax = plt.subplots(figsize=(5, 3.5), constrained_layout=True)
+fig, ax = plt.subplots(figsize=(FULL_WIDTH, 3.2), constrained_layout=True)
 
 ax.hlines(0, xmin=min(a_list), xmax=max(a_list), color="lightgrey")
 
@@ -174,11 +178,7 @@ ax2_y = ax.secondary_yaxis("right")
 ax2_y.set_yticks(y2_vals, y2_labs)
 
 if savefig:
-    figpath = plot_utils.fig_path("slope-thresholding")
-    formats = [".svg", ".pdf"]
-    [
-        fig.savefig(figpath.with_suffix(f), bbox_inches="tight", pad_inches=0.01)
-        for f in formats
-    ]
+    figpath = "images/slope-thresholding.pdf"
+    fig.savefig(figpath, bbox_inches="tight", pad_inches=0.05)
 else:
     plt.show(block=False)

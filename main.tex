@@ -269,6 +269,8 @@ algorithm converges to the correct clusters and global minimum.
     a proximal gradient descent step.}
   \label{alg:hybrid}
   \SetKwInOut{Input}{input}
+  \SetKwComment{tcc}{$\triangleright$ }{}
+  \SetCommentSty{textit}
 
   \Input{%
     \(X \in \mathbb{R}^{n\times p}\),
@@ -277,7 +279,7 @@ algorithm converges to the correct clusters and global minimum.
     \(v \in \mathbb{N}\)
   }
 
-  \Repeat{\(P(\beta_0, \beta) - D(\theta) \leq \varepsilon\)}{
+  \Repeat{\(P(\beta_0, \beta) - D(\theta) \leq \varepsilon|P(\beta_0, \beta)|\)}{
 
     Set \(t\) with backtracking line search\;
 
@@ -286,8 +288,8 @@ algorithm converges to the correct clusters and global minimum.
     \For{\(i \gets 1,\dots,n\)}{
 
       \(\eta_i \gets x_i^T \beta + \beta_0 \)\;
-      \(w_i \gets \frac{\partial}{\partial \eta_i} f(\eta_i, y_i) \)\;
-      \(z_i \gets \eta_i - \frac{r_i(\eta_i, y_i)}{w_i} \)\;
+      \(w_i \gets \frac{\partial}{\partial \eta_i} f(\eta_i, y_i) \)\tcc*{Weights for IRLS}
+      \(z_i \gets \eta_i - \frac{r_i(\eta_i, y_i)}{w_i} \)\tcc*{Working response for IRLS}
     }
     Update \(c\), \(\mathcal{C}\)\;
     \For{\texttt{it} \(\gets 1,\dots,\)\texttt{cd\_maxit}}{
@@ -296,12 +298,10 @@ algorithm converges to the correct clusters and global minimum.
 
       \While{\(k \leq \lvert \mathcal{C} \rvert\)}{
         \(\tilde x \gets \sum_{j \in \cC_k} x_j \sign \beta_j \)\;
-        \(\tilde{r} \gets X \beta + \beta_0 - z\)\;
-        \(\gamma \gets \frac{1}{n} \sum_{i=1}^n w_i \tilde{x}_i \tilde{r}_i \)\;
-        \(\xi \gets \frac{1}{n} \sum_{i=1}^n w_i \tilde{x}_i^2 \)\;
-        % TODO: THe thresholding operator here is defined differently
-        % compared to the cd slope paper. Is this bad?
-        \(\tilde {c} \gets T\left(c_k - \gamma/\xi, \lambda / \xi, k, c, \cC \right)\)\;
+        \(\tilde{r} \gets X \beta + \beta_0 - z\)\tcc*{Residuals}
+        \(\gamma \gets \frac{1}{n} \sum_{i=1}^n w_i \tilde{x}_i \tilde{r}_i\)\tcc*{Gradient}
+        \(\xi \gets \frac{1}{n} \sum_{i=1}^n w_i \tilde{x}_i^2 \)\tcc*{Hessian}
+        \(\tilde {c} \gets T(c_k \xi - \gamma; \xi, c^{\setminus k}, \lambda)\)\;
         \(\beta_{\cC_k} \gets \tilde{c} \sign(\beta_{\cC_k})\)\;
         Update \(c\), \(\mathcal{C}\)\;
         \(k \gets k + 1\)\;
@@ -315,47 +315,16 @@ algorithm converges to the correct clusters and global minimum.
   }
 
 \end{algorithm}
-%
-% TODO: We need to define the thresholding operator. Maybe even plot it?
-%
-% \begin{algorithm}[hbt]
-%   \SetKwInOut{Input}{input}
-%   \caption{%
-%     Hybrid coordinate descent and proximal gradient descent algorithm
-%     for SLOPE\label{alg:hybrid}}
-%   \Input{%
-%     \(X \in \mathbb{R}^{n\times p}\),
-%     \(y\in \mathbb{R}^n\),
-%     \(\lambda \in \{\mathbb{R}^p : \lambda_1 \geq \lambda_2 \geq \cdots > 0\}\),
-%     \(v \in \mathbb{N}\),
-%     \(\beta \in \mathbb{R}^p\)
-%   }
-%
-%   \For{\(t \gets 0,1,\dots\)}{
-%
-%   \If{\(t \bmod v = 0\)}{
-%   \(\beta \leftarrow \prox_{J/{\norm{X}^2_2}}\Big(\beta - \frac{1}{\norm{X}_2^2}X^T(X \beta - y)\Big)\) \label{alg:hybrid-istastep}
-%
-%   Update \(c\), \(\mathcal{C}\)
-%   }
-%   \Else{
-%     \(k \gets 1\)
-%
-%     \While{\(k \leq \lvert \mathcal{C} \rvert\)}{
-%       \(\tilde x_k \gets X_{\mathcal{C}_k} \sign(\beta_{\cC_k}) \)
-%
-%       \(z \gets T(c_k\norm{\tilde x}^2 - \tilde x^T(X\beta - y); \norm{x}^2, c^{\setminus k}, \lambda)\)
-%
-%       \(\beta_{\cC_k} \gets z \sign(\beta_{\cC_k})\)
-%
-%       Update \(c\), \(\mathcal{C}\)
-%
-%       \(k \gets k + 1\)
-%     }
-%   }
-%   }
-%   \Return{\(\beta\)}
-% \end{algorithm}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\natwidth]{images/slope-thresholding.pdf}
+  \caption{%
+  The SLOPE thresholding operator. We define
+  \(S(x) = \sum_{j \in C(x)}\lambda_{(j)^-_{x}}\)
+  }
+  \label{fig:slope-thresholding}
+\end{figure}
 
 The hybrid nature of the algorithm comes with boons of its own.
 Indeed, proximal gradient descent algorithms are known to converge under
@@ -384,7 +353,7 @@ Our packages use a duality-based stopping criterion, providing an upper bound
 on suboptimality at convergence. We transform the primal problem into a
 constrained formulation and derive a dual problem that allows us to compute a
 duality gap. As a stopping criterion, we use the relative duality gap: \[
-  P(\beta_0, \beta) - D(\delta) \leq \varepsilon P(\beta_0, \beta), \] where
+  P(\beta_0, \beta) - D(\delta) \leq \varepsilon | P(\beta_0, \beta) |, \] where
 \(\varepsilon >0\) is the user-defined tolerance level. This provides a
 reliable, solver-independent measure of convergence. The complete derivation of
 the dual problem and the calculation of the duality gap is provided in
@@ -392,7 +361,7 @@ the dual problem and the calculation of the duality gap is provided in
 
 \subsection{Path fitting}
 
-Our packages are designed to fit the full regularization path for SLOPE, which
+Our packages are optimized for fitting the full regularization path for SLOPE, which
 is the sequence of solutions to the problem in \Cref{eq:slope} as \(\alpha\) is varied
 from \(\alpha_\text{max}\), at which point the first cluster enters the model,
 to a small value of \(\alpha\) at which the model is almost saturated.
@@ -402,9 +371,8 @@ exceeds \(n + 1\) (by default), since the support of SLOPE is limited at \(n\) c
 which can potentially exceed the number of non-zero coefficients.\footnote{In practice
   this is quite rare since clusters do not form easily at low levels of regularization.}
 
-Fitting the full regularization path is a natural element of SLOPE and similar
-models since an optimal setting for \(\lambda\) is only available under
-strict and non-testable assumptions.
+Since an optimal setting for \(\lambda\) is only available under
+strict assumptions that are typically hard to test, it
 
 \subsection{Screening rules and working sets}
 
