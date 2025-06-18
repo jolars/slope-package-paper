@@ -124,7 +124,9 @@ which is obtained by taking a constant \(\lambda\).
 
 A special property of SLOPE is that it can clusters coefficients by
 setting them to the same magnitude~\citep{figueiredo2016,bogdan2022}. This is a natural
-consequence of the sorted \(\ell_1\) norm and stems from the fact that
+consequence of the sorted \(\ell_1\) norm, stemming from the fact that
+the contribution to the norm of a given coefficient increases disproportionally if it
+changes order.
 
 SLOPE is a convex but non-smooth optimization problem. But since the
 pool-adjacent-violators algorithm~(PAVA)~\citep{barlow1972} can be used to
