@@ -836,16 +836,17 @@ features the following solvers:\footnote{The \proglang{R} package \pkg{SLOPE} is
         results from \citet{larsson2023}.
         We considered using the heuristic \(\rho\) selection method from
         \citet{boyd2010}, but have avoided to do so since it, as shown by \citet{larsson2023},
-        may lead to erratic convergence behavior in practice. We use the \fct{lsqr}
-        solver from \pkg{SciPy}~\citep{virtanen2020} to solve the linear system if
-        \(\min\{n, p\} > \num{1000}\) and otherwise use the factorizations
-        suggested by \citet{boyd2010}.
+        may lead to erratic convergence behavior in practice. We use \fct{lsqr}
+        from \pkg{SciPy}~\citep{virtanen2020} to solve the linear system if
+        \(\min\{n, p\} > \num{1000}\) and otherwise use solve the linear system
+        as suggested by \citet{boyd2010}.
 
   \item[Newt-ALM] A semi-smooth Newton-based method~\citep{luo2019}. Our
         implementation of this method is based on that from \citet{larsson2023},
         but improved with better heuristics for selecting the inner solver,
         improved conjugate gradient solver, and
-        a bug fix for the Woodbury-based solver.
+        a bug fix for the Woodbury-based solver. For the conjugate gradient solver,
+        we use \fct{cg} from \pkg{SciPy}~\citep{virtanen2020}.
 
   \item[skglm] Another implementation of FISTA from the
         \pkg{skglm} package~\citep{bertrand2022}.
