@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from slopeutils import FULL_WIDTH, merge_parquet_files, set_plot_defaults
+from slopeutils import FULL_WIDTH, legend_labels, merge_parquet_files, set_plot_defaults
 
 set_plot_defaults()
 
@@ -16,7 +16,7 @@ def extract_path_length(df):
     return df
 
 
-results_dir = "results/path_0613"
+results_dir = "results/path_0623"
 df = merge_parquet_files(results_dir)
 df = extract_path_length(df)
 
@@ -49,8 +49,6 @@ path_values = sorted(df_subset["path_length"].unique())
 dataset_values = sorted(df_subset["dataset"].unique())
 solver_values = sorted(df_subset["solver_name"].unique())
 
-# Create a color palette for solvers
-# colors = sns.color_palette("tab10", len(solver_values))
 colors = plt.cm.tab10(np.linspace(0, 1, len(solver_values)))
 solver_colors = dict(zip(solver_values, colors))
 
@@ -58,28 +56,21 @@ ymax_def = 15
 ymin_def = 1e-7
 
 custom_limits = {
-    # (50, "Koussounadis2014"): (-0.1, 2.6, ymin_def, ymax_def),
-    # (0.1, "Koussounadis2014"): (-0.1, 6, ymin_def, ymax_def),
-    # (0.02, "Koussounadis2014"): (-0.5, 33, ymin_def, ymax_def),
-    # (0.5, "Rhee2006"): (-0.001, 0.011, ymin_def, ymax_def),
-    # (0.1, "Rhee2006"): (-0.001, 0.021, ymin_def, ymax_def),
-    # (0.02, "Rhee2006"): (-0.001, 0.045, ymin_def, ymax_def),
-    # (0.5, "brca1"): (-0.1, 2.6, ymin_def, ymax_def),
-    # (0.1, "brca1"): (-0.2, 9.1, ymin_def, ymax_def),
-    # (0.02, "brca1"): (-1, 31, ymin_def, ymax_def),
-    # (0.5, "news20.binary"): (-2, 41, ymin_def, ymax_def),
-    # (0.1, "news20.binary"): (-3, 81, ymin_def, ymax_def),
-    # (0.02, "news20.binary"): (-4, 101, ymin_def, ymax_def),
-    # (0.5, "rcv1.binary"): (-0.1, 2.1, ymin_def, ymax_def),
-    # (0.1, "rcv1.binary"): (-0.5, 11, ymin_def, ymax_def),
-    # (0.02, "rcv1.binary"): (-2, 31, ymin_def, ymax_def),
+    (50, "Koussounadis2014"): (-1, 13, ymin_def, ymax_def),
+    (100, "Koussounadis2014"): (-1, 21, ymin_def, ymax_def),
+    (200, "Koussounadis2014"): (-1, 23, ymin_def, ymax_def),
+    (50, "Rhee2006"): (-0.5, 6, ymin_def, ymax_def),
+    (100, "Rhee2006"): (-1, 11, ymin_def, ymax_def),
+    (200, "Rhee2006"): (-1, 11, ymin_def, ymax_def),
+    (50, "brca1"): (-1, 16, ymin_def, ymax_def),
+    (100, "brca1"): (-1, 16, ymin_def, ymax_def),
+    (200, "brca1"): (-1.5, 19, ymin_def, ymax_def),
 }
 
 # Create markers for solvers
 markers = ["o", "s", "^", "D", "*", "x", "+", "v", "<", ">", "p", "h", "H", "d"]
 solver_markers = dict(zip(solver_values, markers[: len(solver_values)]))
 
-# Set up the matplotlib figure and axes grid
 fig, axes = plt.subplots(
     len(dataset_values),
     len(path_values),
@@ -89,20 +80,10 @@ fig, axes = plt.subplots(
     constrained_layout=True,
 )
 
-# Adjust to handle single row or column case
-if len(path_values) == 1 and len(dataset_values) == 1:
-    axes = np.array([[axes]])
-elif len(path_values) == 1:
-    axes = axes.reshape(-1, 1)
-elif len(dataset_values) == 1:
-    axes = axes.reshape(1, -1)
-
-# Plot data on each subplot
 for i, dataset in enumerate(dataset_values):
     for j, path_length in enumerate(path_values):
         ax = axes[i, j]
 
-        # Filter data for this subplot
         subplot_data = df_subset[
             (df_subset["path_length"] == path_length)
             & (df_subset["dataset"] == dataset)
@@ -130,14 +111,12 @@ for i, dataset in enumerate(dataset_values):
                     markeredgecolor=solver_colors[solver],
                 )
 
-        # Set y-axis to log scale
         ax.set_yscale("log")
 
         if j == len(path_values) - 1:
             ax.yaxis.set_label_position("right")
             ax.set_ylabel(dataset, rotation=270, va="bottom")
 
-        # Set titles and labels
         if i == 0:
             ax.set_title(f"Path length: {path_values[j]}")
 
@@ -147,8 +126,6 @@ for i, dataset in enumerate(dataset_values):
             x_min, x_max, y_min, y_max = custom_limits[facet_key]
             ax.set_xlim(x_min, x_max)
             ax.set_ylim(y_min, y_max)
-
-        # ax.grid(True, linestyle="--", alpha=0.7)
 
 
 fig.supxlabel("Time (s)")
@@ -169,28 +146,7 @@ for solver in solver_values:
     )
     handles.append(line)
 
-    # Create shorter solver labels by extracting key info
-    if "[" in solver:
-        # Extract the acceleration and prox method if available
-        acceleration = re.search(r"acceleration=(\w+)", solver)
-        acceleration = acceleration.group(1) if acceleration else ""
-
-        prox = re.search(r"prox=(\w+)", solver)
-        prox = prox.group(1) if prox else ""
-
-        # Get the base solver name (before the bracket)
-        base_solver = solver.split("[")[0]
-
-        if acceleration and prox:
-            short_label = f"{base_solver}[{acceleration},{prox.replace('prox_', '')}]"
-        elif acceleration:
-            short_label = f"{base_solver}[{acceleration}]"
-        elif prox:
-            short_label = f"{base_solver}[{prox.replace('prox_', '')}]"
-        else:
-            short_label = solver
-    else:
-        short_label = solver
+    short_label = legend_labels(solver)
 
     labels.append(short_label)
 
@@ -199,7 +155,7 @@ fig.legend(
     handles,
     labels,
     loc="outside upper center",
-    ncol=min(3, len(solver_values)),
+    ncol=min(4, len(solver_values)),
 )
 
 # plt.subplots_adjust(top=0.85)  # Make room for the legend at the top
