@@ -438,7 +438,7 @@ In this section, we provide a detailed overview of the implementation
 details of the SLOPE packages, including the data structures used to represent
 the clusters, the thresholding operator, and parallelization strategies.
 
-\subsection{Software}
+\subsection{Software architecture}
 \label{sec:software}
 
 We have implemented a collection of packages for solving SLOPE, currently with
@@ -476,8 +476,7 @@ API from our \proglang{C++} library to the high-level languages. This includes
 \proglang{R}, \pkg{pybind11}~\citep{jakob2025}, and \pkg{CxxWrap}~\citep{janssens2020} for
 \proglang{Julia}.
 
-\subsection{Clusters}
-\label{sec:clusters}
+\subsection{Core algorithmic components}
 
 Handling the cluster structure of SLOPE is a key part of the algorithm since we
 will both be iterating over the clusters as part of the coordinate descent
@@ -499,8 +498,6 @@ handling of updating the clusters (merging,
 reordering, removal), which can now be performed with negligible
 overhead and with minimal copying.
 
-\subsection{Thresholding operator}
-
 The SLOPE thresholding operator~(\Cref{fig:slope-thresholding}) is the analogue
 to the soft-thresholding operator for the lasso. But unlike the latter, which
 is trivial to compute, the SLOPE thresholding operator needs to conduct a
@@ -519,7 +516,7 @@ lead to large overhead when updating a large cluster. In our implementation, we
 instead evaluate these sums lazily based on the cumulative sum of the
 \(\lambda\) array, which for some cases lead to a significant speedups.
 
-\subsection{Sparsity}
+\subsection{Data handling and optimization}
 
 Our package is based on the \pkg{Eigen} \proglang{C++} library and provides
 support for both dense and sparse design matrices. The latter can be
@@ -529,60 +526,39 @@ packages in and are passed to the \proglang{C++} API without copying
 and with negligible overhead. Coefficients are returned in a sparse format, which
 allows for efficient storage and retrieval of the coefficients.
 
-\subsection{Parallelization}
+For dense matrices, the packages implement memory-efficient views of
+the input matrices in order to avoid copies of the data. This means, for instance, that no copies need to be made when separating
+data sets into training and test data. Due to this memory-efficient implementation, we provide
+an option to altogether avoid copying the data during cross-validation.
+This means that we parallelize the cross-validation procedure over
+arbitrarily many folds and repetitions, yet still completely
+avoid the need to copy the data.
+
+The SLOPE packages support out-of-memory storage for the design matrix, which
+means that users can fit SLOPE models on data sets that are larger than the
+available memory. Storage in RAM is therefore limited to the order of \(O(n) +
+O(p)\), which means that the packages can be used on huge data sets.
+This is supported via the generic \code{Eigen::Map} class, which allows
+arbitrary data to be mapped into \pkg{Eigen} data structures. At the
+time of writing, this is only supported for \proglang{R},
+which is possible via the \pkg{bigmemory} package~\citep{kane2013},
+and currently only for dense designs.
 
 The software is parallelized using \pkg{OpenMP}, which is supported on all
-major platforms\footnote{Since the overhead for spawning multiple threads is,
-  however, high on Windows, the benefits of multi-threading are there in
-  practice limited to cross-validation.}. Functions make use of heuristics to
+major platforms. Functions make use of heuristics to
 determine whether to spawn multiple threads depending on problem size, except
 for the case of cross-validation, which is always parallelized.
-
-\subsection{Normalization}
 
 As shown by \citet{larsson2025}, predictor normalization (centering and
 scaling the design matrix) may have large consequences for the
 solutions. In our packages, we provide multiple different options
 for centering and scaling, independently of one another.
 We also provide the possibility to manually supply centering
-and scaling vectors.
-
-Optionally, normalization is also realized just-in-time (JIT),
+and scaling vectors. Optionally, normalization is also realized just-in-time (JIT),
 which means that the design matrix does not need to be normalized in place.
 Normalization is performed as predictors of the design matrix are accessed during
 optimization, which allows us to support centering even of sparse design
 matrices. This also allows us to completely avoid copying the design matrix.
-
-\subsection{Memory management}
-\label{sec:memory-management}
-
-For dense matrices, the packages implement memory-efficient views of
-the input matrices in order to avoid copies of the data.\footnote{This is technically achievable for sparse matrices too, but
-  would mean heavy overhead since we would need to iterate over all nonzero
-  elements for each view. We have thus decided against implementing this.}
-This means, for instance, that no copies need to be made when separating
-data sets into training and test data.
-
-\subsection{Cross-validation}
-
-Due to the memory-efficient implementation of view~\Cref{sec:memory-management}, we provide
-an option to altogether avoid copying the data during cross-validation.
-This means that we parallelize the cross-validation procedure over
-arbitrarily many folds and repetitions, yet still completely
-avoid the need to copy the data.
-
-\subsection{Out-of-memory support}
-
-The SLOPE packages support out-of-memory storage for the design matrix, which
-means that users can fit SLOPE models on data sets that are larger than the
-available memory. Storage in RAM is therefore limited to the order of \(O(n) +
-O(p)\), which means that the packages can be used on huge data sets.
-
-This is supported via the generic \code{Eigen::Map} class, which allows
-arbitrary data to be mapped into \pkg{Eigen} data structures. At the
-time of writing, this is only supported for \proglang{R},
-which is possible via the \pkg{bigmemory} package~\citep{kane2013},
-and currently only for dense designs.
 
 \section{Examples}\label{sec:examples}
 
