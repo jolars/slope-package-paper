@@ -1,10 +1,7 @@
-import glob
-import os
 import re
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 
 from slopeutils import (
     FULL_WIDTH,
@@ -101,20 +98,10 @@ fig, axes = plt.subplots(
     constrained_layout=True,
 )
 
-# Adjust to handle single row or column case
-if len(reg_values) == 1 and len(dataset_values) == 1:
-    axes = np.array([[axes]])
-elif len(reg_values) == 1:
-    axes = axes.reshape(-1, 1)
-elif len(dataset_values) == 1:
-    axes = axes.reshape(1, -1)
-
-# Plot data on each subplot
 for i, dataset in enumerate(dataset_values):
     for j, reg in enumerate(reg_values):
         ax = axes[i, j]
 
-        # Filter data for this subplot
         subplot_data = real_df[
             (real_df["reg"] == reg) & (real_df["dataset"] == dataset)
         ]
@@ -145,14 +132,12 @@ for i, dataset in enumerate(dataset_values):
                     markeredgecolor=solver_colors[solver],
                 )
 
-        # Set y-axis to log scale
         ax.set_yscale("log")
 
         if j == len(reg_values) - 1:
             ax.yaxis.set_label_position("right")
             ax.set_ylabel(dataset, rotation=270, va="bottom")
 
-        # Set titles and labels
         if i == 0:
             ax.set_title(reg_labels(reg))
 
@@ -163,13 +148,10 @@ for i, dataset in enumerate(dataset_values):
             ax.set_xlim(x_min, x_max)
             ax.set_ylim(y_min, y_max)
 
-        # ax.grid(True, linestyle="--", alpha=0.7)
-
 
 fig.supxlabel("Time (s)")
 fig.supylabel("Relative Duality Gap")
 
-# Create a single legend for all subplots
 handles, labels = [], []
 for solver in solver_values:
     line = plt.Line2D(
@@ -188,7 +170,6 @@ for solver in solver_values:
 
     labels.append(short_label)
 
-# Add the legend below the subplots
 fig.legend(
     handles,
     labels,

@@ -15,9 +15,7 @@ from slopeutils import (
 set_plot_defaults()
 
 
-# Extract dataset specifics from data_name to create shorter labels
 def extract_dataset_name(data_name):
-    # Extract n_features and n_samples
     n_features = re.search(r"n_features=(\d+)", data_name).group(1)
     n_samples = re.search(r"n_samples=(\d+)", data_name).group(1)
 
@@ -53,16 +51,12 @@ df_subset = df[
 
 simulated_df = df_subset[df_subset["data_name"].str.contains("Simulated")]
 
-# Apply the function to create a shorter dataset identifier
 simulated_df.loc[:, "dataset"] = simulated_df["data_name"].apply(extract_dataset_name)
 
-# Get unique values for facets
 reg_values = np.asarray(np.flip(sorted(simulated_df["reg"].unique())), dtype="float64")
 dataset_values = sorted(simulated_df["dataset"].unique())
 solver_values = sorted(simulated_df["solver_name"].unique())
 
-# Create a color palette for solvers
-# colors = sns.color_palette("tab10", len(solver_values))
 colors = plt.cm.tab10(np.linspace(0, 1, len(solver_values)))
 solver_colors = dict(zip(solver_values, colors))
 
@@ -81,11 +75,9 @@ custom_limits = {
     (0.02, "Low Dim"): (-0.05, 5.1, ymin_def, ymax_def),
 }
 
-# Create markers for solvers
 markers = ["o", "s", "^", "D", "*", "x", "+", "v", "<", ">", "p", "h", "H", "d"]
 solver_markers = dict(zip(solver_values, markers[: len(solver_values)]))
 
-# Set up the matplotlib figure and axes grid
 fig, axes = plt.subplots(
     len(dataset_values),
     len(reg_values),
@@ -95,15 +87,6 @@ fig, axes = plt.subplots(
     constrained_layout=True,
 )
 
-# Adjust to handle single row or column case
-if len(reg_values) == 1 and len(dataset_values) == 1:
-    axes = np.array([[axes]])
-elif len(reg_values) == 1:
-    axes = axes.reshape(-1, 1)
-elif len(dataset_values) == 1:
-    axes = axes.reshape(1, -1)
-
-# Plot data on each subplot
 for i, dataset in enumerate(dataset_values):
     for j, reg in enumerate(reg_values):
         ax = axes[i, j]
@@ -137,14 +120,12 @@ for i, dataset in enumerate(dataset_values):
                     markeredgecolor=solver_colors[solver],
                 )
 
-        # Set y-axis to log scale
         ax.set_yscale("log")
 
         if j == len(reg_values) - 1:
             ax.yaxis.set_label_position("right")
             ax.set_ylabel(dataset, rotation=270, va="bottom")
 
-        # Set titles and labels
         if i == 0:
             ax.set_title(reg_labels(reg))
 
@@ -155,13 +136,10 @@ for i, dataset in enumerate(dataset_values):
             ax.set_xlim(x_min, x_max)
             ax.set_ylim(y_min, y_max)
 
-        # ax.grid(True, linestyle="--", alpha=0.7)
-
 
 fig.supxlabel("Time (s)")
 fig.supylabel("Relative Duality Gap")
 
-# Create a single legend for all subplots
 handles, labels = [], []
 for solver in solver_values:
     line = plt.Line2D(
@@ -180,7 +158,6 @@ for solver in solver_values:
 
     labels.append(short_label)
 
-# Add the legend below the subplots
 fig.legend(
     handles,
     labels,

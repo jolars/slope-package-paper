@@ -26,6 +26,7 @@ def set_plot_defaults():
     plt.rcParams["axes.titlesize"] = 10
     plt.rcParams["lines.markersize"] = 3
     plt.rcParams["lines.linewidth"] = 1
+    plt.rcParams["legend.frameon"] = False
     plt.rcParams["text.latex.preamble"] = (
         r"\usepackage{mathtools}\usepackage{lmodern}\usepackage{bm}\usepackage{siunitx}"
     )
