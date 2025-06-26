@@ -112,10 +112,23 @@ set.seed(48)
 fit_cv <- cvSLOPE(x, y, q = c(0.1, 0.2))
 
 cv_file <- fig_name("slope-cv")
-pdf(cv_file, width = 6, height = height, pointsize = ps)
-par(mfrow = c(1, 2), cex = 1)
-plot_args <- list(ylab = "")
-plot(fit_cv, plot_args = plot_args)
+pdf(cv_file, width = 5.8, height = 3, pointsize = ps)
+par(
+  mfrow = c(1, 2),
+  cex = 1,
+  mar = c(4, 0.7, 2, 0.1),
+  oma = c(0.1, 4.5, 0.1, 0.1)
+)
+plot(fit_cv, index = 1)
+plot(
+  fit_cv,
+  plot_args = list(
+    ylab = "",
+    yaxt = "n"
+  ),
+  index = 2
+)
+mtext("MSE", side = 2, line = 2, outer = TRUE)
 dev.off()
 par(opar)
 knitr::plot_crop(cv_file)
