@@ -993,18 +993,6 @@ Because all of the packages rely on the same \proglang{C++} library, contributio
 will also propagate directly to the higher-level packages in \proglang{R},
 \proglang{Julia}, and \proglang{Python}.
 
-% \citet{friedman2010} present an alternative coordinate descent update that is
-% based on pre-computing the Gram matrix \(X^\intercal X\) and then use this to
-% speed up the updates. As the authors note, this can lead to dramatic speed-ups
-% for the ordinary lasso (with least-squares loss), but not for other loss
-% functions and not in the high-dimensional setting. Yet, although this type of
-% update would be useful for SLOPE as well, it is not implemented in our
-% packages. The main reason for this is that the Gram matrix we need is the
-% collapsed version \((XP)^\intercal XP\), where \(P\) is the pattern matrix,
-% which cannot be derived from \(X^\intercal X\). \(P\) typically changes
-% continuously throughout optimization, which means that the precomputed Gram
-% matrix must be updated as well, and this would invoke additional cost.
-
 We hope that our packages will be useful for researchers and
 practitioners alike and that the design of our software suite
 might inspire others to more closely couple the available features
