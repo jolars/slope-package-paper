@@ -570,9 +570,6 @@ for the case of cross-validation, which is always parallelized.
 
 \section{Examples}\label{sec:examples}
 
-In this section we will show how to use the packages to fit SLOPE models in
-the different languages.
-
 The packages are
 available through the respective package managers for each language, and can be
 be installed using the following commands:
@@ -590,7 +587,7 @@ Assuming that we have loaded a data set consisting of a design
 matrix \code{x} and response vector \code{y}, we can fit the full regularization
 path for the SLOPE model using the following commands for the different languages:
 
-\begin{minipage}[t]{0.25\textwidth}%
+\begin{minipage}[t]{0.24\textwidth}%
   \textbf{\proglang{R}}
   \begin{Code}
 R> library(SLOPE)
@@ -598,8 +595,7 @@ R> fit <- SLOPE(x, y)
   \end{Code}
 \end{minipage}
 \hfill
-\begin{minipage}[t]{0.32\textwidth}
-
+\begin{minipage}[t]{0.33\textwidth}%
   \textbf{\proglang{Python}}
   \begin{Code}
 >>> import sortedl1
@@ -608,7 +604,7 @@ R> fit <- SLOPE(x, y)
   \end{Code}
 \end{minipage}
 \hfill
-\begin{minipage}[t]{0.32\textwidth}
+\begin{minipage}[t]{0.32\textwidth}%
   \textbf{\proglang{Julia}}
   \begin{Code}
 julia> using SLOPE
@@ -628,7 +624,8 @@ auto path_result = model.path(x, y);
 \end{Code}
 
 In the sequel, we will focus our examples on the \proglang{R} package, but
-note that the API is similar across all of the packages.
+note that all of the functionality we cover is available throughout
+the suite of packages and feature similar APIs.
 
 \subsection{First steps}
 
@@ -649,16 +646,15 @@ R> plot(fit_slope)
 The \code{q} parameter is a parameter of the sequence of \(\lambda\) values,
 which by default~(\code{lambda = "bh"}) is the Benjamini--Hochberg (BH)
 sequence~\citep{bogdan2015}. If the design matrix is orthogonal, then the
-\code{q} parameter will decide the expected false discovery rate (FDR) in terms
-of the identification of true signals (nonzero coefficients), provided
-that this sequence is used.
+\code{q} parameter sets a desired false discovery rate (FDR) in terms
+of the identification of true signals (nonzero coefficients).
 
 Other types of sequences are also supported,
 including \code{lambda = "lasso"} for the lasso
 \code{lambda = "oscar"} for the OSCAR sequence~\citep{bondell2008}, and
 \code{lambda = "gaussian"} for the Gaussian-type sequence~\citep{bogdan2015},
 which is a modification of the BH sequence that has been empirically shown to
-provide similar FDR control in non-orthogonal and low-dimensional settings.
+provide similar FDR control in non-orthogonal, low-dimensional settings.
 
 To show how the choice of the \(\lambda\) sequence affects the
 results, we will refit the diabetes data using the lasso sequence.
@@ -692,17 +688,15 @@ it later enters again on its own.
 
 \subsection{Relaxed SLOPE}
 
-Unlike the lasso, the relaxed version of SLOPE has not been studied in much detail.
-There are at least two papers where it is described, but then typically it is
-called \emph{debiased} SLOPE. We prefer to use the term \emph{relaxed} here,
-since it corresponds closer to the terminology from the lasso literature and
-avoids confusion with the debiased lasso~\citep{geer2014}, which is a different
-model.
-
-In our packages, we support the relaxed version of SLOPE, and parameterize
-this relaxation with a parameter \(\gamma\).
-
-The relaxation parameter \(\gamma\) controls the mix between the
+To attain sparsity, SLOPE shrinks coefficients towards zero. This introduces
+bias, which, although it helps to combat overfitting, may also lead to
+worse predictions in some cases. To mitigate this, it is possible
+to \emph{relax} the SLOPE solutions by fitting an ordinary least-squares
+model to the collapsed cluster structure from running SLOPE~\citep{skalski2022}\footnote{
+  Note that this paper refers to the relaxed SLOPE as the \emph{debiased} SLOPE. Here,
+  we prefer the term relaxed to stay closer to the nomenclature from the lasso literature and
+  avoid confusion with the debiased lasso~\citep{geer2014}, which represents a different approach.}.
+The level of relaxation is parameterized by \(\gamma\), which controls the mix between the
 original SLOPE solution (\(\gamma = 1\) and the fully relaxed
 solution (\(\gamma = 0\)), so that
 the end result is given by
@@ -710,6 +704,7 @@ the end result is given by
   \hat{\beta} = \gamma \hat{\beta}_\text{SLOPE} + (1 - \gamma) \hat{\beta}_\text{relaxed}.
 \]
 
+Our packages support regularization through the \code{gamma} argument.
 Here, we fit two models, one that is fully relaxed
 (\(\gamma = 0\)) and one that is semi-relaxed (\(\gamma = 0.5\)).
 
@@ -718,7 +713,8 @@ R> fit_relaxed <- SLOPE(x, y, q = 0.1, gamma = 0)
 R> fit_semirelaxed <- SLOPE(x, y, q = 0.1, gamma = 0.5)
 \end{Code}
 
-We fit the result in \Cref{fig:relaxed-slope}.
+We fit the result in \Cref{fig:relaxed-slope}. The path is no longer smooth and
+changes dramatically depending on the current cluster structure.
 
 \begin{figure}[tp]
   \centering
@@ -734,17 +730,17 @@ We fit the result in \Cref{fig:relaxed-slope}.
 \subsection{Cross-validation}
 
 Our packages support hyper-parameter tuning via iterated \(k\)-fold
-cross-validation, with parameterization over \(\alpha\), \(\lambda\) type (BH,
+cross-validation (CV), with parameterization over \(\alpha\), \(\lambda\) type (BH,
 Gaussian type, etc.), \(\gamma\) (SLOPE relaxation parameter).
-
-Here, we show the CV functionality by cross-validating across
-to values of the \(q\) parameter.
+Here, we demonstrate the CV functionality by cross-validating across
+to values of the \(q\) parameter and printing the results,
+which displays the optimal values for all the cross-validated paramters.
 
 \begin{CodeChunk}
   \begin{CodeInput}
 R> set.seed(48)
 R> fit_cv <- cvSLOPE(x, y, q = c(0.1, 0.2))
-R> plot(fit_cv)
+R> fit_cv
 \end{CodeInput}
   \begin{CodeOutput}
 Call:
@@ -756,7 +752,10 @@ Optimum values:
 \end{CodeOutput}
 \end{CodeChunk}
 
-It is also easy to plot the cross-validation results~\Cref{fig:cv}.
+It also easy to plot the cross-validation results~\Cref{fig:cv}, which
+show the cross-validation error with 95\% confidence intervals and
+a dashed line indicating the optimal value of \(\alpha\) for the
+best value of \(q\).
 
 \begin{Code}
 R> plot(fit_cv)
@@ -773,9 +772,6 @@ R> plot(fit_cv)
   }
   \label{fig:cv}
 \end{figure}
-
-It is also possible to cross-validate over the \(\gamma\) parameter, to
-find the optimal level of relaxation for SLOPE.
 
 \section{Benchmarks}
 
