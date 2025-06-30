@@ -532,15 +532,17 @@ packages in and are passed to the \proglang{C++} API without copying
 and with negligible overhead. Coefficients are returned in a sparse format, which
 allows for efficient storage and retrieval of the coefficients.
 
-For dense matrices, the packages implement memory-efficient views of
-the input matrices in order to avoid copies of the data. This means, for instance, that no copies need to be made when separating
-data sets into training and test data. Due to this memory-efficient implementation, we provide
-an option to altogether avoid copying the data during cross-validation.
-This means that we parallelize the cross-validation procedure over
-arbitrarily many folds and repetitions, yet still completely
-avoid the need to copy the data.
+For dense matrices, the packages implement memory-efficient views of the input
+matrices in order to avoid copies of the data. This means, for instance, that
+no copies need to be made when separating data sets into training and test
+data. Due to this memory-efficient implementation, we provide an option to
+altogether avoid copying the data during cross-validation. This allows us to
+parallelize the cross-validation procedure over arbitrarily many folds and
+repetitions without needing to ever copy the data, which makes for a much
+much more memory-friendly implementation (at the cost of
+worse runtime performance).
 
-The SLOPE packages support out-of-memory storage for the design matrix, which
+The SLOPE packages also support out-of-memory storage for the design matrix, which
 means that users can fit SLOPE models on data sets that are larger than the
 available memory. Storage in RAM is therefore limited to the order of \(O(n) +
 O(p)\), which means that the packages can be used on huge data sets.
@@ -549,11 +551,6 @@ arbitrary data to be mapped into \pkg{Eigen} data structures. At the
 time of writing, this is only supported for \proglang{R},
 which is possible via the \pkg{bigmemory} package~\citep{kane2013},
 and currently only for dense designs.
-
-The software is parallelized using \pkg{OpenMP}, which is supported on all
-major platforms. Functions make use of heuristics to
-determine whether to spawn multiple threads depending on problem size, except
-for the case of cross-validation, which is always parallelized.
 
 As shown by \citet{larsson2025}, predictor normalization (centering and
 scaling the design matrix) may have large consequences for the
@@ -565,6 +562,11 @@ which means that the design matrix does not need to be normalized in place.
 Normalization is performed as predictors of the design matrix are accessed during
 optimization, which allows us to support centering even of sparse design
 matrices. This also allows us to completely avoid copying the design matrix.
+
+The software is parallelized using \pkg{OpenMP}, which is supported on all
+major platforms. Our functions employ several heuristics based on problem size to
+determine whether to spawn multiple threads, except
+for the case of cross-validation, which is always parallelized.
 
 \section{Examples}\label{sec:examples}
 
