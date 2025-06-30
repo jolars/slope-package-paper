@@ -173,8 +173,7 @@ packages solve, namely generalized linear models (GLMs) regularized with the sor
   let SLOPE be defined for any loss function.}, and provide a brief overview of
 the mathematical properties of GLMs and the particular properties of SLOPE.
 We discuss the optimization problem and describe the hybrid
-coordinate descent algorithm we use for solving SLOPE, focusing on the
-improvements we have made to the original algorithm by \citet{larsson2023}.
+coordinate descent algorithm we use for solving SLOPE.
 In \Cref{sec:implementation-details}, we provide a detailed overview of the
 software implementations, highlighting technical aspects such as
 memory management, parallelization, and convergence criteria.
@@ -290,10 +289,9 @@ any generalized linear model---not just the Gaussian case. To do so,
 we use a iteratively reweighted least-squares (IRLS) approach, determining
 weights \(w\) and a working response \(z\) after each proximal gradient descent step.
 We then run the coordinate descent algorithm for a fixed number of iterations.
-Convergence is monitored using a duality-based stopping criterion, which
+Convergence is monitored using a duality-based stopping criterion~(\Cref{sec:convergence-criteria-details}), which
 we check after each gradient is computed. In order to avoid complicating
-the presentation, we have omitted the details of the
-screening rules~(\Cref{sec:screening-rules}) and convergence checks here.
+the presentation, we have omitted some details of the algorithm here.
 
 \begin{algorithm}[tp]
   \caption{
@@ -372,9 +370,10 @@ screening rules~(\Cref{sec:screening-rules}) and convergence checks here.
   \label{fig:slope-thresholding}
 \end{figure}
 
-The hybrid nature of the algorithm comes with benefits of its own. One such is
-that proximal gradient descent algorithms are known to converge under more
-general assumptions than coordinate descent algorithms~\citep{wright2015},
+The hybrid nature of the algorithm is not only useful for enabling the
+coordinate descent steps, but also comes with benefits due to the inclusion of
+the PGD steps. Proximal gradient descent algorithms are known to converge under
+more general assumptions than coordinate descent algorithms~\citep{wright2015},
 which means that the PGD part of the algorithm can serve as a fallback in case
 the coordinate descent part does not converge. In practice, we store the
 current solution before updating and revert to it if the coordinate descent
@@ -383,11 +382,12 @@ step does not improve the primal objective.
 The implementation in \citet{larsson2023} used a type of cyclical coordinate
 descent in which the algorithm iterated over the clusters in descending order
 by their coefficients' magnitudes. Although simple to implement
-and efficient for many problems, we have found this
-algorithm to suffer under convergence issues in a few cases.
-For the current implementation, we have therefore also
-implemented a version using random permutations, which we have found to be more
-robust at little extra cost.
+and efficient for many problems, cyclical coordinate descent is known
+to suffer from convergence issues in some cases~\citep{wright2015}, which
+we found to be the case for SLOPE as well.
+For the current implementation, we therefore include as well as default
+to a version using random permutations, which is slightly slower but
+more robust.
 
 \subsection{Convergence criteria}
 
@@ -401,23 +401,26 @@ reliable, solver-independent measure of convergence. The complete derivation of
 the dual problem and the calculation of the duality gap is provided in
 \Cref{sec:convergence-criteria-details}.
 
-\subsection{Path fitting}
+\subsection{Path fitting}\label{sec:path-fitting}
 
-Our packages are optimized for fitting the full regularization path for SLOPE, which
-is the sequence of solutions to the problem in \Cref{eq:slope} as \(\alpha\) is varied
+Since optimal settings of \(\alpha\) are only available under strict
+assumptions that are typically hard to test, it is common to instead use
+cross-validation to tune \(\alpha\) over a grid of values. In practice, this
+means that we repeatedly have to fit the full regularization path, which is the
+sequence of solutions to the problem in \Cref{eq:slope} as \(\alpha\) is varied
 from \(\alpha_\text{max}\), at which point the first cluster enters the model,
-to a small value of \(\alpha\) at which the model is almost saturated.
+to a small value of \(\alpha\) at which the model is almost saturated. Our
+packages are optimized to efficiently compute the full regularization path, and
+make use of  screening rules~(\Cref{sec:screening-rules}) to speed up the
+process of doing so.
+
 We use the same criteria as \citet{friedman2010} for stopping the path early,
 except that we stop if the number of \emph{clusters} excluding the zero-cluster
-exceeds \(n + 1\) (by default), since the support of SLOPE is limited at \(n\) clusters,
-which can potentially exceed the number of non-zero coefficients.\footnote{In practice
-  this is quite rare since clusters do not form easily at low levels of regularization.}
-
-Since optimal settings of \(\alpha\) are only available under
-strict assumptions that are typically hard to test, it is common to
-instead use cross-validation to tune \(\alpha\) over a grid of values.
-In practice, this means that we repeatedly have to fit the full SLOPE
-path, which makes path-fitting a key part of the implementation.
+exceeds \(n + 1\) (by default), since the support of SLOPE is limited at \(n\)
+clusters\footnote{ As opposed to the lasso, which at most allows \(n\) non-zero
+  \emph{coefficients}. }, which can potentially exceed the number of non-zero
+coefficients.\footnote{In practice this is quite rare since clusters do not
+  form easily at low levels of regularization.}
 
 \subsection{Screening rules}\label{sec:screening-rules}
 
@@ -432,7 +435,7 @@ excluded predictors correspond to zero coefficients in the final model. Heuristi
 rules, on the other hand, do not guarantee this and therefore need to be
 complemented with a pass over all coefficients at the end to ensure that the
 optimality conditions are satisfied. Since they are less conservative, however,
-the cost of doing so is typically outweighed by the savings in computation
+the cost of doing so may be outweighed by the savings in computation
 time.
 
 In the SLOPE package, we use the strong screening rule for
@@ -458,8 +461,8 @@ all serve as thin wrappers to the \proglang{C++} library, with some additional
 functionality for handling data and plotting the results. This means that new
 features and bug fixes propagate quickly and easily to all these wrapppers and
 enable users to promptly take advantage of the latest developments. The entire
-suite of packages is open source and licensed under the GPL-3.0 license, and is
-available on GitHub~(\Cref{tab:slope-packages}).
+suite of packages is open source and available in version-controlled
+online repositories~(\Cref{tab:slope-packages}).
 
 \begin{table}[tp]
   \centering
@@ -499,7 +502,6 @@ implementation, we represent the clusters as a collection of three vectors:
 
 In this representation, the indices for the \(k\)th cluster are given by \code{
 c_idx[c_ptr[k] : c_ptr[k+1]]} and the coefficient is simply \code{c[k]}.
-
 This structure is the same basic setup as in \citet{larsson2023}. Unlike
 their implementation, however, we have made improvements to the
 handling of updating the clusters (merging,
@@ -510,19 +512,15 @@ The SLOPE thresholding operator~(\Cref{fig:slope-thresholding}) is the analogue
 to the soft-thresholding operator for the lasso. But unlike the latter, which
 is trivial to compute, the SLOPE thresholding operator needs to conduct a
 search over the clusters in order to find correct solution. This leads to a
-worst-case complexity that depends on the number of clusters, which could be prohibitive in
-practice. Fortunately, the situation is much less dire in practice, since the
-order of the clusters typically stabilizes early. Instead, the bulk of the
-computational time is spent on computing the gradient. For this reason we use a
-linear search, which, although suboptimal theoretically, is faster than a
-binary search in practice.
-
-We have, however, improved the implementation of operator by
-\citet{larsson2023} significantly. In their implementation, partial \(\lambda\)
-sums were computed in each iteration of the search, which for some cases could
-lead to large overhead when updating a large cluster. In our implementation, we
-instead evaluate these sums lazily based on the cumulative sum of the
-\(\lambda\) array, which for some cases lead to a significant speedups.
+worst-case complexity that depends on the number of clusters, which might seem
+to be prohibitive when both \(n\) and \(p\) are large. Fortunately, however,
+the situation is much less dire in practice, since the order of the clusters
+typically stabilizes early during optimization. This also means that, contrary
+to conventional wisdom, it is in fact more efficient to conduct a linear, as opposed
+to binary, search over the clusters. Note also that the partial \(\lambda\) sums
+do not need to be computed directly. Instead, we simply compute the
+cumulative sum of the \(\lambda\) array once and use this to retrieve
+the partial sums as needed.
 
 \subsection{Data handling and optimization}
 
