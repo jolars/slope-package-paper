@@ -810,7 +810,8 @@ of the solvers from the previous benchmark.
 
 We have run the benchmarks for both simulated~(\Cref{tab:simulated-data}) as
 well as real data~(\Cref{tab:real-data}). For all real data, we standardize the
-predictors to have mean zero and unit variance. For all data we use the
+predictors to have mean zero and unit variance if \(X\) is dense and scale with
+the maximum absolute value of each predictor otherwise. For all data we use the
 Benjamini--Hochberg sequence for \(\lambda\) with \(q=0.2\). Since some of the
 solvers cannot handle intercepts, we have omitted the intercepts from the
 models. Also note that not all solvers support sparse design matrices, which is
@@ -966,7 +967,7 @@ have shown these in a series of benchmarks on both real and simulated
 data.
 
 Our results are similar to those of \citet{larsson2023}, which features the
-same algorithm, except that the current implementation faress even better. We
+same algorithm, except that the current implementation fares better. We
 believe this is likely due to the addition of screening rules and improvements
 to the algorithm and implementation. One difference from \citet{larsson2023} is
 the performance of the Newt-ALM method, which in the current benchmarks have
@@ -1115,9 +1116,7 @@ each language.
   as noted in \citet{larsson2022d}, the marginal improvement
   of using duality-based screening strategies is minor, so we have
   opted not to implement these in our packages.
-  % TODO: Maybe reconsider this!
-  %
-  % \begin
+
   \section{Solver details}\label{sec:solver-details}
 
   \begin{description}
@@ -1125,11 +1124,6 @@ each language.
           proximal gradient/coordinate descent algorithm described in this work and
           \citet{larsson2023}. We use the randomized version of the coordinate descent
           updates.
-
-          % \item[PGD] The proximal gradient descent algorithm, which is a standard
-          %       algorithm for solving convex optimization problems~\citep{wright2009}. We use a
-          %       analytical computation of the Lipschitz constant to pick the step size.
-          %
     \item[Anderson PGD] The proximal gradient descent (PGD) algorithm with Anderson acceleration, which is a
           method for accelerating the convergence of fixed-point
           iterations~\citep{anderson1965,zhang2020}.
