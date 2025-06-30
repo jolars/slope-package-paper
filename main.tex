@@ -90,8 +90,8 @@
 \section{Introduction}
 
 Sorted L-One Penalized Estimation
-(SLOPE)~\citep{bogdan2013,zeng2014,bogdan2015} is a type of
-regularized regression that consists of the following convex optimization problem:
+(SLOPE)~\citep{bogdan2013,zeng2014,bogdan2015} is a type of regularized
+regression that consists of solving the following convex optimization problem:
 \begin{equation}
   \label{eq:slope}
   \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p}
@@ -107,76 +107,62 @@ that controls the strength of regularization, and \(\lambda\) a non-increasing s
   \label{eq:sl1}
   J_{\lambda}(\beta) = \sum_{j=1}^p \lambda_j |\beta_{(j)}|, \quad
   \text{where}\quad |\beta_{(1)}| \geq |\beta_{(2)}| \geq \ldots \geq
-  |\beta_{(p)}|.
+  |\beta_{(p)}|,
 \end{equation}
-
-We will assume that \(F\) takes the following form:
+and \(\lambda\) is a non-increasing sequence of penalty weights. We will
+assume that \(F\) takes the following form:
 \[
   F(\beta_0, \beta) = \frac{1}{n} \sum_{i=1}^n f(y_i, \beta_0 + x_i^\intercal \beta),
 \]
-where \(f\) is a convex function, \(y_i\) is the response variable, and
-\(x_i\) is the \(i\)th row of the design matrix.
+where \(f\) is a smooth, convex function and \(x_i\) is the \(i\)th row of the
+\(n \times p\) design matrix \(X\). Throughout the paper, we will use the
+convention of denoting a row of a matrix \(X\) as \(x_i\) and a column as
+\(x_j\). \(y_i\) is the \(i\)th row of the \(n \times m\) response matrix
+\(Y\),\footnote{For our case, \(m = 1\) unless the model is multinomial
+  logistic regression.}
+and we let \((\hat{\beta}_0,
+\hat{\beta})\) denote a solution to the problem in \Cref{eq:slope}.
 
-We let \((\hat{\beta}_0, \hat{\beta})\) denote a solution to the problem in \Cref{eq:slope}
-and take \(X\) to be the \(n \times p\) design matrix and \(Y\) the
-\(n \times m\) response matrix,\footnote{For our case, \(m = 1\) unless
-  the model is multinomial logistic regression.} using the convention
-of denoting a row of a matrix \(X\) as \(x_i\) and a column as \(x_j\).
-
-SLOPE is a generalization of OSCAR (octagonal shrinkage and clustering
-algorithm for regression)~\citep{bondell2008}, which is attained by
-setting \(\lambda\) to be a linear sequence, which is typically parameterized as
-\(\lambda_j = \theta_1 + \theta_2(p - j)\),\footnote{We have used \(\theta_1,\theta_2\) in place of
-  \(\lambda_1,\lambda_2\), used in \citet{bondell2008}, to avoid abusing notation.} where \(\theta_1, \theta_2
-\geq 0\)~\citep{figueiredo2014}. It is also a special case of
-the lasso~\citep{santosa1986,donoho1994,donoho1995,tibshirani1996},
-which is obtained by taking a constant \(\lambda\).
-
-% SLOPE is a flexible method, which comes from the fact that the
-% \(\lambda\) sequence can be chosen in many different ways (including
-% the two mentioned above).
-
-% net~\citep{zou2005}, the SCAD (smoothly clipped absolute deviation)
-% penalty~\citep{fan2001}, and the MCP~(minimax concave
-% penalty)~\citep{zhang2010} for sparse regression.
-
-A special property of SLOPE is that it can clusters coefficients by
+SLOPE is a generalization of both the lasso\footnote{The lasso is attained by
+  taking a constant
+  \(\lambda\).}~~\citep{santosa1986,donoho1994,donoho1995,tibshirani1996} and
+OSCAR\footnote{OSCAR is attained by setting \(\lambda\) to be a linear
+  sequence, \(\lambda_j = \theta_1 + \theta_2(p - j)\) with \(\theta_1,
+  \theta_2 \geq 0\)~\citep{figueiredo2014}.} (octagonal shrinkage and clustering
+algorithm for regression)~\citep{bondell2008}.
+A special property of SLOPE is that it can cluster coefficients by
 setting them to the same magnitude~\citep{figueiredo2016,bogdan2022}. This is a natural
 consequence of the sorted \(\ell_1\) norm, stemming from the fact that
 the contribution to the norm of a given coefficient increases disproportionally if it
 changes order.
 
-SLOPE is a convex but non-smooth optimization problem. But since the
+Like the lasso, SLOPE is a convex but non-smooth optimization problem. And since the
 pool-adjacent-violators algorithm~(PAVA)~\citep{barlow1972} can be used to
 efficiently\footnote{At an average \(p \log p\) rate, due to the limiting
   sorting operation.} compute the proximal operator of the sorted \(\ell_1\)
 norm, it is possible to use a wide range of proximal algorithms, such
 as proximal gradient descent, to solve SLOPE. This also includes accelerated
-methods such as FISTA~\citep{beck2009}, which is used in the original
-implementation of SLOPE by \citet{bogdan2015}. Other possibilities include
-proximal Newton~\citep{lee2014} and the alternating direction method of
-multipliers (ADMM) method~\citep{boyd2010}.
+methods such as FISTA~\citep{beck2009}, which was for instance used by
+\citet{bogdan2015}. Other possibilities include proximal Newton~\citep{lee2014}
+and the alternating direction method of multipliers (ADMM) method~\citep{boyd2010}.
 
-For similar problems such as the lasso~\citet{tibshirani1996} and
-elastic net\citet{zou2005}, however, these
+For similar problems such as the lasso and
+elastic net\citep{zou2005}, however, these
 aforementioned methods have generally found themselves outperformed by coordinate
 descent methods~\citep{friedman2007,friedman2010}, which optimize one
 coefficient at a time. Unfortunately, coordinate descent requires that the
-objective is separable in \(\beta_0, \beta\), which is not the case in SLOPE
+objective is separable in \((\beta_0, \beta)\), which is not the case in SLOPE
 due to the permutations involved in the sorted \(\ell_1\) norm, which means
 that coordinate descent cannot be used directly. This problem was, however,
 overcome by \citet{larsson2023}, who invented a hybrid combination of proximal
-gradient and coordinate descent. The algorithm alternates between full gradient
-descent steps and coordinate descent on current cluster structure to achieve
-robust and fast convergence. So far, however, this algorithm has only
-been available in the form of a experimental Python module, packaged
-in the supplemental code of \citet{larsson2023}.
+gradient and coordinate descent. The algorithm alternates between proximal gradient
+descent steps on the full problem and coordinate descent on a collapsed
+problem corresponding to the current cluster structure to achieve
+robust and fast convergence.
 
 In this paper we make this algorithm available to a wide audience, by
 presenting a collection of packages in \proglang{R}, \proglang{Python},
-\proglang{Julia}, and \proglang{C++}, which both improves upon the original
-implementation in terms of performance, robustness, and memory efficiency
-as well as greatly expands its feature set.
+\proglang{Julia}, and \proglang{C++}.
 
 \subsection{Outline of the paper}
 
