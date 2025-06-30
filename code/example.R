@@ -100,6 +100,7 @@ plot(
   fit_slope,
   ylab = "",
   main = expression(paste(gamma, " = 1")),
+  type = "S",
   yaxt = "n"
 )
 dev.off()

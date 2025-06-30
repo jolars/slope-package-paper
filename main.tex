@@ -130,11 +130,12 @@ OSCAR\footnote{OSCAR is attained by setting \(\lambda\) to be a linear
   sequence, \(\lambda_j = \theta_1 + \theta_2(p - j)\) with \(\theta_1,
   \theta_2 \geq 0\)~\citep{figueiredo2014}.} (octagonal shrinkage and clustering
 algorithm for regression)~\citep{bondell2008}.
-A special property of SLOPE is that it can cluster coefficients by
+One of the most important properties of SLOPE is that it can cluster coefficients by
 setting them to the same magnitude~\citep{figueiredo2016,bogdan2022}. This is a natural
 consequence of the sorted \(\ell_1\) norm, stemming from the fact that
 the contribution to the norm of a given coefficient increases disproportionally if it
-changes order.
+changes order. This also allows SLOPE to better recover ordering patterns
+in the solution.
 
 Like the lasso, SLOPE is a convex but non-smooth optimization problem. And since the
 pool-adjacent-violators algorithm~(PAVA)~\citep{barlow1972} can be used to
@@ -713,8 +714,9 @@ R> fit_relaxed <- SLOPE(x, y, q = 0.1, gamma = 0)
 R> fit_semirelaxed <- SLOPE(x, y, q = 0.1, gamma = 0.5)
 \end{Code}
 
-We fit the result in \Cref{fig:relaxed-slope}. The path is no longer smooth and
-changes dramatically depending on the current cluster structure.
+We plot the resulting paths in \Cref{fig:relaxed-slope}. Observe
+the jaggedness of the relaxed paths, which change dramatically
+as clusters form, merge, and split.
 
 \begin{figure}[tp]
   \centering
@@ -734,7 +736,7 @@ cross-validation (CV), with parameterization over \(\alpha\), \(\lambda\) type (
 Gaussian type, etc.), \(\gamma\) (SLOPE relaxation parameter).
 Here, we demonstrate the CV functionality by cross-validating across
 to values of the \(q\) parameter and printing the results,
-which displays the optimal values for all the cross-validated paramters.
+which displays the optimal values for all the cross-validated parameters.
 
 \begin{CodeChunk}
   \begin{CodeInput}
@@ -781,23 +783,25 @@ when fitting for a single value of \(\alpha\), while in
 \Cref{sec:path-benchmark}, we benchmark the performance of fitting
 the full regularization path.
 
-Our benchmarks are organized and run using \pkg{benchopt}~\citep{moreau2022a},
-and are based upon a version developed by \citet{larsson2023} that we have
-extended to include additional solvers. The benchmark is available as a public
-git repository at \myurl{github.com/benchopt/benchmark\_slope}. It features the
-Python version of our implementation, \pkg{sortedl1}\footnote{The \proglang{R}
-  package \pkg{SLOPE} is also included, but we have omitted it from the
-  benchmark here since it is essentially equivalent to the \proglang{Python}
-  package \pkg{sortedl1}.}, as well as four variations on proximal gradient
+Our benchmarks are organized and run using \pkg{benchopt}~\citep{moreau2022a}.
+They are available as public git repositories at
+\myurl{github.com/benchopt/benchmark\_slope} and
+\myurl{github.com/benchopt/benchmark\_slope\_path} for the single solution and
+path benchmarks, respectively. Both feature the Python version of our
+implementation, \pkg{sortedl1}\footnote{The \proglang{R} package \pkg{SLOPE} is
+  also included, but we have omitted it from the benchmark here since it is
+  essentially equivalent to the \proglang{Python} package \pkg{sortedl1}.}. The
+single solution benchmark includes four variations on proximal gradient
 descent (PGD), using Anderson acceleration~\citep{anderson1965,zhang2020},
 Barzilai--Borwein step sizes, safe screening rules, and the fast iterative
 shrinking and thresholding algorithm (FISTA)~\citep{beck2009}. The latter of
-these is also included through the \pkg{skglm} package~\citep{bertrand2022}. We
-also include the alternating direction method of multipliers
-(ADMM)~\citep{boyd2010}, a semi-smooth Newton-based method~\citep{luo2019}, and
-an approximate homotopy method, \pkg{SolutionPath}~\citet{dupuis2024}, See
-\Cref{sec:solver-details} for more details on the solvers and their
-implementations.
+these is also included through the \pkg{skglm} package~\citep{bertrand2022}.
+We also include the alternating direction method of multipliers
+(ADMM)~\citep{boyd2010}, a semi-smooth Newton-based method~\citep{luo2019},
+and an approximate homotopy method, \pkg{SolutionPath}~\citet{dupuis2024},
+See \Cref{sec:solver-details} for more details on the solvers and their
+implementations. The path benchmark includes a subset of these solvers,
+namely \pkg{FISTA}, \pkg{SolutionPath}, and \pkg{ADMM}.
 
 For this paper, we have also created a separate benchmark for fitting the full
 regularization path, which is available at
@@ -904,8 +908,10 @@ ADMM method, which sometimes diverges.
   \centering
   \includegraphics[width=\natwidth]{images/benchmark_single_real.pdf}
   \caption{%
-    Performance of the solvers for the single solution benchmark for five different real data sets~(\Cref{tab:real-data}).
-    Please see the text for information about the data and setup of the experiment.
+    Performance of the solvers for the single solution benchmark for five
+    different real data sets~(\Cref{tab:real-data}) and three levels of
+    regularization. Please see the text for information about the data and
+    setup of the experiment.
   }
   \label{fig:real-data-single}
 \end{figure}
@@ -927,7 +933,8 @@ implementation is the fastest by a large margin.
   \includegraphics[width=\natwidth]{images/benchmark_path_real.pdf}
   \caption{%
     Benchmark for fitting the full regularization path on real data sets with
-    varying grid sizes.
+    varying path lengths. The plot show the maximum relative duality gap across all
+    solutions along the regularization path.
   }
   \label{fig:real-data-path}
 \end{figure}
@@ -938,62 +945,63 @@ than all the competing methods.
 \section{Discussion}\label{sec:discussion}
 
 SLOPE is an appealing model for high-dimensional regression problems that is
-able to provide sparse solutions with a cluster structure, which sets it apart
-from similar models such as the lasso and elastic net. Unlike these models,
-however, SLOPE represents a more challenging optimization problem since the
-penalty term is inseparable. In spite of this, we have shown that it is
-possible to solve SLOPE efficiently and have, in this paper, presented a collection
-of packages (in \proglang{R}, \proglang{Python}, and \proglang{Julia}) that do
-so. We hope that this endeavour will make SLOPE accessible to a wider audience.
-Ours are the first packages that implement SLOPE in these languages.
-As far as we can tell, the only other packaged implementation of SLOPE
-is \pkg{skglm}, which is available in \proglang{Python}. For
-\proglang{R} and \proglang{Julia}, ours are the only
-available implementations.
+able to recover sparsity and ordering patterns in the solution, which sets it
+apart from similar models such as the lasso and elastic net. Unlike these models
+however, SLOPE represents a more challenging optimization problem due to the
+penalty term's inseperability.
+
+Despite the complexity of the problem, we have here presented a collection of
+packages (in \proglang{R}, \proglang{Python}, and \proglang{Julia}) that offer
+efficient and feature-rich implementations of SLOPE. We hope that this
+endeavour will make SLOPE accessible to a wider audience and note that ours are
+the first packages that implement SLOPE in these languages. At the time of
+writing, the only other implementation of SLOPE is \pkg{skglm}, which is
+available in \proglang{Python}. For \proglang{R} and \proglang{Julia}, ours are
+the only available implementations.
 
 We have shown that the performance of our software is unparalleled
-compared to other algorithms and implementations, both for for fitting
+compared to other algorithms and implementations, both for fitting
 the full regularization path as well as for single solution, and
 have shown these in a series of benchmarks on both real and simulated
-data, both for solving for a single solution and for fitting the full path.
+data.
 
-Our results mostly echo the results from \citet{larsson2023}, except that
-our new implementation performs better. We believe this is likely due to the
-addition of screening rules and improvements to the algorithm and implementation.
-One difference from \citet{larsson2023} is the performance of the Newt-ALM
-method, which in the current benchmarks have performed better. We have
-made improvements to the algorithm here that we think help explain this fact.
+Our results are similar to those of \citet{larsson2023}, which features the
+same algorithm, except that the current implementation faress even better. We
+believe this is likely due to the addition of screening rules and improvements
+to the algorithm and implementation. One difference from \citet{larsson2023} is
+the performance of the Newt-ALM method, which in the current benchmarks have
+performed better. We have made improvements to the algorithm here that we think may
+help explain this fact.
 
 \citet{dupuis2024} benchmarked the Python implementation of the hybrid
 algorithm from \citet{larsson2023} (that our algorithm is based on) against
 their approximate homotopy method and showed that their method performed better
 in one case and worse in another. In our benchmarks, however, we have
 consistently found our algorithm to be superior. One reason for this is that
-\citet{dupuis2024} used a very stringent stopping criterion\footnote{A duality
+\citet{dupuis2024} used a stringent stopping criterion\footnote{A duality
   gap of \(10^{-10}\).} for their benchmarks. Another is that the problem sizes in
-our benchmarks are generally larger.
+our benchmarks are generally larger. A third is, again, that our implementation
+is improved compared to \citet{larsson2023}.
 
 Although our packages are full-fledged implementations of SLOPE, there are
 still some features that are missing. For instance, we do not yet support
-observation weights, nor some of the more advanced features of similar packages
-such as \pkg{glmnet}~\citep{friedman2010}, which allow for a larger variety of
-loss functions, including Cox proportional hazards models and multivariate
-linear regression. We also do not yet support the group sorted \(\ell_1\) norm,
-which would allow an alternative penalization scheme for multivariate response
-problems. In addition, several possible improvements to the hybrid method
-could be considered, such as accelerated and parallelized coordinate
-steps. We leave these possibilities to future work but want to stress that
-our packages are modular and have been designed with extensibility in mind,
-which we hope will facilitate the addition of new features in the future.
-Because all of the packages rely on the same \proglang{C++} library, contributions
-will also propagate directly to the higher-level packages in \proglang{R},
+observation weights or the full suite of loss functions from the family of
+generalized linear models. We also do not yet support the group sorted \(\ell_1\)
+norm, which would allow an alternative penalization scheme for multivariate
+response problems. In addition, several possible improvements to the hybrid
+method could be considered, such as accelerated and parallelized coordinate
+steps. We leave these possibilities to future work but want to stress that our
+packages are modular and have been designed with extensibility in mind, which
+we hope will facilitate the addition of new features in the future. Because all
+of the packages rely on the same \proglang{C++} library, contributions will
+also propagate directly to the higher-level packages in \proglang{R},
 \proglang{Julia}, and \proglang{Python}.
 
-We hope that our packages will be useful for researchers and
-practitioners alike and that the design of our software suite
-might inspire others to more closely couple the available features
-of \proglang{R}, \proglang{Python}, and \proglang{Julia} and avoid
-redundant implementations of the same algorithms in each language.
+We hope that our packages will be useful for researchers and practitioners
+alike and that the design of our software suite might inspire others to more
+closely couple the available features of \proglang{R}, \proglang{Python}, and
+\proglang{Julia} and avoid redundant implementations of the same algorithms in
+each language.
 
 \bibliography{main}
 
