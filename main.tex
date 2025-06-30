@@ -197,7 +197,7 @@ the path fitting procedure used to compute the full regularization path for SLOP
 Our packages are designed to solve SLOPE for generalized linear models (GLMs),
 in which the loss function is defined as
 \[
-  F(\beta_0, \beta) = \frac{1}{n} \sum_{i=1}^n f(y_i, \eta_i),
+  F(\beta_0, \beta) = \frac{1}{n} \sum_{i=1}^n f(\eta, y_i),
 \]
 letting \(\eta_i = x_i^\intercal \beta + \beta_0\) be the linear predictor. The
 response \(y_i\) is modelled as a random variable from an exponential family,
@@ -212,13 +212,13 @@ predictor. A special property of the resulting loss function is that its partial
 derivative with respect to \(\eta\) is the
 \emph{generalized residual}
 \[
-  \frac{\partial}{\partial \eta_i} f(y_i, \eta_i) = \ilink(\eta_i) - y_i = r_i.
+  \frac{\partial}{\partial \eta_i} f(\eta_i, y_i) = \ilink(\eta_i) - y_i = r_i.
 \]
 As a consequence, the gradient of the loss function with respect to \(\beta\)
 can be expressed as
 \[
   \frac{\partial}{\partial \beta_j} F(\beta_0,\beta)
-  = \frac{1}{n} \sum_{i=1}^n x_{ij} \frac{\partial}{\partial \eta_i} f(y_i, \eta_i)
+  = \frac{1}{n} \sum_{i=1}^n x_{ij} \frac{\partial}{\partial \eta_i} f(\eta_i, y_i)
   = \frac{1}{n} \sum_{i=1}^n x_{ij} r_i.
 \]
 
@@ -260,23 +260,24 @@ the last class is also implicit).\footnote{SLOPE needs a \(\lambda\) sequence of
   \(mp\), so the loss function for the multinomial case would not be equivalent
   to the binary case if we used the redundant formulation.} Furthermore, it also
 relieves the problem of the parameter ambiguity that affects the redundant
-formulation, where rows of the coefficient matrix can be arbitrarily shifted
-without changing the value of \(F\). This also means that
+formulation, where rows of the coefficient matrix can be shifted
+without changing the value of \(F(\beta_0, \beta)\). This also means that
 the redundant formulation needs to be accompanied by a bounds adjustment step~\citep{friedman2010}.
 This is trivial in the case of the lasso and ridge and
 only slightly more complicated in the case of elastic net. For SLOPE, however,
-the situation is much trickier problem since, then, shifting the rows of the coefficient
-matrix can affect the penalty due to its inseparability.
+the situation is much more involved since rows of the coefficient matrix cannot
+be arbitrarily shifted, since this might affect the entire clustering
+structure.
 
 \subsection{Hybrid algorithm}
 
 The primary algorithm of the \pkg{SLOPE} packages is the hybrid coordinate
 descent algorithm by \citet{larsson2023}. Since it is described in detail
 there, we will only summarize its key points here and highlight
-some of the differences between that implementation and the one presented here.
-The basic idea of the algorithm is to perform the coordinate descent updates on
-the cluster coefficients, rather than directly on the clusters. In effect, we fix the
-current cluster and update all coefficients belong to it in a single step.
+some of the improvements that we have made to the original algorithm.
+The basic idea is to perform the coordinate descent updates on
+the clusters' coefficients rather than directly on the coefficients. In principle,
+we fix the current cluster and update all coefficients belong to it in a single step.
 On its own, this algorithm is not guaranteed to converge since it can only
 reorder or merge clusters. In order to circumvent this, the algorithm must
 therefore be combined with proximal gradient descent steps. These steps
@@ -284,15 +285,15 @@ are able to split the clusters, which eventually means that the full
 algorithm converges to the correct clusters and global minimum.
 
 We have outlined the algorithm in \Cref{alg:hybrid}. Unlike the implementation
-in \citet{larsson2023}, this algorithm can be used to solve
+in \citet{larsson2023}, this algorithm is extended to
 any generalized linear model---not just the Gaussian case. To do so,
 we use a iteratively reweighted least-squares (IRLS) approach, determining
 weights \(w\) and a working response \(z\) after each proximal gradient descent step.
 We then run the coordinate descent algorithm for a fixed number of iterations.
 Convergence is monitored using a duality-based stopping criterion, which
 we check after each gradient is computed. In order to avoid complicating
-the presentation, we have omitted the details of the screening rules and duality
-gap calculations here.
+the presentation, we have omitted the details of the
+screening rules~(\Cref{sec:screening-rules}) and convergence checks here.
 
 \begin{algorithm}[tp]
   \caption{
@@ -356,11 +357,17 @@ gap calculations here.
   \centering
   \includegraphics[width=\natwidth]{images/slope-thresholding.pdf}
   \caption{
-  An illustration of the SLOPE thresholding operator, adapted from
-  \citet{larsson2023}. We define \(S(x) = \sum_{j \in
+  An illustration of the SLOPE thresholding operator for \(\beta = [0.5, -0.5, 0.3, 0.7]^\intercal\),
+  so that \(c = (0.7, 0.5, 0.3)\) and consequently \(c^{\setminus k} = (0.5, 0.3)\).
+  The example and figure are adapted from \citet{larsson2023}.
+  In the example, we are considering an update for the second cluster (\(k = 2\)).
+  Define \(S(x) = \sum_{j \in
     C(x)}\lambda_{(j)^-_{x}}\) and let \(\varepsilon_c > 0\) be defined such that
   \(\varepsilon_c < \big| c_i - c_j\big|\;\forall\, i \neq j\) and
   \(\varepsilon_c < c_m\) if \(c_m \neq 0\).
+  . Across regions where the function is constant,
+  the operator sets the result to be either exactly 0 or to the value of one
+  of the elements of \(\pm c^{\setminus k}\).
   }
   \label{fig:slope-thresholding}
 \end{figure}
@@ -412,7 +419,7 @@ instead use cross-validation to tune \(\alpha\) over a grid of values.
 In practice, this means that we repeatedly have to fit the full SLOPE
 path, which makes path-fitting a key part of the implementation.
 
-\subsection{Screening rules}
+\subsection{Screening rules}\label{sec:screening-rules}
 
 Sparse models like lasso and SLOPE are well-known to benefit from
 \emph{screening rules}, which are used to reduce the dimension of \(\beta\) in
@@ -781,58 +788,20 @@ the full regularization path.
 Our benchmarks are organized and run using \pkg{benchopt}~\citep{moreau2022a},
 and are based upon a version developed by \citet{larsson2023} that we have
 extended to include additional solvers. The benchmark is available as a public
-git repository at \myurl{github.com/benchopt/benchmark\_slope} and
-features the following solvers:\footnote{The \proglang{R} package \pkg{SLOPE} is also
-  included, but we have omitted it from the benchmark here since it is essentially equivalent
-  to the \proglang{Python} package \pkg{sortedl1}.}
-
-\begin{description}
-  \item[sortedl1] The python package of our implementation of the hybrid
-        proximal gradient/coordinate descent algorithm described in this work and
-        \citet{larsson2023}. We use the randomized version of the coordinate descent
-        updates.
-
-        % \item[PGD] The proximal gradient descent algorithm, which is a standard
-        %       algorithm for solving convex optimization problems~\citep{wright2009}. We use a
-        %       analytical computation of the Lipschitz constant to pick the step size.
-        %
-  \item[Anderson PGD] The proximal gradient descent (PGD) algorithm with Anderson acceleration, which is a
-        method for accelerating the convergence of fixed-point
-        iterations~\citep{anderson1965,zhang2020}.
-  \item[BB PGD] The PGD algorithm with Barizilai--Borwein~\citep{barzilai1988} step sizes.
-
-  \item[Safe PGD] A PGD-based algorithm with acceleration using safe screening
-        rules~\citep{elvira2023}.
-
-  \item[FISTA] The fast iterative shrinking and thresholding
-        algorithm~\citep{beck2009}, which is an accelerated version of iterative
-        soft-thresholding algorihthm (ISTA)~\citep{wright2009}.
-
-  \item[ADMM] The alternating direction method of
-        multipliers~\citep{glowinski1975,boyd2010}, which is a popular algorithm
-        for solving convex optimization problems with constraints. In our experiments,
-        we have used \(\rho = 100\) as a step size based on the
-        results from \citet{larsson2023}.
-        We considered using the heuristic \(\rho\) selection method from
-        \citet{boyd2010}, but have avoided to do so since it, as shown by \citet{larsson2023},
-        may lead to erratic convergence behavior in practice. We use \fct{lsqr}
-        from \pkg{SciPy}~\citep{virtanen2020} to solve the linear system if
-        \(\min\{n, p\} > \num{1000}\) and otherwise use solve the linear system
-        as suggested by \citet{boyd2010}.
-
-  \item[Newt-ALM] A semi-smooth Newton-based method~\citep{luo2019}. Our
-        implementation of this method is based on that from \citet{larsson2023},
-        but improved with better heuristics for selecting the inner solver,
-        improved conjugate gradient solver, and
-        a bug fix for the Woodbury-based solver. For the conjugate gradient solver,
-        we use \fct{cg} from \pkg{SciPy}~\citep{virtanen2020}.
-
-  \item[skglm] Another implementation of FISTA from the
-        \pkg{skglm} package~\citep{bertrand2022}.
-
-  \item[SolutionPath] An approximate homotopy method by \citet{dupuis2024},
-        which is similar to the lars algorithm for the lasso~\citep{efron2004}.
-\end{description}
+git repository at \myurl{github.com/benchopt/benchmark\_slope}. It features the
+Python version of our implementation, \pkg{sortedl1}\footnote{The \proglang{R}
+  package \pkg{SLOPE} is also included, but we have omitted it from the
+  benchmark here since it is essentially equivalent to the \proglang{Python}
+  package \pkg{sortedl1}.}, as well as four variations on proximal gradient
+descent (PGD), using Anderson acceleration~\citep{anderson1965,zhang2020},
+Barzilai--Borwein step sizes, safe screening rules, and the fast iterative
+shrinking and thresholding algorithm (FISTA)~\citep{beck2009}. The latter of
+these is also included through the \pkg{skglm} package~\citep{bertrand2022}. We
+also include the alternating direction method of multipliers
+(ADMM)~\citep{boyd2010}, a semi-smooth Newton-based method~\citep{luo2019}, and
+an approximate homotopy method, \pkg{SolutionPath}~\citet{dupuis2024}, See
+\Cref{sec:solver-details} for more details on the solvers and their
+implementations.
 
 For this paper, we have also created a separate benchmark for fitting the full
 regularization path, which is available at
@@ -1056,7 +1025,7 @@ redundant implementations of the same algorithms in each language.
   \begin{equation}
     \label{eq:slope-constrained}
     \begin{aligned}
-       & \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} &  & \frac{1}{n} \sum_{i=1}^n f(y_i, x_i^\intercal \beta + \beta_0) + J_{\lambda}(\beta) \\
+       & \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} &  & \frac{1}{n} \sum_{i=1}^n f(x_i^\intercal \beta + \beta_0, y_i) + J_{\lambda}(\beta) \\
       % & \text{subject to}                                              &  & r_i = \link(\bm{x}_i^\intercal \bm{\beta}) - y_i, \quad i = 1, \ldots, n                                            \\
        & \text{subject to}                                         &  & r_i = \ilink(\beta_0 + x_i^\intercal \beta) - y_i, \quad i = 1, \ldots, n           \\
     \end{aligned}
@@ -1064,11 +1033,11 @@ redundant implementations of the same algorithms in each language.
 
   Since \(\beta_0 + x_i^\intercal \beta = g(r_i + y_i)\), we can write the Lagrangian as
   \[
-    L(\beta_0,\beta,r,\delta) = \frac{1}{n} \sum_{i=1}^n f\big(y_i, g(r_i + y_i)\big) + J_{\lambda}(\beta) - \sum_{i=1}^n \delta_i \left(g(r_i + y_i) - x_i^\intercal \beta - \beta_0 \right).
+    L(\beta_0,\beta,r,\delta) = \frac{1}{n} \sum_{i=1}^n f\big(g(r_i + y_i), y_i\big) + J_{\lambda}(\beta) - \sum_{i=1}^n \delta_i \left(g(r_i + y_i) - x_i^\intercal \beta - \beta_0 \right).
   \]
   This allows us to write the dual problem as
   \[
-    D(\delta)  = \inf_r\left( \frac{1}{n} \sum_{i=1}^n f\left(y_i, g(r_i+y_i)\right) - \delta_i g(r_i+ y_i)\right)
+    D(\delta)  = \inf_r\left( \frac{1}{n} \sum_{i=1}^n f\left(g(r_i+y_i), y_i\right) - \delta_i g(r_i+ y_i)\right)
     % & \phantom{={}} + \inf_\beta \left(J_\lambda(\beta) - \delta^\intercal X\beta\right)   \\
     % & \phantom{={}} + \inf_{\beta_0} \left( -\delta^\intercal \bm{1} \beta_0\right)        \\
     - \sup_\beta \big((-X^\intercal \delta)^\intercal \beta -  J_\lambda(\beta) \big)
@@ -1077,7 +1046,7 @@ redundant implementations of the same algorithms in each language.
   Here, we begin by noting that the infimum is attained at the point where
   \(r = \delta\)~\citep{fercoq2015}, which means that the value is
   \[
-    \frac{1}{n} \sum_{i=1}^n f\left(y_i, g(\delta_i+y_i)\right) - \delta_i g(\delta_i + y_i)
+    \frac{1}{n} \sum_{i=1}^n f\left(g(\delta_i+y_i), y_i\right) - \delta_i g(\delta_i + y_i)
   \]
   in general, although loss-specific simplifications can be made. For instance, in the case of
   quadratic loss the expression evaluates to \(\frac{1}{2} \lVert y \rVert_2^2 - \frac{1}{2} \lVert \delta + y \lVert^2_2 \).
@@ -1104,7 +1073,7 @@ redundant implementations of the same algorithms in each language.
   Taken together, this means that we have the following dual function:
   \begin{equation}
     D(\delta) = \begin{cases}
-      \frac{1}{n} \sum_{i=1}^n f\left(y_i, g(\delta_i+y_i)\right) - \delta_i g(\delta_i+ y_i) & \text{if } J^*_\lambda(-X^\intercal \delta) \leq 1 \text{ and } \delta^\intercal \bm{1} = 0 \\
+      \frac{1}{n} \sum_{i=1}^n f\left(g(\delta_i+y_i), y_i\right) - \delta_i g(\delta_i+ y_i) & \text{if } J^*_\lambda(-X^\intercal \delta) \leq 1 \text{ and } \delta^\intercal \bm{1} = 0 \\
       -\infty,                                                                                & \text{otherwise}.
     \end{cases}
   \end{equation}
@@ -1155,6 +1124,57 @@ redundant implementations of the same algorithms in each language.
   of using duality-based screening strategies is minor, so we have
   opted not to implement these in our packages.
   % TODO: Maybe reconsider this!
+  %
+  % \begin
+  \section{Solver details}\label{sec:solver-details}
+
+  \begin{description}
+    \item[sortedl1] The python package of our implementation of the hybrid
+          proximal gradient/coordinate descent algorithm described in this work and
+          \citet{larsson2023}. We use the randomized version of the coordinate descent
+          updates.
+
+          % \item[PGD] The proximal gradient descent algorithm, which is a standard
+          %       algorithm for solving convex optimization problems~\citep{wright2009}. We use a
+          %       analytical computation of the Lipschitz constant to pick the step size.
+          %
+    \item[Anderson PGD] The proximal gradient descent (PGD) algorithm with Anderson acceleration, which is a
+          method for accelerating the convergence of fixed-point
+          iterations~\citep{anderson1965,zhang2020}.
+    \item[BB PGD] PGD with Barizilai--Borwein~\citep{barzilai1988} step sizes.
+
+    \item[FISTA] The fast iterative shrinking and thresholding
+          algorithm~\citep{beck2009}, which is an accelerated version of iterative
+          soft-thresholding algorihthm (ISTA)~\citep{wright2009}.
+
+    \item[Safe PGD] FISTA with acceleration using safe screening
+          rules~\citep{elvira2023}.
+
+    \item[ADMM] The alternating direction method of
+          multipliers~\citep{glowinski1975,boyd2010}, which is a popular algorithm
+          for solving convex optimization problems with constraints. In our experiments,
+          we have used \(\rho = 100\) as a step size based on the
+          results from \citet{larsson2023}.
+          We considered using the heuristic \(\rho\) selection method from
+          \citet{boyd2010}, but have avoided to do so since it, as shown by \citet{larsson2023},
+          may lead to erratic convergence behavior in practice. We use \fct{lsqr}
+          from \pkg{SciPy}~\citep{virtanen2020} to solve the linear system if
+          \(\min\{n, p\} > \num{1000}\) and otherwise use solve the linear system
+          as suggested by \citet{boyd2010}.
+
+    \item[Newt-ALM] A semi-smooth Newton-based method~\citep{luo2019}. Our
+          implementation of this method is based on that from \citet{larsson2023},
+          but improved with better heuristics for selecting the inner solver,
+          improved conjugate gradient solver, and
+          a bug fix for the Woodbury-based solver. For the conjugate gradient solver,
+          we use \fct{cg} from \pkg{SciPy}~\citep{virtanen2020}.
+
+    \item[skglm] Another implementation of FISTA from the
+          \pkg{skglm} package~\citep{bertrand2022}.
+
+    \item[SolutionPath] An approximate homotopy method by \citet{dupuis2024},
+          which is similar to the lars algorithm for the lasso~\citep{efron2004}.
+  \end{description}
 
 \end{appendix}
 
