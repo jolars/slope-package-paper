@@ -53,13 +53,22 @@
 \Shorttitle{Efficient Solvers for SLOPE}
 
 \Abstract{
-  We present a collection of packages in \proglang{R}, \proglang{Python},
-  \proglang{Julia}, and \proglang{C++} to efficiently solve the full
-  regularization path for Sorted L-One Penalized Estimation (SLOPE) in
-  \proglang{R}, \proglang{Python}, \proglang{Julia}, and \proglang{C++}.
-  The packages feature a new and improved implementation of the 
-  hybrid coordinate descent algorithm for solving SLOPE, which
-  features improved and robust convergence properties.
+  \noindent We present a suite of packages in \proglang{R}, \proglang{Python},
+  \proglang{Julia}, and \proglang{C++} that efficiently solves
+  the Sorted L-One Penalized Estimation (SLOPE) problem.
+  The packages features a highly efficient hybrid coordinate descent
+  algorithm that fits generalized linear models (GLMs) and supports
+  a variety of loss functions, including Gaussian, binomial,
+  Poisson, and multinomial logistic regression. Our implementation
+  is designed to be fast, memory-efficient, and flexible.
+  The packages support a variety of data structures (dense and sparse matrices, as well
+  as out-of-memory matrices) and are designed to efficiently fit the
+  full SLOPE path as well as handle cross-validation of SLOPE models,
+  including the relaxed SLOPE.
+  We present examples of how to use the packages and benchmarks that
+  demonstrate the performance of the packages on a variety of both
+  real and simulated data and show that our packages outperform
+  existing implementations of SLOPE in terms of speed.
 }
 
 \Keywords{SLOPE, OWL, regularization, generalized linear models, \proglang{R}, \proglang{Python}, \proglang{Julia}, \proglang{C++}}
@@ -148,8 +157,9 @@ implementation of SLOPE by \citet{bogdan2015}. Other possibilities include
 proximal Newton~\citep{lee2014} and the alternating direction method of
 multipliers (ADMM) method~\citep{boyd2010}.
 
-For related problems such as the lasso and elastic net, however, these
-aforementioned methods have typically been shown to be inferior to coordinate
+For similar problems such as the lasso~\citet{tibshirani1996} and
+elastic net\citet{zou2005}, however, these
+aforementioned methods have generally found themselves outperformed by coordinate
 descent methods~\citep{friedman2007,friedman2010}, which optimize one
 coefficient at a time. Unfortunately, coordinate descent requires that the
 objective is separable in \(\beta_0, \beta\), which is not the case in SLOPE
