@@ -112,7 +112,7 @@ that controls the strength of regularization, and \(\lambda\) a non-increasing s
 and \(\lambda\) is a non-increasing sequence of penalty weights. We will
 assume that \(F\) takes the following form:
 \[
-  F(\beta_0, \beta) = \frac{1}{n} \sum_{i=1}^n f(y_i, \beta_0 + x_i^\intercal \beta),
+  F(\beta_0, \beta) = \frac{1}{n} \sum_{i=1}^n f(\beta_0 + x_i^\intercal \beta, y_i),
 \]
 where \(f\) is a smooth, convex function and \(x_i\) is the \(i\)th row of the
 \(n \times p\) design matrix \(X\). Throughout the paper, we will use the
@@ -199,32 +199,27 @@ in which the loss function is defined as
 \[
   F(\beta_0, \beta) = \frac{1}{n} \sum_{i=1}^n f(y_i, \eta_i),
 \]
-letting \(\eta_i = x_i^\intercal \beta + \beta_0\) be the
-linear predictor.
+letting \(\eta_i = x_i^\intercal \beta + \beta_0\) be the linear predictor. The
+response \(y_i\) is modelled as a random variable from an exponential family,
+and is assumed to depend conditionally on the linear predictor \(\eta_i\)
+through \(\E(y_i \mid \eta_i) = \ilink(\eta_i)\), where \(\ilink\) is the
+inverse link function.
 
-In a generalized linear model, the response variable \(y_i\) is modelled
-as a random variable from an exponential family, and is assumed to depend
-conditionally on the linear predictor \(\eta_i\) through
-\[
-  \E(y_i \mid \eta_i) = \ilink(\eta_i),
-\]
-where \(\ilink\) is the inverse link function.
-
-To estimate the parameters of the model, \(\beta_0, \beta\), we form a loss
+To estimate the parameters of the model, \((\beta_0, \beta)\), we form a loss
 function from the negative log-likelihood of the target distribution, modeling
 its mean parameter through the inverse link funktion applied to the linear
-predictor. A special attribute of resulting loss function is that its partial
+predictor. A special property of the resulting loss function is that its partial
 derivative with respect to \(\eta\) is the
 \emph{generalized residual}
 \[
   \frac{\partial}{\partial \eta_i} f(y_i, \eta_i) = \ilink(\eta_i) - y_i = r_i.
 \]
-As a consequence, the gradient of the loss function with respect to \(\beta_0\)
-and \(\beta\) can be expressed as
+As a consequence, the gradient of the loss function with respect to \(\beta\)
+can be expressed as
 \[
   \frac{\partial}{\partial \beta_j} F(\beta_0,\beta)
   = \frac{1}{n} \sum_{i=1}^n x_{ij} \frac{\partial}{\partial \eta_i} f(y_i, \eta_i)
-  = \frac{1}{n} \sum_{i=1}^n x_{ij} r_i
+  = \frac{1}{n} \sum_{i=1}^n x_{ij} r_i.
 \]
 
 We summarize the loss functions, link functions, and inverse link functions
@@ -235,7 +230,7 @@ for the GLMs supported by the SLOPE packages in \Cref{tab:glm}.
   \label{tab:glm}
   \begin{tabular}{lccc}
     \toprule
-    Model       & \(f(y, \eta)\)                                                                                       & \(\link(\mu)\)                            & \(\ilink(\eta)\)                                       \\
+    Model       & \(f(\eta, y)\)                                                                                       & \(\link(\mu)\)                            & \(\ilink(\eta)\)                                       \\
     \midrule
     Gaussian    & \(\frac{1}{2}(y - \eta)^2\)                                                                          & \(\mu\)                                   & \(\eta\)                                               \\
     \addlinespace
@@ -261,16 +256,17 @@ formulation of the loss function, with the last class serving as the reference
 category. This choice complicates notation slightly and leads to a more
 complex formulation for the dual problem. For SLOPE, however, this is a
 more natural choice since it generalizes to the binary case as well (in which
-the last class is also implicit). SLOPE needs a \(\lambda\) sequence of length
-\(mp\), so the loss function for the multinomial case would not be equivalent
-to the binary case if we used the redundant formulation. Furthermore, the
-redundant formulation is not estimable in the absence of regularization, which
-is not the case for the non-redundant formulation. This fact also means that a
-coordinate descent algorithm needs bounds checks to handle the parameter
-ambiguity~\citep{friedman2010}. This is not especially difficult to implement
-for the lasso, but is more complicated in the case of SLOPE since rows of the
-coefficient matrix cannot be arbitrarily shifted because it would alter the
-overall cluster structure.
+the last class is also implicit).\footnote{SLOPE needs a \(\lambda\) sequence of length
+  \(mp\), so the loss function for the multinomial case would not be equivalent
+  to the binary case if we used the redundant formulation.} Furthermore, it also
+relieves the problem of the parameter ambiguity that affects the redundant
+formulation, where rows of the coefficient matrix can be arbitrarily shifted
+without changing the value of \(F\). This also means that
+the redundant formulation needs to be accompanied by a bounds adjustment step~\citep{friedman2010}.
+This is trivial in the case of the lasso and ridge and
+only slightly more complicated in the case of elastic net. For SLOPE, however,
+the situation is much trickier problem since, then, shifting the rows of the coefficient
+matrix can affect the penalty due to its inseparability.
 
 \subsection{Hybrid algorithm}
 
