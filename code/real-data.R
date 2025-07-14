@@ -41,7 +41,6 @@ dev.off()
 
 
 ####### SLOPE and Lasso - classification
-
 set.seed(222)
 
 dat <- readxl::read_excel("./code/41598_2023_38243_MOESM2_ESM.xlsx")[, -1]
@@ -95,7 +94,6 @@ lasso_model <- glmnet(
   family = "binomial"
 )
 
-
 ### results
 
 # slope
@@ -122,7 +120,6 @@ auc_val_lasso <- auc(roc_obj_lasso)
 
 pred_class_lasso <- ifelse(pred_prob_lasso > 0.5, 1, 0)
 f1_lasso <- MLmetrics::F1_Score(y_true = Y_test, y_pred = pred_class_lasso)
-
 
 # plot
 
@@ -155,9 +152,6 @@ plot(
 )
 dev.off()
 
-
-####
-
 slope_model_path <- SLOPE(
   X_train,
   Y_train,
@@ -165,7 +159,6 @@ slope_model_path <- SLOPE(
   family = "binomial",
   patterns = TRUE
 )
-
 
 # chosen variables lasso / slope
 cbind(coefficients(lasso_model), as.vector(coefficients(slope_model)))
