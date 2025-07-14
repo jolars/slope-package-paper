@@ -944,21 +944,15 @@ To demonstrate the practical utility of SLOPE, we applied it to a metabolomics d
 
 We compared SLOPE to the lasso by tuning the regularization parameter $\alpha$ via 10-fold cross-validation using the area under the ROC curve (AUC) on the training data. The optimal values selected were  $\alpha \approx 0.0047$ for SLOPE and $0.05$ for lasso. On the held-out test set, SLOPE achieved an AUC of 0.978, outperforming the lasso’s AUC of 0.94 (see Figure~\ref{fig:real-data-path}). In addition to predictive accuracy, SLOPE selected a substantially larger and more diverse set of features (38 metabolites grouped into 27 clusters) compared to 11 variables selected by the lasso.
 \begin{figure}[tp]
-\centering
-\includegraphics[width=\textwidth]{images/glioma-roc.pdf}
-\caption{ROC curves comparing the predictive performance of SLOPE and Lasso models for glioma versus healthy control classification.}
-\label{fig:real-data-path}
+  \centering
+  \includegraphics[width=\textwidth]{images/glioma-roc.pdf}
+  \caption{ROC curves comparing the predictive performance of SLOPE and Lasso models for glioma versus healthy control classification.}
+  \label{fig:real-data-path}
 \end{figure}
 
 Both methods consistently identified \textit{kynurenine}, a well-established glioma biomarker related to the tryptophan pathway \citep{du2020both}. Importantly, SLOPE additionally selected \textit{tryptophan}, highlighting its ability to capture a broader metabolic signature. Both models also included \textit{phenylalanine} and \textit{lysine}, amino acids implicated in glioma-related metabolic changes \citep{koslinski2023comparative, srivastava2025amino}. Furthermore, SLOPE uniquely identified a group of carnitine derivatives—such as acetylcarnitine and propionylcarnitine—that have recently been suggested as glioma biomarkers in cerebrospinal fluid \citep{wang2024genomic}.
 
 These results illustrate SLOPE’s capacity to recover meaningful biological signals beyond those identified by Lasso, while maintaining excellent predictive performance. The method’s sensitivity to subtle and related metabolic features supports its application in high-dimensional biomedical data where interpretability and rich feature selection are important.
-
-
-
-
-
-
 
 \section{Discussion}\label{sec:discussion}
 
