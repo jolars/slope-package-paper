@@ -87,6 +87,12 @@
                 languageserver
                 SLOPE
                 ggplot2
+                MLmetrics
+                caret
+                dplyr
+                glmnet
+                pROC
+                readxl
               ];
             })
             (python3.withPackages (ps: [
