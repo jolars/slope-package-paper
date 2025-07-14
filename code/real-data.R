@@ -13,7 +13,10 @@ fig_name <- function(name) {
 
 opar <- par(no.readonly = TRUE)
 
-dat <- readxl::read_excel("./code/41598_2023_38243_MOESM2_ESM.xlsx")[, -1]
+dat <- readxl::read_excel(here::here(
+  "code",
+  "41598_2023_38243_MOESM2_ESM.xlsx"
+))[, -1]
 colnames(dat)[1] <- "group"
 metabolites <- colnames(dat)[-1]
 
@@ -43,7 +46,9 @@ dev.off()
 ####### SLOPE and Lasso - classification
 set.seed(222)
 
-dat <- readxl::read_excel("./code/41598_2023_38243_MOESM2_ESM.xlsx")[, -1]
+dat <- readxl::read_excel(here("code", "41598_2023_38243_MOESM2_ESM.xlsx"))[,
+  -1
+]
 colnames(dat)[1] <- "group"
 metabolites <- colnames(dat)[-1]
 
