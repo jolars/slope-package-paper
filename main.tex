@@ -16,13 +16,6 @@
 
 \usepackage{enumitem}
 
-\usepackage[capitalize,noabbrev]{cleveref}
-\usepackage{crossreftools}
-\pdfstringdefDisableCommands{%
-  \let\Cref\crtCref
-  \let\cref\crtcref
-}
-
 \usepackage{todonotes}
 
 % Workaround for Gin settings
@@ -104,7 +97,7 @@ where \(P\) is the primal problem, \(F\) is the loss function, \(\alpha\) a para
 that controls the strength of regularization, and \(\lambda\) a non-increasing sequence of penalty weights. \(J\) is the
 \emph{sorted $\ell_1$ norm}, defined as
 \begin{equation}
-  \label{eq:sl1}
+  % \label{eq:sl1}
   J_{\lambda}(\beta) = \sum_{j=1}^p \lambda_j |\beta_{(j)}|, \quad
   \text{where}\quad |\beta_{(1)}| \geq |\beta_{(2)}| \geq \ldots \geq
   |\beta_{(p)}|,
@@ -121,7 +114,7 @@ convention of denoting a row of a matrix \(X\) as \(x_i\) and a column as
 \(Y\),\footnote{For our case, \(m = 1\) unless the model is multinomial
   logistic regression.}
 and we let \((\hat{\beta}_0,
-\hat{\beta})\) denote a solution to the problem in \Cref{eq:slope}.
+\hat{\beta})\) denote a solution to the problem in \autoref{eq:slope}.
 
 SLOPE is a generalization of both the lasso\footnote{The lasso is attained by
   taking a constant
@@ -167,7 +160,7 @@ presenting a collection of packages in \proglang{R}, \proglang{Python},
 
 \subsection{Outline of the paper}
 
-In \Cref{sec:math-details}, we introduce the statistical problem that our
+In \autoref{sec:math-details}, we introduce the statistical problem that our
 packages solve, namely generalized linear models (GLMs) regularized with the sorted
 \(\ell_1\) norm (SLOPE)\footnote{SLOPE is sometimes used only as the procedure
   that uses quadratic loss, but here we adopt a more general terminology and
@@ -175,12 +168,12 @@ packages solve, namely generalized linear models (GLMs) regularized with the sor
 the mathematical properties of GLMs and the particular properties of SLOPE.
 We discuss the optimization problem and describe the hybrid
 coordinate descent algorithm we use for solving SLOPE.
-In \Cref{sec:implementation-details}, we provide a detailed overview of the
+In \autoref{sec:implementation-details}, we provide a detailed overview of the
 software implementations, highlighting technical aspects such as
 memory management, parallelization, and convergence criteria.
-In \Cref{sec:examples}, we showcase how our packages work in practice,
+In \autoref{sec:examples}, we showcase how our packages work in practice,
 providing examples of fitting models, plotting, and cross-validation.
-Finally, in \Cref{sec:discussion}, we summarize the contributions of this paper
+Finally, in \autoref{sec:discussion}, we summarize the contributions of this paper
 and discuss future work.
 
 \section{Mathematical details}\label{sec:math-details}
@@ -192,7 +185,7 @@ convergence criteria used to determine when the algorithm has converged, and
 the path fitting procedure used to compute the full regularization path for SLOPE.
 
 \subsection{Generalized linear models}
-\label{sec:glm}
+% \label{sec:glm}
 
 Our packages are designed to solve SLOPE for generalized linear models (GLMs),
 in which the loss function is defined as
@@ -223,11 +216,10 @@ can be expressed as
 \]
 
 We summarize the loss functions, link functions, and inverse link functions
-for the GLMs supported by the SLOPE packages in \Cref{tab:glm}.
+for the GLMs supported by the SLOPE packages in \autoref{tab:glm}.
 
 \begin{table}[t!]
   \centering
-  \label{tab:glm}
   \begin{tabular}{lccc}
     \toprule
     Model       & \(f(\eta, y)\)                                                                                       & \(\link(\mu)\)                            & \(\ilink(\eta)\)                                       \\
@@ -246,6 +238,7 @@ for the GLMs supported by the SLOPE packages in \Cref{tab:glm}.
     multinomial logistic regression, the input is vector-valued, and we allow
     \(\log\) and \(\exp\) to be overloaded to apply element-wise in these cases.
   }
+  \label{tab:glm}
 \end{table}
 
 A particular case of interest is the multinomial logistic regression model.
@@ -284,13 +277,13 @@ therefore be combined with proximal gradient descent steps. These steps
 are able to split the clusters, which eventually means that the full
 algorithm converges to the correct clusters and global minimum.
 
-We have outlined the algorithm in \Cref{alg:hybrid}. Unlike the implementation
+We have outlined the algorithm in \autoref{alg:hybrid}. Unlike the implementation
 in \citet{larsson2023}, this algorithm is extended to
 any generalized linear model---not just the Gaussian case. To do so,
 we use a iteratively reweighted least-squares (IRLS) approach, determining
 weights \(w\) and a working response \(z\) after each proximal gradient descent step.
 We then run the coordinate descent algorithm for a fixed number of iterations.
-Convergence is monitored using a duality-based stopping criterion~(\Cref{sec:convergence-criteria-details}), which
+Convergence is monitored using a duality-based stopping criterion~(\autoref{sec:convergence-criteria-details}), which
 we check after each gradient is computed. In order to avoid complicating
 the presentation, we have omitted some details of the algorithm here.
 
@@ -301,7 +294,7 @@ the presentation, we have omitted some details of the algorithm here.
     after a proximal gradient descent step. We describe the cyclical version of
     the algorithm here. \(c^{\setminus k}\) is a version of the vector \(c\)
     with the \(k\)th coefficient omitted and \(T\) is the SLOPE thresholding
-    operator, which we have illustrated in \Cref{fig:slope-thresholding}.
+    operator, which we have illustrated in \autoref{fig:slope-thresholding}.
   }
   \label{alg:hybrid}
   \SetKwInOut{Input}{input}
@@ -319,7 +312,7 @@ the presentation, we have omitted some details of the algorithm here.
 
     Set \(t\) with backtracking line search\;
 
-    \(\beta \gets \beta - t \nabla F(\beta_0, \beta)\)\; \label{alg:hybrid-istastep}
+    \(\beta \gets \beta - t \nabla F(\beta_0, \beta)\)\;
 
     \For{\(i \gets 1,\dots,n\)}{
 
@@ -400,19 +393,20 @@ duality gap. As a stopping criterion, we use the relative duality gap: \[
 \(\varepsilon >0\) is the user-defined tolerance level. This provides a
 reliable, solver-independent measure of convergence. The complete derivation of
 the dual problem and the calculation of the duality gap is provided in
-\Cref{sec:convergence-criteria-details}.
+\autoref{sec:convergence-criteria-details}.
 
-\subsection{Path fitting}\label{sec:path-fitting}
+\subsection{Path fitting}
+% \label{sec:path-fitting}
 
 Since optimal settings of \(\alpha\) are only available under strict
 assumptions that are typically hard to test, it is common to instead use
 cross-validation to tune \(\alpha\) over a grid of values. In practice, this
 means that we repeatedly have to fit the full regularization path, which is the
-sequence of solutions to the problem in \Cref{eq:slope} as \(\alpha\) is varied
+sequence of solutions to the problem in \autoref{eq:slope} as \(\alpha\) is varied
 from \(\alpha_\text{max}\), at which point the first cluster enters the model,
 to a small value of \(\alpha\) at which the model is almost saturated. Our
 packages are optimized to efficiently compute the full regularization path, and
-make use of  screening rules~(\Cref{sec:screening-rules}) to speed up the
+make use of  screening rules~(\autoref{sec:screening-rules}) to speed up the
 process of doing so.
 
 We use the same criteria as \citet{friedman2010} for stopping the path early,
@@ -451,7 +445,7 @@ details of the SLOPE packages, including the data structures used to represent
 the clusters, the thresholding operator, and parallelization strategies.
 
 \subsection{Software architecture}
-\label{sec:software}
+% \label{sec:software}
 
 We have implemented a collection of packages for solving SLOPE, currently with
 support for \proglang{R}, \proglang{Python}, and \proglang{Julia}. The backbone
@@ -463,7 +457,7 @@ functionality for handling data and plotting the results. This means that new
 features and bug fixes propagate quickly and easily to all these wrapppers and
 enable users to promptly take advantage of the latest developments. The entire
 suite of packages is open source and available in version-controlled
-online repositories~(\Cref{tab:slope-packages}).
+online repositories~(\autoref{tab:slope-packages}).
 
 \begin{table}[tp]
   \centering
@@ -509,7 +503,7 @@ handling of updating the clusters (merging,
 reordering, removal), which can now be performed with negligible
 overhead and with minimal copying.
 
-The SLOPE thresholding operator~(\Cref{fig:slope-thresholding}) is the analogue
+The SLOPE thresholding operator~(\autoref{fig:slope-thresholding}) is the analogue
 to the soft-thresholding operator for the lasso. But unlike the latter, which
 is trivial to compute, the SLOPE thresholding operator needs to conduct a
 search over the clusters in order to find correct solution. This leads to a
@@ -666,7 +660,7 @@ R> fit_lasso <- SLOPE(x, y, lambda = "lasso")
 R> plot(fit_lasso)
 \end{Code}
 
-The resulting paths are plotted in \Cref{fig:diabetes}. Observe that the
+The resulting paths are plotted in \autoref{fig:diabetes}. Observe that the
 paths are overall similar but that the SLOPE path has clustered
 some coefficients for parts of the path. Predictors 3 and 9, for instance,
 enter the path together and remain clustered at the beginning, then
@@ -715,7 +709,7 @@ R> fit_relaxed <- SLOPE(x, y, q = 0.1, gamma = 0)
 R> fit_semirelaxed <- SLOPE(x, y, q = 0.1, gamma = 0.5)
 \end{Code}
 
-We plot the resulting paths in \Cref{fig:relaxed-slope}. Observe
+We plot the resulting paths in \autoref{fig:relaxed-slope}. Observe
 the jaggedness of the relaxed paths, which change dramatically
 as clusters form, merge, and split.
 
@@ -755,7 +749,7 @@ Optimum values:
 \end{CodeOutput}
 \end{CodeChunk}
 
-It also easy to plot the cross-validation results~\Cref{fig:cv}, which
+It also easy to plot the cross-validation results~\autoref{fig:cv}, which
 show the cross-validation error with 95\% confidence intervals and
 a dashed line indicating the optimal value of \(\alpha\) for the
 best value of \(q\).
@@ -779,9 +773,9 @@ R> plot(fit_cv)
 \section{Benchmarks}
 
 In this section, we present benchmarks of the numerical performance of our
-implementation for solving SLOPE. In \Cref{sec:single-solution-benchmark}, we examine the performance of SLOPE
+implementation for solving SLOPE. In \autoref{sec:single-solution-benchmark}, we examine the performance of SLOPE
 when fitting for a single value of \(\alpha\), while in
-\Cref{sec:path-benchmark}, we benchmark the performance of fitting
+\autoref{sec:path-benchmark}, we benchmark the performance of fitting
 the full regularization path.
 
 Our benchmarks are organized and run using \pkg{benchopt}~\citep{moreau2022a}.
@@ -800,7 +794,7 @@ these is also included through the \pkg{skglm} package~\citep{bertrand2022}.
 We also include the alternating direction method of multipliers
 (ADMM)~\citep{boyd2010}, a semi-smooth Newton-based method~\citep{luo2019},
 and an approximate homotopy method, \pkg{SolutionPath}~\citet{dupuis2024},
-See \Cref{sec:solver-details} for more details on the solvers and their
+See \autoref{sec:solver-details} for more details on the solvers and their
 implementations. The path benchmark includes a subset of these solvers,
 namely \pkg{FISTA}, \pkg{SolutionPath}, and \pkg{ADMM}.
 
@@ -809,8 +803,8 @@ regularization path, which is available at
 \myurl{github.com/benchopt/benchmark\_slope\_path} and which features a subset
 of the solvers from the previous benchmark.
 
-We have run the benchmarks for both simulated~(\Cref{tab:simulated-data}) as
-well as real data~(\Cref{tab:real-data}). For all real data, we standardize the
+We have run the benchmarks for both simulated~(\autoref{tab:simulated-data}) as
+well as real data~(\autoref{tab:real-data}). For all real data, we standardize the
 predictors to have mean zero and unit variance if \(X\) is dense and scale with
 the maximum absolute value of each predictor otherwise. For all data we use the
 Benjamini--Hochberg sequence for \(\lambda\) with \(q=0.2\). Since some of the
@@ -881,7 +875,7 @@ the model), and run the benchmarks for \(\alpha = \alpha_\text{max}/2\),
 \(\alpha_\text{max}/10\), and \(\alpha_\text{max}/50\). We present convergence using
 the duality gap.
 
-The results for the simulated data are presented in \Cref{fig:simulated-data-single}.
+The results for the simulated data are presented in \autoref{fig:simulated-data-single}.
 We can observe that our algorithm is fastest in every case except
 the (\(\alpha_\text{max}/50\), High Dim) combination, where the Newt-ALM
 method seems to perform better (although does not quite converge). The difference
@@ -893,13 +887,13 @@ often many times faster than the next best method.
   \includegraphics[width=\natwidth]{images/benchmark_single_simulated.pdf}
   \caption{%
     Performance of the solvers for the single solution benchmark for three different settings
-    of simulated data~(\Cref{tab:simulated-data}).
+    of simulated data~(\autoref{tab:simulated-data}).
     Please see the text for information about the data and setup of the experiment.
   }
   \label{fig:simulated-data-single}
 \end{figure}
 
-For real data~\Cref{fig:real-data-single}, we see a mostly similar pattern.
+For real data~\autoref{fig:real-data-single}, we see a mostly similar pattern.
 Our algorithm (sortedl1) performs best for most combinations---again dominating
 in the high-regularization regime, whereas Newt-ALM and occasionally some version of
 the accelerated PGD methods or ADMM perform well. Notice, however, that the other algorithms
@@ -911,7 +905,7 @@ ADMM method, which sometimes diverges.
   \includegraphics[width=\natwidth]{images/benchmark_single_real.pdf}
   \caption{%
     Performance of the solvers for the single solution benchmark for five
-    different real data sets~(\Cref{tab:real-data}) and three levels of
+    different real data sets~(\autoref{tab:real-data}) and three levels of
     regularization. Please see the text for information about the data and
     setup of the experiment.
   }
@@ -921,11 +915,11 @@ ADMM method, which sometimes diverges.
 \subsection{Path}\label{sec:path-benchmark}
 
 Here, we present benchmarks
-on a subset of the real data sets from \Cref{tab:real-data}. We parameterize
+on a subset of the real data sets from \autoref{tab:real-data}. We parameterize
 the benchmark using the length of the path, using 50, 100, and 200 steps. We
 present the results as the maximum relative duality gap along the path.
 
-The results are presented in \Cref{fig:real-data-path}. Note that the interpretation
+The results are presented in \autoref{fig:real-data-path}. Note that the interpretation
 of progress towards convergence does not hold quite the same way as for the single
 solution benchmarks since we fit a full path. Nevertheless, we note that our
 implementation is the fastest by a large margin.
@@ -1014,10 +1008,10 @@ each language.
   \section{Duality gap and convergence criteria}
   \label{sec:convergence-criteria-details}
 
-  In detail, we transform the primal problem \(P\), defined in \Cref{eq:slope}, into a
+  In detail, we transform the primal problem \(P\), defined in \autoref{eq:slope}, into a
   constrained problem, taking \(\alpha = 1\) without loss of generality:
   \begin{equation}
-    \label{eq:slope-constrained}
+    % \label{eq:slope-constrained}
     \begin{aligned}
        & \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} &  & \frac{1}{n} \sum_{i=1}^n f(x_i^\intercal \beta + \beta_0, y_i) + J_{\lambda}(\beta) \\
       % & \text{subject to}                                              &  & r_i = \link(\bm{x}_i^\intercal \bm{\beta}) - y_i, \quad i = 1, \ldots, n                                            \\
