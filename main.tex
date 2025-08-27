@@ -201,7 +201,7 @@ inverse link function.
 
 To estimate the parameters of the model, \((\beta_0, \beta)\), we form a loss
 function from the negative log-likelihood of the target distribution, modeling
-its mean parameter through the inverse link funktion applied to the linear
+its mean parameter through the inverse link function applied to the linear
 predictor. A special property of the resulting loss function is that its partial
 derivative with respect to \(\eta\) is the
 \emph{generalized residual}
@@ -455,7 +455,7 @@ all of the numerical algorithms for SLOPE, including preprocessing,
 cross-validation, and path fitting. The packages for the high-level languages
 all serve as thin wrappers to the \proglang{C++} library, with some additional
 functionality for handling data and plotting the results. This means that new
-features and bug fixes propagate quickly and easily to all these wrapppers and
+features and bug fixes propagate quickly and easily to all these wrappers and
 enable users to promptly take advantage of the latest developments. The entire
 suite of packages is open source and available in version-controlled
 online repositories~(\autoref{tab:slope-packages}).
@@ -535,7 +535,7 @@ data. Due to this memory-efficient implementation, we provide an option to
 altogether avoid copying the data during cross-validation. This allows us to
 parallelize the cross-validation procedure over arbitrarily many folds and
 repetitions without needing to ever copy the data, which makes for a much
-much more memory-friendly implementation (at the cost of
+more memory-friendly implementation (at the cost of
 worse runtime performance).
 
 The SLOPE packages also support out-of-memory storage for the design matrix, which
@@ -1008,18 +1008,18 @@ R> SLOPE::plotClusters(fit_pat, include_zeroes = FALSE)
 \end{figure}
 
 This produces a cluster map of selected metabolites, revealing biologically
-meaningful groupings. For example, both SLOPE and the lasso consistently
-identified \textit{kynurenine}, a known glioma biomarker~\citep{du2020both}.
-SLOPE additionally highlighted \textit{tryptophan} and several carnitine
-derivatives (e.g., acetylcarnitine and propionylcarnitine), which have recently
-been proposed as glioma biomarkers~\citep{wang2024genomic}. Other significant
-amino acids such as \textit{phenylalanine} and
-\textit{lysine}~\citep{koslinski2023comparative, srivastava2025amino} were
-selected by both SLOPE and lasso.
+meaningful groupings~(\autoref{fig:real-data-clusters}). For example, both
+SLOPE and the lasso consistently identified \textit{kynurenine}, a known glioma
+biomarker~\citep{du2020both}. SLOPE additionally highlighted
+\textit{tryptophan} and several carnitine derivatives (e.g., acetylcarnitine
+and propionylcarnitine), which have recently been proposed as glioma
+biomarkers~\citep{wang2024genomic}. Other significant amino acids such as
+\textit{phenylalanine} and \textit{lysine}~\citep{koslinski2023comparative,
+  srivastava2025amino} were selected by both SLOPE and lasso.
 
 Overall, this example demonstrates how the package can be applied in practice.
 Beyond predictive performance, its functionality, such as cross-validation,
-prediction, and clustering visualization makes it a useful tool for
+prediction, and cluster visualization, makes it a useful tool for
 high-dimensional biomedical data analysis, where interpretability and feature
 selection are central.
 
@@ -1029,7 +1029,7 @@ SLOPE is an appealing model for high-dimensional regression problems that is
 able to recover sparsity and ordering patterns in the solution, which sets it
 apart from similar models such as the lasso and elastic net. Unlike these models
 however, SLOPE represents a more challenging optimization problem due to the
-penalty term's inseperability.
+penalty term's inseparability.
 
 Despite the complexity of the problem, we have here presented a collection of
 packages (in \proglang{R}, \proglang{Python}, and \proglang{Julia}) that offer
@@ -1040,11 +1040,10 @@ writing, the only other implementation of SLOPE is \pkg{skglm}, which is
 available in \proglang{Python}. For \proglang{R} and \proglang{Julia}, ours are
 the only available implementations.
 
-We have shown that the performance of our software is unparalleled
-compared to other algorithms and implementations, both for fitting
-the full regularization path as well as for single solution, and
-have shown these in a series of benchmarks on both real and simulated
-data.
+We have shown that the performance of our software is unparalleled compared to
+other algorithms and implementations, both for fitting the full regularization
+path as well as for a single solution, and have shown these in a series of
+benchmarks on both real and simulated data.
 
 Our results are similar to those of \citet{larsson2023}, which features the
 same algorithm, except that the current implementation fares better. We
@@ -1068,7 +1067,7 @@ Although our packages are full-fledged implementations of SLOPE, there are
 still some features that are missing. For instance, we do not yet support
 observation weights or the full suite of loss functions from the family of
 generalized linear models. We also do not yet support the group sorted \(\ell_1\)
-norm, which would allow an alternative penalization scheme for multivariate
+norm, which would allow for an alternative penalization scheme for multivariate
 response problems. In addition, several possible improvements to the hybrid
 method could be considered, such as accelerated and parallelized coordinate
 steps. We leave these possibilities to future work but want to stress that our
