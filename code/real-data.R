@@ -1,11 +1,11 @@
-library(dplyr)
 library(SLOPE)
-library(readxl)
 library(caret)
 library(pROC)
 library(here)
 library(glmnet)
 library(MLmetrics)
+library(dplyr)
+library(readxl)
 
 fig_name <- function(name) {
   here::here("images", paste0(name, ".pdf"))
@@ -13,17 +13,7 @@ fig_name <- function(name) {
 
 opar <- par(no.readonly = TRUE)
 
-dat <- readxl::read_excel(here::here(
-  "code",
-  "41598_2023_38243_MOESM2_ESM.xlsx"
-))[, -1]
-colnames(dat)[1] <- "group"
-metabolites <- colnames(dat)[-1]
-
-glioma_dat <- dat %>%
-  filter(group != "Meningioma") %>%
-  mutate(group = ifelse(group == "Healthy control", 0, 1))
-
+glioma_dat <- readRDS("./code/glioma_dat.RDS")
 x <- glioma_dat[, -1]
 y <- glioma_dat[, 1][[1]]
 
@@ -33,8 +23,8 @@ fit_pat <- SLOPE(x, y, q = 0.1, pattern = TRUE, family = "binomial")
 pattern <- fit_pat$patterns[[20]]
 pattern
 
-width <- 17
-height <- 10
+width <- 6
+height <- 4.2
 ps <- 8
 
 patterns_glioma <- fig_name("glioma-clusters")
@@ -46,13 +36,8 @@ dev.off()
 ####### SLOPE and Lasso - classification
 set.seed(222)
 
-dat <- readxl::read_excel(here("code", "41598_2023_38243_MOESM2_ESM.xlsx"))[,
-  -1
-]
-colnames(dat)[1] <- "group"
-metabolites <- colnames(dat)[-1]
 
-glioma_dat <- dat %>%
+glioma_dat <- readRDS("./code/glioma_dat.RDS") %>%
   filter(group != "Meningioma")
 
 X <- scale(glioma_dat[, -1])
@@ -60,9 +45,9 @@ Y <- glioma_dat[, 1][[1]]
 
 train_index <- createDataPartition(Y, p = 0.7, list = FALSE)
 X_train <- X[train_index, ]
-Y_train <- ifelse(Y[train_index] == "Healthy control", 0, 1)
+Y_train <- Y[train_index]
 X_test <- X[-train_index, ]
-Y_test <- ifelse(Y[-train_index] == "Healthy control", 0, 1)
+Y_test <- Y[-train_index]
 
 # CV SLOPE
 
@@ -74,6 +59,7 @@ slope_cv <- cvSLOPE(
   measure = "auc",
   n_folds = 10
 )
+
 alpha_cv <- slope_cv$optima$alpha
 slope_model <- SLOPE(
   X_train,
@@ -168,9 +154,12 @@ slope_model_path <- SLOPE(
 # chosen variables lasso / slope
 cbind(coefficients(lasso_model), as.vector(coefficients(slope_model)))
 
+colSums(cbind(coefficients(lasso_model), as.vector(coefficients(slope_model))) != 0)
+
 # patterns
 pat_slope <- slope_model_path$patterns[[which(
   slope_cv$summary$alpha == alpha_cv
 )]]
 rownames(pat_slope) <- metabolites
 pat_slope[rowSums(pat_slope) != 0, ]
+
