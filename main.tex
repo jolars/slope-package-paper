@@ -984,10 +984,10 @@ R> X_test  <- X[-train_index, ]
 R> Y_test  <- Y[-train_index]
 \end{Code}
 
-In this example, SLOPE achieved an AUC of 0.978 on the test set, while the lasso
-obtained 0.94. More importantly, SLOPE selected a richer set of features (25
-metabolites grouped into 10 clusters), compared to 10 variables selected by the
-lasso. One of the unique features of the R implementation is the ability to
+In this example, SLOPE achieved an AUC of 0.978 on the test set, while the
+lasso obtained 0.94. More importantly, SLOPE selected a richer set of features
+(25 metabolites grouped into 10 clusters), compared to 10 variables selected by
+the lasso. One of the unique features of the R implementation is the ability to
 visualize the clustering of coefficients with the \texttt{plotClusters()}
 function\footnote{This functionality is specific to the R package.}. The plot
 highlights groups of variables with coefficients of the same magnitude (up to
@@ -1002,18 +1002,19 @@ R> SLOPE::plotClusters(fit_pat, include_zeroes = FALSE)
   \centering
   \includegraphics[width=\textwidth]{images/glioma-clusters.pdf}
   \caption{Cluster structure of metabolites selected by SLOPE. Variables are
-  grouped by effect size, with colors indicating distinct clusters.}
+    grouped by effect size, with colors indicating distinct clusters.}
   \label{fig:real-data-clusters}
 \end{figure}
 
 This produces a cluster map of selected metabolites, revealing biologically
 meaningful groupings. For example, both SLOPE and the lasso consistently
-identified \textit{kynurenine}, a known glioma biomarker \citep{du2020both}. SLOPE additionally
-highlighted \textit{tryptophan} and several carnitine derivatives (e.g.,
-acetylcarnitine and propionylcarnitine), which have recently been proposed as
-glioma biomarkers \citep{wang2024genomic}. Other significant amino acids such as
-\textit{phenylalanine} and \textit{lysine} \citep{koslinski2023comparative, srivastava2025amino} were selected by both SLOPE and lasso.
-.
+identified \textit{kynurenine}, a known glioma biomarker \citep{du2020both}.
+SLOPE additionally highlighted \textit{tryptophan} and several carnitine
+derivatives (e.g., acetylcarnitine and propionylcarnitine), which have recently
+been proposed as glioma biomarkers \citep{wang2024genomic}. Other significant
+amino acids such as \textit{phenylalanine} and \textit{lysine}
+\citep{koslinski2023comparative, srivastava2025amino} were selected by both
+SLOPE and lasso. .
 
 Overall, this example demonstrates how the package can be applied in practice.
 Beyond predictive performance, its functionality, such as cross-validation,
