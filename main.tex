@@ -33,7 +33,7 @@
   \And
   Ma\l{}gorzata Bogdan~\orcidlink{0000-0001-6355-8261}\\University of Wroc\l{}aw
   \And
-  Krystyna Grzesiak~\orcidlink{0000-0003-2581-7722}\\Medical University of Bialystok
+  Krystyna Grzesiak~\orcidlink{0000-0003-2581-7722}\\University of Wroc\l{}aw
   \AND
   Mathurin Massias~\orcidlink{0000-0002-8950-0356}\\Inria, ENS de Lyon, CNRS
   \And
@@ -937,6 +937,89 @@ implementation is the fastest by a large margin.
 
 Taken together, our benchmarks show that our method performs better
 than all the competing methods.
+
+\section{Application to real-world data}\label{sec:realdat}
+
+To illustrate the practical utility of SLOPE, we applied it to a metabolomics
+dataset from \citet{Godlewski2023}, comprising plasma measurements from glioma
+patients and healthy controls. The dataset contains 165 samples (94 glioma
+cases and 71 controls), each with 139 metabolite features.
+
+We first create the design matrix \texttt{X} and the response vector
+\texttt{Y}:
+
+\begin{Code}
+R> glioma_dat <- readRDS("./code/glioma_dat.RDS")
+R> X <- scale(glioma_dat[, -1])
+R> Y <- glioma_dat[, 1][[1]]
+\end{Code}
+
+We then fit a SLOPE model with cross-validation to select the regularization
+parameter. The function \texttt{cvSLOPE()} performs $K$-fold cross-validation
+and optimizes over~$\alpha$:
+
+\begin{Code}
+R> slope_cv <- cvSLOPE(X, Y, q = 0.1, family = "binomial", measure = "auc")
+R> alpha_cv <- slope_cv$optima$alpha
+R> slope_model <- SLOPE(X, Y, q = 0.1, family = "binomial", alpha = alpha_cv)
+\end{Code}
+
+Predicted probabilities for new data can be obtained with the \texttt{predict()}
+method:
+
+\begin{Code}
+R> pred_prob <- predict(slope_model, X, type = "response")
+\end{Code}
+
+For illustration, we also split the data into training and test sets. This
+allows us to evaluate out-of-sample classification performance when
+distinguishing glioma patients from healthy controls:
+
+\begin{Code}
+R> set.seed(222)
+R> train_index <- caret::createDataPartition(Y, p = 0.7, list = FALSE)
+R> X_train <- X[train_index, ]
+R> Y_train <- Y[train_index]
+R> X_test  <- X[-train_index, ]
+R> Y_test  <- Y[-train_index]
+\end{Code}
+
+In this example, SLOPE achieved an AUC of 0.978 on the test set, while the lasso
+obtained 0.94. More importantly, SLOPE selected a richer set of features (25
+metabolites grouped into 10 clusters), compared to 10 variables selected by the
+lasso. One of the unique features of the R implementation is the ability to
+visualize the clustering of coefficients with the \texttt{plotClusters()}
+function\footnote{This functionality is specific to the R package.}. The plot
+highlights groups of variables with coefficients of the same magnitude (up to
+sign):
+
+\begin{Code}
+R> fit_pat <- SLOPE(X, Y, q = 0.1, pattern = TRUE, family = "binomial")
+R> SLOPE::plotClusters(fit_pat, include_zeroes = FALSE)
+\end{Code}
+
+\begin{figure}[tp]
+  \centering
+  \includegraphics[width=\textwidth]{images/glioma-clusters.pdf}
+  \caption{Cluster structure of metabolites selected by SLOPE. Variables are
+  grouped by effect size, with colors indicating distinct clusters.}
+  \label{fig:real-data-clusters}
+\end{figure}
+
+This produces a cluster map of selected metabolites, revealing biologically
+meaningful groupings. For example, both SLOPE and the lasso consistently
+identified \textit{kynurenine}, a known glioma biomarker \citep{du2020both}. SLOPE additionally
+highlighted \textit{tryptophan} and several carnitine derivatives (e.g.,
+acetylcarnitine and propionylcarnitine), which have recently been proposed as
+glioma biomarkers \citep{wang2024genomic}. Other significant amino acids such as
+\textit{phenylalanine} and \textit{lysine} \citep{koslinski2023comparative, srivastava2025amino} were selected by both SLOPE and lasso.
+.
+
+Overall, this example demonstrates how the package can be applied in practice.
+Beyond predictive performance, its functionality, such as cross-validation,
+prediction, and clustering visualization makes it a useful tool for
+high-dimensional biomedical data analysis, where interpretability and feature
+selection are central.
 
 \section{Discussion}\label{sec:discussion}
 
