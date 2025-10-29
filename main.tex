@@ -369,7 +369,7 @@ omitted some details of the algorithm here.
     C(x)}\lambda_{(j)^-_{x}}\) and let \(\varepsilon_c > 0\) be defined such that
   \(\varepsilon_c < \big| c_i - c_j\big|\;\forall\, i \neq j\) and
   \(\varepsilon_c < c_m\) if \(c_m \neq 0\).
-  . Across regions where the function is constant,
+  Across regions where the function is constant,
   the operator sets the result to be either exactly 0 or to the value of one
   of the elements of \(\pm c^{\setminus k}\).
   }
@@ -424,7 +424,7 @@ We use the same criteria as \citet{friedman2010} for stopping the path early,
 except that we stop if the number of \emph{clusters}, excluding the zero-cluster,
 exceeds \(n + 1\) (by default), since the support of SLOPE is limited at \(n\)
 clusters\footnote{As opposed to the lasso, which at most allows \(n\) non-zero
-  \emph{coefficients}.}. This can potentially exceed the number of non-zero)
+  \emph{coefficients}.}. This can potentially exceed the number of non-zero
 coefficients, although in practice this is rare since clusters do not form
 easily at low levels of regularization.
 
@@ -655,7 +655,7 @@ sequence~\citep{bogdan2015}. If the design matrix is orthogonal, then the
 of the identification of true signals (nonzero coefficients).
 
 Other types of sequences are also supported,
-including \code{lambda = "lasso"} for the lasso
+including \code{lambda = "lasso"} for the lasso,
 \code{lambda = "oscar"} for the OSCAR sequence~\citep{bondell2008}, and
 \code{lambda = "gaussian"} for the Gaussian-type sequence~\citep{bogdan2015},
 which is a modification of the BH sequence that has been empirically shown to
@@ -675,7 +675,7 @@ some coefficients along parts of the path. Predictors 3 and 9, for instance,
 enter the path together and remain clustered at the beginning, then
 split apart and again cluster together briefly, before diverging again.
 We also see that predictors 4, 10, and 8 enter the model together, only
-to then, one by one, split apart later on. Unlike lasso path, there
+to then, one by one, split apart later on. Unlike the lasso path, there
 are many more \emph{kinks} in the SLOPE path, since they occur not only when
 new predictors become active, but also when they merge into or split
 from clusters.
@@ -804,7 +804,7 @@ shrinking and thresholding algorithm (FISTA)~\citep{beck2009}. The latter of
 these is also included through the \pkg{skglm} package~\citep{bertrand2022}.
 We also include the alternating direction method of multipliers
 (ADMM)~\citep{boyd2010}, a semi-smooth Newton-based method~\citep{luo2019},
-and an approximate homotopy method, \pkg{SolutionPath}~\citet{dupuis2024},
+and an approximate homotopy method, \pkg{SolutionPath}~\citep{dupuis2024}.
 See \autoref{sec:solver-details} for more details on the solvers and their
 implementations. The path benchmark includes a subset of these solvers,
 namely \pkg{FISTA}, \pkg{SolutionPath}, and \pkg{ADMM}.
