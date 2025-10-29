@@ -88,6 +88,7 @@
                 SLOPE
                 ggplot2
                 MLmetrics
+                tinytex
                 caret
                 dplyr
                 glmnet

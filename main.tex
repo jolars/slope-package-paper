@@ -644,7 +644,7 @@ R> library(SLOPE)
 R> data("diabetes", package = "lars")
 R> x <- scale(diabetes$x)
 R> y <- diabetes$y
-R> fit_slope <- SLOPE(x, y, q = 0.1)
+R> fit_slope <- SLOPE(x, y, q = 0.4)
 R> plot(fit_slope)
 \end{Code}
 
@@ -670,13 +670,15 @@ R> plot(fit_lasso)
 \end{Code}
 
 The resulting paths are plotted in \autoref{fig:diabetes}. Observe that the
-paths are overall similar but that the SLOPE path has clustered
-some coefficients for parts of the path. Predictors 3 and 9, for instance,
+paths are similar but that SLOPE has clustered
+some coefficients along parts of the path. Predictors 3 and 9, for instance,
 enter the path together and remain clustered at the beginning, then
 split apart and again cluster together briefly, before diverging again.
-We also see that predictor 6 joins the path briefly together
-with predictor 5 on the SLOPE path, but then return to zero until
-it later enters again on its own.
+We also see that predictors 4, 10, and 8 enter the model together, only
+to then, one by one, split apart later on. Unlike lasso path, there
+are many more \emph{kinks} in the SLOPE path, since they occur not only when
+new predictors become active, but also when they merge into or split
+from clusters.
 
 \begin{figure}[tp]
   \centering
