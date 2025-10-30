@@ -102,6 +102,7 @@
               ps.pandas
               ps.pyarrow
               ps.scipy
+              ps.scipy-stubs
               ps.fastparquet
               sortedl1
             ]))
