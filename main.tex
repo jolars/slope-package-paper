@@ -392,13 +392,14 @@ but more robust.
 \subsection{Convergence criteria}
 
 Our packages use a duality-based stopping criterion, providing an upper bound
-on suboptimality at convergence. We transform the primal problem into a
-constrained formulation and derive a dual problem that allows us to compute a
-duality gap. As a stopping criterion, we use the relative duality gap: \[
-  P(\beta_0, \beta) - D(\delta) \leq \varepsilon | P(\beta_0, \beta) |, \] where
-\(\varepsilon >0\) is the user-defined tolerance level. This provides a
-reliable, solver-independent measure of convergence. The complete derivation of
-the dual problem and the calculation of the duality gap is provided in
+on suboptimality at convergence. We transform the primal problem, \(P(\beta_0,
+\beta)\), into a constrained formulation and derive a dual problem,
+\(D(\delta)\), that allows us to compute a duality gap. As a stopping criterion,
+we use the relative duality gap: \[ P(\beta_0, \beta) - D(\delta) \leq
+  \varepsilon | P(\beta_0, \beta) |, \] where \(\varepsilon >0\) is the
+user-defined tolerance level. This provides a reliable, solver-independent
+measure of convergence. The complete derivation of the dual problem and the
+calculation of the duality gap is provided in
 \autoref{sec:convergence-criteria-details}.
 
 \subsection{Path fitting}
@@ -1097,7 +1098,7 @@ each language.
   \section{Duality gap and convergence criteria}
   \label{sec:convergence-criteria-details}
 
-  In detail, we transform the primal problem \(P\), defined in \autoref{eq:slope}, into a
+  In detail, we transform the primal problem \(P(\beta_0,\beta)\), defined in \autoref{eq:slope}, into a
   constrained problem, taking \(\alpha = 1\) without loss of generality:
   \begin{equation}
     % \label{eq:slope-constrained}
