@@ -437,8 +437,8 @@ nonzero coefficients. Screening rules are either \emph{heuristic} or
 correspond to zero coefficients in the final model. Heuristic rules, on the
 other hand, do not guarantee this and therefore need to be complemented with a
 pass over all coefficients at the end to ensure that the optimality conditions
-are satisfied. Since they are less conservative, however, the cost of doing so
-may be outweighed by the savings in computation time.
+are satisfied. But since heuristic rules are typically less conservative, the
+computational gains often outweigh this extra cost in practice.
 
 In the SLOPE package, we use the strong screening rule for
 SLOPE~\citep{larsson2020a}, which is an extension of the working set strategy
