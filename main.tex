@@ -394,9 +394,9 @@ but more robust.
 Our packages use a duality-based stopping criterion, providing an upper bound
 on suboptimality at convergence. We transform the primal problem, \(P(\beta_0,
 \beta)\), into a constrained formulation and derive a dual problem,
-\(D(\delta)\), that allows us to compute a duality gap. As a stopping criterion,
-we use the relative duality gap: \[ P(\beta_0, \beta) - D(\delta) \leq
-  \varepsilon | P(\beta_0, \beta) |, \] where \(\varepsilon >0\) is the
+\(D(\delta)\), that allows us to compute a duality gap. As a stopping
+criterion, we use the relative duality gap: \[ P(\beta_0, \beta) - D(\delta)
+  \leq \varepsilon | P(\beta_0, \beta) |, \] where \(\varepsilon >0\) is the
 user-defined tolerance level. This provides a reliable, solver-independent
 measure of convergence. The complete derivation of the dual problem and the
 calculation of the duality gap is provided in
@@ -427,18 +427,18 @@ easily at low levels of regularization.
 \subsection{Screening rules}\label{sec:screening-rules}
 
 Sparse models like lasso and SLOPE are well-known to benefit from
-\emph{screening rules}, which are used to reduce the dimension of \(\beta\) in
-the optimization problem and thereby speed up optimization. The intuition for
-this is that it is possible to estimate the gradient \(\nabla F(\beta) \) for a
-given SLOPE problem and, via the subdifferential, estimate the support of the
-solution: the identity of the nonzero coefficients. Screening rules are
-either \emph{heuristic} or \emph{safe}. In the latter case the rule guarantees that
-excluded predictors correspond to zero coefficients in the final model. Heuristic
-rules, on the other hand, do not guarantee this and therefore need to be
-complemented with a pass over all coefficients at the end to ensure that the
-optimality conditions are satisfied. Since they are less conservative, however,
-the cost of doing so may be outweighed by the savings in computation
-time.
+\emph{screening rules}, which are used to reduce the dimension of \(\beta\) for
+a fixed \(\lambda\) in the optimization problem and thereby speed up
+optimization. The intuition for this is that it is possible to estimate the
+gradient \(\nabla F(\beta) \) for a given SLOPE problem and, via the
+subdifferential, estimate the support of the solution: the identity of the
+nonzero coefficients. Screening rules are either \emph{heuristic} or
+\emph{safe}. In the latter case the rule guarantees that excluded predictors
+correspond to zero coefficients in the final model. Heuristic rules, on the
+other hand, do not guarantee this and therefore need to be complemented with a
+pass over all coefficients at the end to ensure that the optimality conditions
+are satisfied. Since they are less conservative, however, the cost of doing so
+may be outweighed by the savings in computation time.
 
 In the SLOPE package, we use the strong screening rule for
 SLOPE~\citep{larsson2020a}, which is an extension of the working set strategy
