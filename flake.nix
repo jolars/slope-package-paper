@@ -60,8 +60,8 @@
             src = pkgs.fetchFromGitHub {
               owner = "jolars";
               repo = "SLOPE";
-              rev = "e28f933e6b8bed3d2dc0c12bc77342b8edb3f11c";
-              hash = "sha256-ZWCgZxn5htn3ssvjR88nG5bAa5LYxmnx974LARlDFac=";
+              rev = "486a98fbf9bef8522e9b16f3461a54e730ebeb66";
+              hash = "sha256-QzKIe+vKIluJPaKQdFyzX3IEKzzKJ18oWCmKyO+HDwE=";
             };
             propagatedBuildInputs = with pkgs.rPackages; [
               Matrix
