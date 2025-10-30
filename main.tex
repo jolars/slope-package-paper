@@ -280,7 +280,16 @@ descent algorithm by \citet{larsson2023}. Since it is described in detail
 there, we will only summarize its key points here and highlight some of the
 improvements that we have made to the original algorithm. The basic idea is to
 perform the coordinate descent updates on the clusters' coefficients rather
-than directly on the coefficients. In principle, we fix the current cluster and
+than directly on the coefficients.
+
+For a fixed $\beta$ such that $|\beta_j|$ takes $m$ distinct values, we let
+\(\mathcal{C}_1, \mathcal{C}_2 , \dots, \mathcal{C}_m\) and
+\(c_1, c_2, \dots,
+c_m\) be the indices and coefficients, respectively, of the \(m\) clusters of
+$\beta$, such that $\mathcal{C}_i = \{j : |\beta_j| = c_i\}$ and $c_1 > c_2 >
+  \cdots > c_m \geq 0.$
+
+In our algorithm, we fix the current cluster, e.g. $\mathcal{C}_k$, and
 update all coefficients belonging to it in a single step. By itself, this
 algorithm is not guaranteed to converge, since it can only reorder or merge
 clusters. To circumvent this, the algorithm must be combined with proximal
@@ -304,7 +313,8 @@ omitted some details of the algorithm here.
     The Hybrid coordinate descent algorithm for generalized linear models, using
     the IRLS where weights \(w\) and a working response \(z\) are computed
     after a proximal gradient descent step. We describe the cyclical version of
-    the algorithm here. \(c^{\setminus k}\) is a version of the vector \(c\)
+    the algorithm here and have omitted the intercept for simplicity.
+    \(c^{\setminus k}\) is a version of the vector \(c\)
     with the \(k\)th coefficient omitted and \(T\) is the SLOPE thresholding
     operator, which we have illustrated in \autoref{fig:slope-thresholding}.
   }
@@ -361,12 +371,13 @@ omitted some details of the algorithm here.
   \centering
   \includegraphics[width=\natwidth]{images/slope-thresholding.pdf}
   \caption{
-  An illustration of the SLOPE thresholding operator for \(\beta = [0.5, -0.5,
-  0.3, 0.7]^\intercal\), where we consider an update for the second cluster,
-  \(C_2 = \{1, 2\}\). The example is adapted from \citet{larsson2023}. Across
-  regions where the function is constant, the operator sets the result to be
-  either exactly 0 or merges the cluster with another cluster, setting their
-  magnitudes to be equal.
+  An illustration of the SLOPE thresholding operator for \(\beta = [0.5,
+  -0.5, 0.3, 0.7]^\intercal\), and thus $c = \{0.7, 0.5, 0.3\}$, where we consider
+  an update for the second cluster, \(C_2 = \{1, 2\}\). We have omitted the
+  particular value of $\omega$ for brevity. The example is adapted from
+  \citet{larsson2023}. Across regions where the function is constant, the
+  operator sets the result to be either exactly 0 or merges the cluster
+  with another cluster, setting their magnitudes to be equal.
   }
   \label{fig:slope-thresholding}
 \end{figure}
