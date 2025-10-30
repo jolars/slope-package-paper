@@ -322,7 +322,7 @@ omitted some details of the algorithm here.
 
   \Repeat{\(P(\beta_0, \beta) - D(\theta) \leq \varepsilon|P(\beta_0, \beta)|\)}{
 
-    Set \(t\) with backtracking line search\;
+    set \(t\) with backtracking line search\;
 
     \(\beta \gets \beta - t \nabla F(\beta_0, \beta)\)\;
 
@@ -332,7 +332,7 @@ omitted some details of the algorithm here.
       \(w_i \gets \frac{\partial}{\partial \eta_i} f(\eta_i, y_i) \)\tcc*{Weights for IRLS}
       \(z_i \gets \eta_i - \frac{r_i(\eta_i, y_i)}{w_i} \)\tcc*{Working response for IRLS}
     }
-    Update \(c\), \(\mathcal{C}\)\;
+    update \(c\), \(\mathcal{C}\)\;
     \For{\texttt{it} \(\gets 1,\dots,\)\texttt{cd\_maxit}}{
       \(k \gets 1\)\;
       \(\beta^\text{old} \gets \beta\)\;
