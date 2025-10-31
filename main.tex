@@ -47,7 +47,7 @@
 
 \Abstract{
   \noindent We present a suite of packages in \proglang{R}, \proglang{Python},
-  \proglang{Julia}, and \proglang{C++} that efficiently solves
+  \proglang{Julia}, and \proglang{C++} that efficiently solve
   the Sorted L-One Penalized Estimation (SLOPE) problem.
   The packages feature a highly efficient hybrid coordinate descent
   algorithm that fits generalized linear models (GLMs) and supports
@@ -65,7 +65,7 @@
 }
 
 \Keywords{SLOPE, OWL, regularization, generalized linear models, \proglang{R}, \proglang{Python}, \proglang{Julia}, \proglang{C++}}
-\Plainkeywords{SLOPE, OWL, regularization, generalized linear models, R, Python, C++}
+\Plainkeywords{SLOPE, OWL, regularization, generalized linear models, R, Python, Julia, C++}
 
 \Address{
   Johan Larsson\\
@@ -1227,7 +1227,7 @@ each language.
 
     \item[FISTA] The fast iterative shrinking and thresholding
           algorithm~\citep{beck2009}, which is an accelerated version of iterative
-          soft-thresholding algorihthm (ISTA)~\citep{wright2009}.
+          soft-thresholding algorithm (ISTA)~\citep{wright2009}.
 
     \item[Safe PGD] FISTA with acceleration using safe screening
           rules~\citep{elvira2023}.
@@ -1238,10 +1238,10 @@ each language.
           we have used \(\rho = 100\) as a step size based on the
           results from \citet{larsson2023}.
           We considered using the heuristic \(\rho\) selection method from
-          \citet{boyd2010}, but have avoided to do so since it, as shown by \citet{larsson2023},
+          \citet{boyd2010}, but have avoided doing so since it, as shown by \citet{larsson2023},
           may lead to erratic convergence behavior in practice. We use \fct{lsqr}
           from \pkg{SciPy}~\citep{virtanen2020} to solve the linear system if
-          \(\min\{n, p\} > \num{1000}\) and otherwise use solve the linear system
+          \(\min\{n, p\} > \num{1000}\) and otherwise solve the linear system
           as suggested by \citet{boyd2010}.
 
     \item[Newt-ALM] A semi-smooth Newton-based method~\citep{luo2019}. Our
