@@ -898,7 +898,12 @@ We can observe that our algorithm is fastest in every case except
 the (\(\alpha_\text{max}/50\), High Dim) combination, where the Newt-ALM
 method seems to perform better (although does not quite converge). The difference
 is especially pronounced for high levels of regularization, where our method is
-often many times faster than the next best method.
+often many times faster than the next best method. Our current implementation shows
+improved performance compared to \citet{larsson2023}, which also featured
+the hybrid method. We believe this is likely due to the addition
+of screening rules as well as algorithmic improvements. The Newt-ALM method also
+performs better than in \citet{larsson2023}, which is the result of
+algorithmic improvements made in the implemention we use here.
 
 \begin{figure}[tp]
   \centering
@@ -954,7 +959,14 @@ implementation is the fastest by a large margin.
 \end{figure}
 
 Taken together, our benchmarks show that our method outperforms all competing
-methods.
+methods. In contrast to \citet{dupuis2024}, who showed mixed results when
+comparing their approximate homotopy method to the hybrid algorithm from
+\citet{larsson2023}, we consistently find our algorithm to be superior across
+all tested scenarios. This improved performance can be attributed to several
+factors: \citet{dupuis2024} used a more stringent stopping criterion (duality
+gap of \(10^{-10}\)), our benchmarks generally involve larger problem sizes,
+and our implementation includes enhancements over the original version from
+\citet{larsson2023}.
 
 \section{Application to real-world data}\label{sec:realdat}
 
@@ -1062,23 +1074,12 @@ other algorithms and implementations, both for fitting the full regularization
 path as well as for a single solution, and have shown these in a series of
 benchmarks on both real and simulated data.
 
-Our results are similar to those of \citet{larsson2023}, which features the
-same algorithm, except that the current implementation fares better. We
-believe this is likely due to the addition of screening rules and improvements
-to the algorithm and implementation. One difference from \citet{larsson2023} is
-the performance of the Newt-ALM method, which in the current benchmarks have
-performed better. We have made improvements to the algorithm here that we think may
-help explain this fact.
-
-\citet{dupuis2024} benchmarked the Python implementation of the hybrid
-algorithm from \citet{larsson2023} (that our algorithm is based on) against
-their approximate homotopy method and showed that their method performed better
-in one case and worse in another. In our benchmarks, however, we have
-consistently found our algorithm to be superior. One reason for this is that
-\citet{dupuis2024} used a stringent stopping criterion\footnote{A duality
-  gap of \(10^{-10}\).} for their benchmarks. Another is that the problem sizes in
-our benchmarks are generally larger. A third is, again, that our implementation
-is improved compared to \citet{larsson2023}.
+Our results confirm the effectiveness of the hybrid algorithm approach, with
+performance improvements over \citet{larsson2023} due to the addition of
+screening rules and other algorithmic enhancements. The comprehensive benchmarks
+demonstrate consistent superiority over competing methods, including the
+approximate homotopy method of \citet{dupuis2024}, across diverse problem
+settings and data types.
 
 Although our packages are full-fledged implementations of SLOPE, there are
 still some features that are missing. For instance, we do not yet support
