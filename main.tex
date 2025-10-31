@@ -975,13 +975,12 @@ dataset from \citet{Godlewski2023}, comprising plasma measurements from glioma
 patients and healthy controls. The dataset contains 165 samples (94 glioma
 cases and 71 controls), each with 138 metabolite features.
 
-We first create the design matrix \texttt{X} and the response vector
-\texttt{Y}:
+We first create the design matrix \texttt{x} and the response vector
+\texttt{y}:
 
 \begin{Code}
-R> glioma_dat <- readRDS("./code/glioma_dat.RDS")
-R> X <- scale(glioma_dat[, -1])
-R> Y <- glioma_dat[, 1][[1]]
+R> x <- glioma$x
+R> y <- glioma$y
 \end{Code}
 
 We then fit a SLOPE model with cross-validation to select the regularization
@@ -989,16 +988,16 @@ parameter. The function \texttt{cvSLOPE()} performs $K$-fold cross-validation
 and optimizes over~$\alpha$:
 
 \begin{Code}
-R> slope_cv <- cvSLOPE(X, Y, q = 0.1, family = "binomial", measure = "auc")
+R> slope_cv <- cvSLOPE(x, y, q = 0.1, family = "binomial", measure = "auc")
 R> alpha_cv <- slope_cv$optima$alpha
-R> slope_model <- SLOPE(X, Y, q = 0.1, family = "binomial", alpha = alpha_cv)
+R> slope_model <- SLOPE(x, y, q = 0.1, family = "binomial", alpha = alpha_cv)
 \end{Code}
 
 Predicted probabilities for new data can be obtained with the \texttt{predict()}
 method:
 
 \begin{Code}
-R> pred_prob <- predict(slope_model, X, type = "response")
+R> pred_prob <- predict(slope_model, x, type = "response")
 \end{Code}
 
 For illustration, we also split the data into training and test sets. This
@@ -1007,11 +1006,11 @@ distinguishing glioma patients from healthy controls:
 
 \begin{Code}
 R> set.seed(222)
-R> train_index <- caret::createDataPartition(Y, p = 0.7, list = FALSE)
-R> X_train <- X[train_index, ]
-R> Y_train <- Y[train_index]
-R> X_test  <- X[-train_index, ]
-R> Y_test  <- Y[-train_index]
+R> train_index <- caret::createDataPartition(y, p = 0.7, list = FALSE)
+R> x_train <- x[train_index, ]
+R> y_train <- y[train_index]
+R> x_test  <- x[-train_index, ]
+R> y_test  <- y[-train_index]
 \end{Code}
 
 In this example, SLOPE achieved an AUC of 0.978 on the test set, while the
@@ -1024,8 +1023,8 @@ the ability to visualize the clustering of coefficients with the
 same magnitude (up to sign):
 
 \begin{Code}
-R> fit_pat <- SLOPE(X, Y, q = 0.1, pattern = TRUE, family = "binomial")
-R> SLOPE::plotClusters(fit_pat, include_zeroes = FALSE)
+R> fit_pat <- SLOPE(x, y, q = 0.1, pattern = TRUE, family = "binomial")
+R> plotClusters(fit_pat, include_zeroes = FALSE)
 \end{Code}
 
 \begin{figure}[tp]

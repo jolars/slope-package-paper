@@ -11,11 +11,8 @@ fig_name <- function(name) {
   here::here("images", paste0(name, ".pdf"))
 }
 
-opar <- par(no.readonly = TRUE)
-
-glioma_dat <- readRDS("./code/glioma_dat.RDS")
-x <- glioma_dat[, -1]
-y <- glioma_dat[, 1][[1]]
+x <- glioma$x
+y <- glioma$y
 
 # pattern
 fit_pat <- SLOPE(x, y, q = 0.1, pattern = TRUE, family = "binomial")
@@ -23,37 +20,33 @@ fit_pat <- SLOPE(x, y, q = 0.1, pattern = TRUE, family = "binomial")
 pattern <- fit_pat$patterns[[20]]
 pattern
 
-width <- 6
+width <- 4.5
 height <- 4.2
-ps <- 8
+ps <- 7
 
 patterns_glioma <- fig_name("glioma-clusters")
 pdf(patterns_glioma, width = width, height = height, pointsize = ps)
-SLOPE::plotClusters(fit_pat, include_zeroes = F)
+SLOPE::plotClusters(fit_pat, include_zeroes = FALSE)
 dev.off()
 
 
 ####### SLOPE and Lasso - classification
 set.seed(222)
 
+x <- scale(glioma$x)
+y <- glioma$y
 
-glioma_dat <- readRDS("./code/glioma_dat.RDS") %>%
-  filter(group != "Meningioma")
-
-X <- scale(glioma_dat[, -1])
-Y <- glioma_dat[, 1][[1]]
-
-train_index <- createDataPartition(Y, p = 0.7, list = FALSE)
-X_train <- X[train_index, ]
-Y_train <- Y[train_index]
-X_test <- X[-train_index, ]
-Y_test <- Y[-train_index]
+train_index <- createDataPartition(y, p = 0.7, list = FALSE)
+x_train <- x[train_index, ]
+y_train <- y[train_index]
+x_test <- x[-train_index, ]
+y_test <- y[-train_index]
 
 # CV SLOPE
 
 slope_cv <- cvSLOPE(
-  X_train,
-  Y_train,
+  x_train,
+  y_train,
   q = 0.1,
   family = "binomial",
   measure = "auc",
@@ -62,8 +55,8 @@ slope_cv <- cvSLOPE(
 
 alpha_cv <- slope_cv$optima$alpha
 slope_model <- SLOPE(
-  X_train,
-  Y_train,
+  x_train,
+  y_train,
   q = 0.1,
   family = "binomial",
   alpha = alpha_cv
@@ -72,15 +65,15 @@ slope_model <- SLOPE(
 # CV Lasso
 
 lambda_cv <- cv.glmnet(
-  as.matrix(X_train),
-  Y_train,
+  as.matrix(x_train),
+  y_train,
   nfolds = 10,
   type.measure = "auc",
   family = "binomial"
 )
 lasso_model <- glmnet(
-  as.matrix(X_train),
-  Y_train,
+  as.matrix(x_train),
+  y_train,
   lambda = lambda_cv$lambda.min,
   family = "binomial"
 )
@@ -89,28 +82,28 @@ lasso_model <- glmnet(
 
 # slope
 
-pred_prob_slope <- predict(slope_model, X_test, type = "response")
+pred_prob_slope <- predict(slope_model, x_test, type = "response")
 
-roc_obj_slope <- roc(Y_test, pred_prob_slope)
+roc_obj_slope <- roc(y_test, pred_prob_slope)
 auc_val_slope <- auc(roc_obj_slope)
 
 pred_class_slope <- ifelse(pred_prob_slope > 0.5, 1, 0)
-f1_slope <- MLmetrics::F1_Score(y_true = Y_test, y_pred = pred_class_slope)
+f1_slope <- MLmetrics::F1_Score(y_true = y_test, y_pred = pred_class_slope)
 
 
 # lasso
 
 pred_prob_lasso <- as.vector(predict(
   lasso_model,
-  as.matrix(X_test),
+  as.matrix(x_test),
   type = "response"
 ))
 
-roc_obj_lasso <- roc(Y_test, pred_prob_lasso)
+roc_obj_lasso <- roc(y_test, pred_prob_lasso)
 auc_val_lasso <- auc(roc_obj_lasso)
 
 pred_class_lasso <- ifelse(pred_prob_lasso > 0.5, 1, 0)
-f1_lasso <- MLmetrics::F1_Score(y_true = Y_test, y_pred = pred_class_lasso)
+f1_lasso <- MLmetrics::F1_Score(y_true = y_test, y_pred = pred_class_lasso)
 
 # plot
 
@@ -144,8 +137,8 @@ plot(
 dev.off()
 
 slope_model_path <- SLOPE(
-  X_train,
-  Y_train,
+  x_train,
+  y_train,
   q = 0.1,
   family = "binomial",
   patterns = TRUE
@@ -154,12 +147,13 @@ slope_model_path <- SLOPE(
 # chosen variables lasso / slope
 cbind(coefficients(lasso_model), as.vector(coefficients(slope_model)))
 
-colSums(cbind(coefficients(lasso_model), as.vector(coefficients(slope_model))) != 0)
+colSums(
+  cbind(coefficients(lasso_model), as.vector(coefficients(slope_model))) != 0
+)
 
 # patterns
 pat_slope <- slope_model_path$patterns[[which(
   slope_cv$summary$alpha == alpha_cv
 )]]
-rownames(pat_slope) <- metabolites
+rownames(pat_slope) <- colnames(x)
 pat_slope[rowSums(pat_slope) != 0, ]
-
