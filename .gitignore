@@ -621,3 +621,5 @@ Manifest.toml
 *.sif
 
 slope-package-paper*.pdf
+
+_build/
