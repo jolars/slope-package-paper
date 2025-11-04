@@ -79,6 +79,7 @@
           packages = with pkgs; [
             bashInteractive
             apptainer
+            go-task
             (rWrapper.override {
               packages = with rPackages; [
                 here
