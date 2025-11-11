@@ -53,15 +53,12 @@ tasks:
       - git archive --format=tar HEAD | tar -x -C _build/jss/paper
       - git submodule foreach --recursive 'git archive --format=tar HEAD | tar
         -x -C $toplevel/_build/jss/paper/$sm_path'
-      - |
-        cp -r \
-          main.bbl \
-          main.pdf \
-          _build/jss/paper
+      - cp -r main.pdf cover-letter.pdf _build/jss/
       - |
         cp -r \
           _build/packages/ \
           _build/jss/
+      - cd _build/jss/paper && tar -czf ../replication-material.tar.gz .
       - cd _build/jss && tar -czf ../jss-{{.DATE}}.tar.gz .
     vars:
       DATE:

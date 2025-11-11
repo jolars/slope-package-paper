@@ -1,0 +1,100 @@
+\PassOptionsToPackage{unicode,pdfusetitle}{hyperref}
+\PassOptionsToPackage{hyphens}{xurl}
+\PassOptionsToPackage{usenames,dvipsnames}{xcolor}
+
+\documentclass[english,a4paper,14pt]{letter}
+
+\usepackage{babel}
+
+% Font settings
+\usepackage[T1]{fontenc}
+\usepackage{libertine}
+\usepackage{inconsolata}
+
+\usepackage{textcomp}
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath}
+
+\usepackage{xcolor}
+
+
+% tables and lists
+\usepackage{enumitem}
+\usepackage{booktabs}
+
+\usepackage{graphicx}
+
+\usepackage{xurl}
+
+\usepackage{fancyhdr}
+\fancyhead{}
+\fancyhead[L]{Larsson, Bogdan, Grzesiak, Massias, Wallin}
+\fancyhead[R]{Cover Letter}
+
+\pagestyle{fancy}
+\thispagestyle{plain}
+
+\usepackage{hyperref}
+\hypersetup{
+  pdftitle   = {Cover Letter},
+  pdfauthor  = {Johan Larsson, Malgorzata Bogdan, Krystyna Grzesiak, Mathurin Massias, Jonas Wallin},
+  colorlinks = true,
+  linkcolor  = MidnightBlue,
+  citecolor  = MidnightBlue,
+  urlcolor   = MidnightBlue,
+  breaklinks = true
+}
+
+\begin{document}
+
+\begin{letter}{Journal of Statistical Software}
+  \opening{Dear Editor,}
+
+  We are pleased to submit our manuscript titled ``Efficient Solvers for SLOPE
+  in R, Python, Julia, and C++'' for consideration for publication in the
+  Journal of Statistical Software.
+
+  This paper presents a comprehensive suite of software packages implementing
+  efficient solvers for Sorted L-One Penalized Estimation (SLOPE) across four
+  programming languages: R, Python, Julia, and C++. The packages support
+  generalized linear models with various loss functions and handle diverse data
+  structures including dense, sparse, and out-of-memory matrices. Our
+  implementation features a highly efficient hybrid coordinate descent
+  algorithm and we provide comprehensive benchmarks to showcase its performance
+  as well as instructive examples on how to use our software in practice.
+
+  We believe this work makes a significant contribution to the statistical
+  software community by providing high-quality, well-documented, and performant
+  implementations of SLOPE that are readily accessible across multiple
+  programming environments. The packages are already available through standard
+  package repositories (CRAN, PyPI, and the Julia General Registry) and have
+  been designed with reproducibility and ease of use in mind.
+
+  The submission includes the complete manuscript, all source code for the
+  packages, and replication materials that allow readers to
+  reproduce all figures and results presented in the paper.
+
+  We confirm that this manuscript has not been published elsewhere and is not
+  under consideration by any other journal. All authors have approved the
+  manuscript and agree with its submission to JSS.
+
+  Thank you for considering our manuscript. We look forward to your feedback.
+
+  \closing{Yours sincerely,\\[1ex]
+    Johan Larsson, Ma\l{}gorzata Bogdan, Krystyna Grzesiak, Mathurin Massias, and Jonas Wallin
+  }
+
+  \encl{manuscript, software, replication materials}
+\end{letter}
+
+\end{document}
+
+\usepackage{libertine}
+
+\title{Cover Letter for Submission to JSS}
+
+\begin{document}
+
+Blabla
+
+\end{document}
