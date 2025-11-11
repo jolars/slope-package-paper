@@ -59,6 +59,7 @@ tasks:
           _build/packages/ \
           _build/jss/
       - cd _build/jss/paper && tar -czf ../replication-material.tar.gz .
+      - rm -rf _build/jss/paper
       - cd _build/jss && tar -czf ../jss-{{.DATE}}.tar.gz .
     vars:
       DATE:
