@@ -22,3 +22,47 @@ tasks:
     vars:
       DATE:
         sh: date +%Y%m%d
+
+  get-packages:
+    desc: "Download required external packages"
+    vars:
+      CPP_VER: 6.1.1
+      PYTHON_VER: 1.7.0
+      R_VER: 1.2.0
+      JULIA_VER: 1.1.0
+    cmds:
+      - rm -rf _build/packages
+      - mkdir -p _build/packages/
+      - curl -L -o _build/packages/libslope-{{.CPP_VER}}.tar.gz
+        "https://github.com/jolars/libslope/archive/refs/tags/{{.CPP_VER}}.tar.gz"
+      - curl -L -o _build/packages/sortedl1-{{.PYTHON_VER}}.tar.gz
+        "https://github.com/jolars/sortedl1/archive/refs/tags/{{.PYTHON_VER}}.tar.gz"
+      - curl -L -o _build/packages/SLOPE-{{.R_VER}}.tar.gz
+        "https://github.com/jolars/SLOPE/archive/refs/tags/{{.R_VER}}.tar.gz"
+      - curl -L -o _build/packages/SLOPE-jl-{{.JULIA_VER}}.tar.gz
+        "https://github.com/jolars/SLOPE/archive/refs/tags/{{.JULIA_VER}}.tar.gz"
+
+  jss-submission:
+    desc: "Prepare JSS submission bundle"
+    deps:
+      - get-packages
+    cmds:
+      - rm -rf _build/jss
+      - mkdir -p _build/jss/paper
+      - latexmk -pdf -interaction=nonstopmode
+      - git archive --format=tar HEAD | tar -x -C _build/jss/paper
+      - git submodule foreach --recursive 'git archive --format=tar HEAD | tar
+        -x -C $toplevel/_build/jss/paper/$sm_path'
+      - |
+        cp -r \
+          main.bbl \
+          main.pdf \
+          _build/jss/paper
+      - |
+        cp -r \
+          _build/packages/ \
+          _build/jss/
+      - cd _build/jss && tar -czf ../jss-{{.DATE}}.tar.gz .
+    vars:
+      DATE:
+        sh: date +%Y%m%d
