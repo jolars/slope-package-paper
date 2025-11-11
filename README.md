@@ -139,6 +139,12 @@ installed, then run:
 latexmk -interaction=nonstopmode main.tex
 ```
 
+## Code in Paper
+
+R and Python scripts for reproducing the figures and analyses in the paper are
+located in the `code/` directory. You can run these scripts after ensuring that
+the required dependencies are installed.
+
 ## Nix Environment
 
 A Nix flake is provided for setting up a reproducible development environment.
