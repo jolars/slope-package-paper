@@ -62,6 +62,7 @@ tasks:
         cp -r \
           _build/packages/ \
           _build/jss/
+      - cp jss-submission-README.md _build/jss/README.md
       - cd _build/jss && tar -czf ../jss-{{.DATE}}.tar.gz .
     vars:
       DATE:
