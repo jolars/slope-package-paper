@@ -1,4 +1,4 @@
-# The SLOPE Package Suite
+# Efficient Solvers for SLOPE in R, Python, Julia, and C++
 
 [![arXiv](https://img.shields.io/badge/arXiv-2511.02430-b31b1b.svg)](https://arxiv.org/abs/2511.02430)
 
@@ -13,6 +13,14 @@ Python, Julia, and C++) for efficiently solving the Sorted L-One Penalized
 Estimation (SLOPE) problem. SLOPE is a type of regularized regression that uses
 a sorted ℓ₁ norm penalty, which allows it to perform variable selection and
 coefficient clustering simultaneously.
+
+### Authors
+
+- Johan Larsson (University of Copenhagen)
+- Małgorzata Bogdan (University of Wrocław)
+- Krystyna Grzesiak (University of Wrocław)
+- Mathurin Massias (Inria, ENS de Lyon, CNRS)
+- Jonas Wallin (Lund University)
 
 ### What is SLOPE?
 
@@ -117,7 +125,7 @@ cd benchmark_slope_path
 
 ### Using Containers
 
-For reproducible results, use the provided Apptainer containers:
+For reproducible results, you can
 
 ```bash
 apptainer run container_single.sif
@@ -134,13 +142,17 @@ installed, then run:
 latexmk -interaction=nonstopmode main.tex
 ```
 
-## Authors
+## Nix Environment
 
-- Johan Larsson (University of Copenhagen)
-- Małgorzata Bogdan (University of Wrocław)
-- Krystyna Grzesiak (University of Wrocław)
-- Mathurin Massias (Inria, ENS de Lyon, CNRS)
-- Jonas Wallin (Lund University)
+A Nix flake is provided for setting up a reproducible development environment.
+To enter the Nix shell, run:
+
+```bash
+nix develop
+```
+
+If you have direnv installed, we provide a `.envrc` file for automatic
+environment loading, and you only have to cd to the repository.
 
 ## Citation
 
