@@ -109,8 +109,12 @@ README with specific instructions.
 
 See [benchmark_slope/README.rst](benchmark_slope/README.rst) and
 [bench_config_single.yml](bench_config_single.yml) for details on how to setup
-and run the benchmark. If all of the dependencies are installed, you can run the
-benchmark with:
+and run the benchmark. In particular, you might need to install the required
+dependencies of each solver, which can be automatically handled via
+`benchopt install .` after creating and activating a conda environment with
+benchopt installed in it.
+
+If all of the dependencies are installed, you can run the benchmark with:
 
 ```bash
 cd benchmark_slope
@@ -121,17 +125,7 @@ benchopt run . --config ../bench_config_single.yml
 
 ```bash
 cd benchmark_slope_path
-# Follow instructions in benchmark_slope_path/README.md
-```
-
-### Using Containers
-
-For reproducible results, you can
-
-```bash
-apptainer run container_single.sif
-# or
-apptainer run container_path.sif
+benchopt run . --config ../bench_config_path.yml
 ```
 
 ## Compiling the Paper
@@ -152,8 +146,12 @@ To enter the Nix shell, run:
 nix develop
 ```
 
-If you have direnv installed, we provide a `.envrc` file for automatic
-environment loading, and you only have to cd to the repository.
+Each of the benchmark directories also contains `flake.nix` files that
+correspond to the exact dependencies used when running the benchmarks.
+
+If you have direnv installed, we provide `.envrc` files for automatic
+environment loading, and you only have to enter the directories to activate the
+corresponding Nix shell.
 
 ## Citation
 
