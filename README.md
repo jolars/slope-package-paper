@@ -105,14 +105,14 @@ The benchmarks use [Benchopt](https://benchopt.github.io/), a benchmarking
 framework for optimization algorithms. Each benchmark directory contains its own
 README with specific instructions.
 
-### Single-Penalty Benchmark
-
 See [benchmark_slope/README.rst](benchmark_slope/README.rst) and
 [bench_config_single.yml](bench_config_single.yml) for details on how to setup
 and run the benchmark. In particular, you might need to install the required
 dependencies of each solver, which can be automatically handled via
 `benchopt install .` after creating and activating a conda environment with
 benchopt installed in it.
+
+### Single-Penalty Benchmark
 
 If all of the dependencies are installed, you can run the benchmark with:
 
@@ -122,6 +122,8 @@ benchopt run . --config ../bench_config_single.yml
 ```
 
 ### Path-Fitting Benchmark
+
+If all of the dependencies are installed, you can run the benchmark with:
 
 ```bash
 cd benchmark_slope_path
