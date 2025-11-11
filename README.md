@@ -54,8 +54,6 @@ This repository is organized into several key components:
   reproducing figures and analyses from the paper
 - **Manuscript** (`main.tex`, `main.pdf`, `tex/`): LaTeX source and compiled
   paper
-- **Reproducibility Infrastructure**: Apptainer container definitions, PBS
-  cluster scripts, and Nix flake for reproducible environments
 
 <details>
 <summary>📁 <b>Full directory tree</b></summary>
@@ -83,17 +81,15 @@ This repository is organized into several key components:
 │   ├── benchmark_single_simulated.pdf
 │   └── ...
 ├── results/                    # Benchmark results
-│   ├── path_0613/
-│   └── single_0612/
+│   ├── path_0623/              # Path-fitting benchmark results
+│   └── single_0612/            # Single-penalty benchmark results
 ├── slopeutils/                 # Utility functions
 │   ├── merge_parquet.py
 │   └── plot_utils.py
-├── tex/                        # LaTeX macros and sections
+├── tex/                        # LaTeX macros
 │   └── macros.tex
-├── apptainer_single.def        # Container for single-penalty benchmark
-├── apptainer_path.def          # Container for path-fitting benchmark
-├── container_single.sif        # Built container image
-├── container_path.sif          # Built container image
+├── bench_config_single.yml     # Benchopt configuration for single-penalty
+├── bench_config_path.yml       # Benchopt configuration for path-fitting
 ├── flake.nix                   # Nix flake for reproducible environment
 ├── Taskfile.yml                # Task automation
 ├── main.tex                    # Paper LaTeX source
@@ -111,9 +107,14 @@ README with specific instructions.
 
 ### Single-Penalty Benchmark
 
+See [benchmark_slope/README.rst](benchmark_slope/README.rst) and
+[bench_config_single.yml](bench_config_single.yml) for details on how to setup
+and run the benchmark. If all of the dependencies are installed, you can run the
+benchmark with:
+
 ```bash
 cd benchmark_slope
-# Follow instructions in benchmark_slope/README.rst
+benchopt run . --config ../bench_config_single.yml
 ```
 
 ### Path-Fitting Benchmark
