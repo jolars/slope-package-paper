@@ -183,4 +183,10 @@ Here is a BibLaTeX entry for citing the paper:
 
 ## License
 
-See `LICENSE.md` for details.
+This repository is dual-licensed:
+
+- **Paper and Documentation** (LaTeX files, PDFs, markdown, images):
+  [CC-BY-3.0](LICENSE-PAPER)
+- **Software Code** (Python, R, benchmarks): [GPL-3.0](LICENSE-CODE)
+
+See [LICENSE](LICENSE) for the complete dual license notice.
