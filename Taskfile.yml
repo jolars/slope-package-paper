@@ -35,13 +35,13 @@ tasks:
       - rm -rf _build/packages
       - mkdir -p _build/packages/
       - curl -L -o _build/packages/libslope-{{.CPP_VER}}.tar.gz
-        "https://github.com/jolars/libslope/archive/refs/tags/{{.CPP_VER}}.tar.gz"
+        "https://github.com/jolars/libslope/archive/refs/tags/v{{.CPP_VER}}.tar.gz"
       - curl -L -o _build/packages/sortedl1-{{.PYTHON_VER}}.tar.gz
-        "https://github.com/jolars/sortedl1/archive/refs/tags/{{.PYTHON_VER}}.tar.gz"
+        "https://github.com/jolars/sortedl1/archive/refs/tags/v{{.PYTHON_VER}}.tar.gz"
       - curl -L -o _build/packages/SLOPE-{{.R_VER}}.tar.gz
-        "https://github.com/jolars/SLOPE/archive/refs/tags/{{.R_VER}}.tar.gz"
+        "https://github.com/jolars/SLOPE/archive/refs/tags/v{{.R_VER}}.tar.gz"
       - curl -L -o _build/packages/SLOPE-jl-{{.JULIA_VER}}.tar.gz
-        "https://github.com/jolars/SLOPE/archive/refs/tags/{{.JULIA_VER}}.tar.gz"
+        "https://github.com/jolars/SLOPE/archive/refs/tags/v{{.JULIA_VER}}.tar.gz"
 
   jss-submission:
     desc: "Prepare JSS submission bundle"
