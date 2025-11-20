@@ -1,0 +1,258 @@
+\PassOptionsToPackage{unicode,pdfusetitle}{hyperref}
+\PassOptionsToPackage{hyphens}{xurl}
+\PassOptionsToPackage{usenames,dvipsnames}{xcolor}
+
+\documentclass[english,a4paper,14pt]{letter}
+
+\usepackage{babel}
+
+% Font settings
+\usepackage[T1]{fontenc}
+\usepackage{libertine}
+\usepackage{inconsolata}
+
+\usepackage{textcomp}
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath}
+
+\usepackage{xcolor}
+
+% tables and lists
+\usepackage{enumitem}
+\usepackage{booktabs}
+
+\usepackage{graphicx}
+
+\usepackage{xurl}
+
+\usepackage{fancyhdr}
+\fancyhead{}
+\fancyhead[L]{Larsson, Bogdan, Grzesiak, Massias, Wallin}
+\fancyhead[R]{Cover Letter}
+
+\pagestyle{fancy}
+\thispagestyle{plain}
+
+\usepackage{hyperref}
+\hypersetup{
+  pdftitle   = {Cover Letter},
+  pdfauthor  = {Johan Larsson, Malgorzata Bogdan, Krystyna Grzesiak, Mathurin Massias, Jonas Wallin},
+  colorlinks = true,
+  linkcolor  = MidnightBlue,
+  citecolor  = MidnightBlue,
+  urlcolor   = MidnightBlue,
+  breaklinks = true
+}
+
+\begin{document}
+
+\begin{letter}{Journal of Statistical Software}
+  \opening{Dear Editor,}
+
+  We are thankful for the feedback on our previous submission and apologize for the
+  issues encountered in the submission. Below, we provide a point-by-point response to the
+  comments raised and outline the changes made to address them.
+
+  We would, however, like to take this opportunity to clear up what we think might
+  be a misunderstanding regarding the software and its scope. SLOPE solves
+  a type of regularized regression problem so it is not related to \emph{slopes}
+  in the geometric sense. Furthermore, SLOPE is distinct from standard \(\ell_1\)-penalized
+  regression (the lasso), so we do not see the relevance of a full background
+  on packages that implement the lasso. We do, however, realize that we
+  neglected to discuss existing SLOPE implementations, even if to explain
+  that there are in fact no other specific SLOPE software packages, and have
+  added such a discussion in the introduction.
+
+  We hope that you will find our revised submission suitable for publication in
+  the Journal of Statistical Software.
+
+  Here are the detailed comments and our answers:
+
+  \begin{quote}
+    Journal of Statistical Software requires that the software
+    usage is illustrated on simple problems run step-by-step in the
+    manuscript, showing command lines and their results. This is currently
+    done for the R package but we would find beneficial to have a similar
+    code for the other two packages.
+  \end{quote}
+
+  \begin{quote}
+    The introduction must include a discussion on related software
+    implementations available in all languages (e.g., software
+    implementations related to l1 penalized linear regression for instance,
+    or even slope problem estimation), highlighting the specific
+    contribution of slope.
+  \end{quote}
+
+  \begin{quote}
+    None of the [package files] can be uncompressed (or used) using gunzip.
+  \end{quote}
+
+  Thanks for pointing this out! We have packaged the package files
+  correctly now and verified that they can be decompressed without issues.
+
+  \begin{quote}
+    It means that, at least a summary method is missing.
+  \end{quote}
+
+  Thanks for the suggestion! We have added \verb|summary()| methods for
+  both \verb|SLOPE| and \verb|TrainedSLOPE| in the R package.
+
+  \begin{quote}
+    Other methods might
+    be missing that would avoid exposing the internal structure of objects
+    in the replication material [...]
+  \end{quote}
+
+  We are not sure we agree that the fields exposed in the objects should be
+  considered internal structure (private) nor that it's idiomatic in R
+  to hide them behind accessor methods, so we have respectfully chosen not to
+  implement such methods. In the case of the SLOPE patterns, this object is
+  computed as part of the fitting procedure and can therefore not be (easily)
+  externalized to a separate function.
+
+  \begin{quote}
+    Using \texttt{example("SLOPE");
+      plot(fit)}
+    results in an empty plot. It is probably not expected: Can the authors
+    look into this?
+  \end{quote}
+
+  Thanks! This was indeed a bug. In the new version of the package, we have
+  added an entirely different (Cleveland dot plot) visualization of the
+  solution for single fits, which should resolve this bug.
+
+  \begin{quote}
+    Replication material should be cleaned and simplified a bit, in
+    particular to remove hidden configuration files coming from github. Make
+    sure to upload only files required to reproduce results of the
+    manuscript and to adapt README files to avoid having to use the github
+    repository in the instructions (you can of course mention that these
+    files are duplicated in a github repository but explain how to run the
+    replication code from the local directory).
+  \end{quote}
+
+  \begin{quote}
+    Following the instructions to run the benchmark given in the README
+    file of \verb|benchmark_slope| (after activating a virtual environment for
+    Python), we obtained: [...]
+
+    % benchopt install ./benchmark\_slope Traceback (most recent call
+    % last): File "myvenv/bin/benchopt", line 8, in
+    % \textless module\textgreater sys.exit(benchopt()) \^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{} File
+    % "myvenv/lib/python3.12/site-packages/click/core.py", line 1485, in
+    % \_\_call\_\_ return self.main(*args,
+    % **kwargs) \^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{} File
+    % "myvenv/lib/python3.12/site-packages/click/core.py", line 1406, in
+    % main rv =
+    % self.invoke(ctx) \^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{} File
+    % "myvenv/lib/python3.12/site-packages/click/core.py", line 1873, in
+    % invoke return
+    % \_process\_result(sub\_ctx.command.invoke(sub\_ctx)) \^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{} File
+    % "myvenv/lib/python3.12/site-packages/click/core.py", line 1269, in
+    % invoke return ctx.invoke(self.callback,
+    % **ctx.params) \^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{} File
+    % "myvenv/lib/python3.12/site-packages/click/core.py", line 824, in
+    % invoke return callback(*args,
+    % **kwargs) \^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{} File
+    % "myvenv/lib/python3.12/site-packages/benchopt/cli/main.py", line 452, in
+    % install raise RuntimeError( RuntimeError: No conda environment is
+    % activated. You should be in a conda environment to use
+    % \textquotesingle benchopt install\textquotesingle.\\
+  \end{quote}
+
+  \begin{quote}
+    If conda has to be used, this should be mentioned in the installation
+    instructions. The README file of the replication material indicates that
+    this is the case: please make the two files consistent or remove the
+    README files of subdirectories.
+  \end{quote}
+
+  \begin{quote}
+    Also provide a more detailed information
+    about setting the conda environment for user not familiar with it.
+  \end{quote}
+
+  \begin{quote}
+    Running benchopt run in \verb|benchmark_slope| results in errors due to
+    missing dependencies (skglm for instance). It would be preferable to
+    provide a \verb|requirements.txt| file allowing users to install all required
+    dependencies without the need to search what they are.
+  \end{quote}
+
+  \begin{quote}
+    Trying to run the same benchmark, we also had: [...]
+    Can you instruct how this should be solved?
+  \end{quote}
+
+  % Traceback (most recent call last): File
+  % "replication-material/benchmark\_slope/solvers/slope\_path.py", line 5,
+  % in \textless module\textgreater from modules import
+  % path\_solver ImportError: cannot import name
+  % \textquotesingle path\_solver\textquotesingle{} from
+  % \textquotesingle modules\textquotesingle{}
+  % anaconda3/lib/python3.12/site-packages/modules.py) \textbar-\/-SlopePath:
+  % not installed \textbar-\/-Newt-ALM{[}inner\_solver=standard{]}:
+  % done Traceback (most recent call last): File
+  % "replication-material/benchmark\_slope/solvers/pgd\_safe\_screening.py",
+  % line 6, in \textless module\textgreater from
+  % slopescreening.solver.parameters import
+  % SlopeParameters ModuleNotFoundError: No module named
+  % \textquotesingle slopescreening\textquotesingle \textbar-\/-PGD\_safe\_screening:
+  % not installed\\
+  % Can you instruct how this should be solved?\\
+
+  \begin{quote}
+    Could you please also provide scripts with minimal command lines to
+    run the equivalent of \verb|example.R| and/or \verb|real-data.R| with Python and
+    Julia?
+  \end{quote}
+
+  \begin{quote}
+    \verb|help(package = "SLOPE")| shows that not man page titles are not in
+    title styles.
+  \end{quote}
+
+  We have converted all manual pages to use title case in their titles.
+
+  \begin{quote}
+    Probably, \verb|plot.TrainedSLOPE()| should be removed from "Other
+    model-tuning".
+  \end{quote}
+
+  Thanks! We have removed the duplicate reference.
+
+  \begin{quote}
+    It seems that the output of \verb|cvSLOPE| only gives a way to obtain the
+    optimal hyperparameters. In R programming, it is standard to also return
+    the best model fit with these parameters (see e.g., \verb|?e1071::tune|). Can
+    the authors think of an handy way for the user to either obtain this
+    trained model from \verb|cvSLOPE| or use the output of \verb|cvSLOPE| in a method that
+    would directly train the optimal model?
+  \end{quote}
+
+  Thanks for the suggestion! You're right that this was an omission. We have now updated
+  \verb|cvSLOPE()| to (optionally and by default), return the fitted model on the full
+  data set. We've also introduced a new function (and generic) \verb|refit()| that
+  can be used to fit SLOPE onto new data using the parameters selected by
+  \verb|cvSLOPE()|.
+
+  \closing{Yours sincerely,\\[1ex]
+    Johan Larsson, Ma\l{}gorzata Bogdan, Krystyna Grzesiak, Mathurin Massias, and Jonas Wallin
+  }
+
+  \encl{manuscript, software, replication materials, original cover letter}
+\end{letter}
+
+\end{document}
+
+\usepackage{libertine}
+
+\title{Cover Letter for Submission to JSS}
+
+\begin{document}
+
+Blabla
+
+\end{document}
+
