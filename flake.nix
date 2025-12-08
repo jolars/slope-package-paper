@@ -118,6 +118,8 @@
               "ProjectRoot"
               "SparseArrays"
               "Runic"
+              "CSV"
+              "DataFrames"
             ])
           ];
         };
