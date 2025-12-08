@@ -106,8 +106,18 @@
               ps.scipy
               ps.scipy-stubs
               ps.fastparquet
+              ps.ipython
               sortedl1
             ]))
+            (pkgs.julia-bin.withPackages [
+              "SLOPE"
+              "Plots"
+              "LaTeXStrings"
+              "LanguageServer"
+              "LinearAlgebra"
+              "ProjectRoot"
+              "SparseArrays"
+            ])
           ];
         };
       }
