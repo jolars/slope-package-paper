@@ -100,8 +100,8 @@
     None of the [package files] can be uncompressed (or used) using gunzip.
   \end{quote}
 
-  Thanks for pointing this out! We have packaged the package files
-  correctly now and verified that they can be decompressed without issues.
+  Thanks for pointing this out! We have now packaged the package files
+  correctly and verified that they can be decompressed without issues.
 
   \begin{quote}
     It means that, at least a summary method is missing.
@@ -117,11 +117,11 @@
   \end{quote}
 
   We are not sure we agree that the fields exposed in the objects should be
-  considered internal structure (private) nor that it's idiomatic in R
-  to hide them behind accessor methods, so we have respectfully chosen not to
-  implement such methods. In the case of the SLOPE patterns, this object is
-  computed as part of the fitting procedure and can therefore not be (easily)
-  externalized to a separate function.
+  considered internal structure (private) nor that it is idiomatic in R to hide
+  them behind accessor methods, so we have, respectfully, not made any changes
+  in this regard. In the case of the SLOPE patterns, this object is computed as
+  part of the fitting procedure and can therefore not be (easily) externalized
+  to a separate function.
 
   \begin{quote}
     Using \texttt{example("SLOPE");
@@ -130,7 +130,7 @@
     look into this?
   \end{quote}
 
-  Thanks! This was indeed a bug. In the new version of the package, we have
+  Thank you! This was indeed a bug. In the new version of the package, we have
   added an entirely different (Cleveland dot plot) visualization of the
   solution for single fits, which should resolve this bug.
 

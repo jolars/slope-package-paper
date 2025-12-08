@@ -6,9 +6,16 @@
     url = "github:numtide/flake-utils";
     inputs.systems.follows = "systems";
   };
+  inputs.libslope.url = "github:jolars/libslope";
+  inputs.libslope.inputs.nixpkgs.follows = "nixpkgs";
 
   outputs =
-    { nixpkgs, flake-utils, ... }:
+    {
+      nixpkgs,
+      libslope,
+      flake-utils,
+      ...
+    }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
@@ -74,10 +81,26 @@
             ];
           }
         );
+
+        buildEnv = pkgs.buildFHSEnv {
+          name = "build-env";
+          targetPkgs = pkgs: [
+            pkgs.bashInteractive
+            pkgs.gcc-unwrapped
+            pkgs.binutils-unwrapped
+            pkgs.glibc
+            pkgs.cmake
+            pkgs.pkg-config
+            pkgs.nodejs
+            pkgs.julia-bin
+          ];
+          runScript = "bash";
+        };
       in
       {
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
+            libslope.packages.${system}.default
             bashInteractive
             apptainer
             go-task
@@ -123,6 +146,8 @@
             ])
           ];
         };
+
+        devShells.fhs = buildEnv;
       }
     );
 }

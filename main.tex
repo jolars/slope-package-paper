@@ -636,10 +636,11 @@ auto path_result = model.path(x, y);
 \end{Code}
 
 In the sequel, we will focus our examples on the \proglang{R} package, but
-note that all of the functionality we cover is available throughout
-the suite of packages and feature similar APIs.
+please see \autoref{sec:examples-julia-python} for equivalent examples in
+\proglang{Python}, \proglang{Julia}, and \proglang{C++}.
 
 \subsection{First steps}
+\label{sec:first-steps}
 
 We start with a simple example of fitting a full SLOPE path to the diabetes
 data set~\citep{efron2004}, including plotting it.\footnote{Note that the
@@ -1113,6 +1114,258 @@ Agency~(ANR) through the BenchArk project~(ANR-24-IAS2-0003).
 \newpage
 
 \begin{appendix}
+
+  \section{Examples in Julia, Python, and C++}%
+  \label{sec:examples-julia-python}
+
+  In this section, we provide \proglang{Python}, \proglang{Julia}, and
+  \proglang{C++} equivalents of the \proglang{R} examples from
+  \autoref{sec:first-steps}. As in the \proglang{R} case, some of the plotting
+  code has been simplified for clarity. Please refer to the code repository for
+  the full code.
+
+  \subsection{Julia}
+
+  We begin by loading the necessary packages.
+
+  \begin{Code}
+julia> using SLOPE
+julia> using CSV
+julia> using ProjectRoot
+julia> using DataFrames
+julia> using Statistics
+julia> using Plots
+  \end{Code}
+
+  Next, we load the diabetes data set, which we have
+  made available as a CSV file in the \texttt{data} directory of the
+  repository. As before, we standardize the features to have mean zero and unit variance.
+
+  \begin{Code}
+julia> df = CSV.read(file, DataFrame)
+julia> x = Matrix(df[:, 2:end])
+julia> y = df[:, 1]
+
+julia> x_means = mean(x, dims = 1)
+julia> x_std = std(x, dims = 1)
+julia> x = (x .- x_means) ./ x_std
+\end{Code}
+
+  We then fit SLOPE and lasso models to the data. Note theat the \code{lambda}
+  argument is actually the symbol $\lambda$ in the \proglang{Julia} package,
+  so this code will not work if you write \code{lambda = "lasso"}.
+
+  \begin{Code}
+julia> fit_lasso = slope(x, y, lambda = :lasso)
+julia> fit_slope = slope(x, y, lambda = :bh)
+  \end{Code}
+
+  Just like the \proglang{R} package, the \proglang{Julia} package
+  supports plotting the solution paths directly. Here, we create a combined plot
+  showing both the lasso and SLOPE paths side by side~(\autoref{fig:diabetes-julia}).
+
+  \begin{Code}
+julia> plot(
+julia>     plot(fit_lasso)
+julia>     plot(fit_slope)
+julia>     layout = (1, 2),
+julia>     size = (800, 400),
+julia>     title = ["Lasso" "SLOPE"],
+julia> )
+  \end{Code}
+
+  \begin{figure}[htpb]
+    \centering
+    \includegraphics[width=\natwidth]{images/diabetes-slope-lasso-julia.pdf}
+    \caption{%
+      SLOPE and lasso paths on the diabetes
+      data set. Note that the \(x\) axis is reversed.
+    }
+    \label{fig:diabetes-julia}
+  \end{figure}
+
+  To perform cross-validation, we use the \code{slopecv} function,
+  which also features a dedicated \code{plot} method\footnote{Note that our
+    package only provides a recipe for the \pkg{Plots.jl} package, and
+    does not depend on it directly. Users need to load the \pkg{Plots.jl} package (as
+    we do here) to have access to these plotting methods.}.
+
+  \begin{Code}
+julia> fit_cv = slopecv(x, y)
+julia> pcv = plot(fit_cv)
+  \end{Code}
+
+  The result is shown in \autoref{fig:cv-julia}.
+
+  \begin{figure}[htpb]
+    \centering
+    \includegraphics[width=\natwidth]{images/slope-cv-julia.pdf}
+    \caption{%
+      Mean-squared error (MSE) from cross-validation of
+      \(q\) and \(\alpha\) for SLOPE fit to the diabetes data set.
+      The ribbons represent 95\% confidence intervals.
+    }
+    \label{fig:cv-julia}
+  \end{figure}
+
+  \subsection{Python}
+
+  We begin by loading the necessary packages.
+
+  \begin{Code}
+>>> from matplotlib import pyplot as plt
+>>> from sklearn.datasets import load_diabetes
+>>> from sklearn.preprocessing import StandardScaler
+>>> from sortedl1 import Slope
+  \end{Code}
+
+  Next, we load the diabetes data set from \pkg{scikit-learn} and
+  standardize the features to have mean zero and unit variance.
+
+  \begin{Code}
+>>> x, y = load_diabetes(return_X_y=True)
+>>> scaler = StandardScaler()
+>>> x = scaler.fit_transform(x)
+  \end{Code}
+
+  We then create SLOPE models with lasso and BH penalty sequences.
+
+  \begin{Code}
+>>> model_lasso = Slope(lambda_type="lasso")
+>>> model_slope = Slope(lambda_type="bh", q=0.4)
+  \end{Code}
+
+  We fit the models to the data using the \code{path} method.
+
+  \begin{Code}
+>>> fit_lasso = model_lasso.path(x, y)
+>>> fit_slope = model_slope.path(x, y)
+  \end{Code}
+
+  Just like the \proglang{R} and \proglang{Julia} packages, the \proglang{Python}
+  package supports plotting the solution paths. The result is shown in
+  \autoref{fig:diabetes-python}.
+
+  \begin{Code}
+>>> fit_lasso.plot()
+>>> plt.title("Lasso")
+>>> plt.show()
+>>>
+>>> fit_slope.plot()
+>>> plt.title("SLOPE")
+>>> plt.show()
+  \end{Code}
+
+  \begin{figure}[htpb]
+    \centering
+    \includegraphics[width=\natwidth]{images/diabetes-slope-python.pdf}%
+    \includegraphics[width=\natwidth]{images/diabetes-lasso-python.pdf}%
+    \caption{%
+      SLOPE and lasso paths on the diabetes
+      data set. Note that the \(x\) axis is reversed.
+    }
+    \label{fig:diabetes-python}
+  \end{figure}
+
+  To perform cross-validation, we use the \code{cv} method.
+
+  \begin{Code}
+>>> fit_cv = model_slope.cv(x, y, q=[0.1, 0.2])
+>>> Fit_cv.plot()
+  \end{Code}
+
+  \subsection{C++}
+
+  Finally, we provide an example in \proglang{C++} with similar functionality.
+  Since our \proglang{C++} library does not have built-in plotting capabilities, nor
+  serialization functionality, we focus here on fitting the models and printing
+  the coefficients to the console.
+
+  \begin{Code}
+#include <eigen3/Eigen/Dense>
+#include <iostream>
+#include <slope.h>
+
+int main() {
+  // Sample data
+  Eigen::MatrixXd x(10, 3);
+  Eigen::VectorXd y(10);
+
+  x << 1, 2, 3,
+       4, 5, 6,
+       7, 8, 9,
+       1, 0, 1,
+       0, 1, 0,
+       2, 1, 3,
+       3, 2, 1,
+       4, 0, 2,
+       0, 3, 1,
+       1, 1, 1;
+
+  y << 1, 2, 3, 1, 0, 2, 1, 3, 0, 1;
+
+  // Instantiate the SLOPE model
+  slope::Slope model;
+
+  // Lasso
+  model.setLambdaType("lasso");
+  auto fit_lasso = model.path(x, y);
+
+  // SLOPE
+  model.setLambdaType("bh");
+  model.setQ(0.2);
+  auto fit_slope = model.path(x, y);
+
+  // Get the last coefficients on the path
+  Eigen::VectorXd coef_lasso = fit_lasso.getCoefs().back();
+  Eigen::VectorXd coef_slope = fit_slope.getCoefs().back();
+
+  std::cout << "Lasso Coefficients:" << std::endl << coef_lasso << std::endl;
+  std::cout << "SLOPE Coefficients:" << std::endl << coef_slope << std::endl;
+
+  // Cross-validation
+  auto cv_res = slope::crossValidate(model, x, y);
+  auto best_params = cv_res.best_params;
+
+  std::cout << "\nBest parameters from Cross-validation:" << std::endl;
+  for (const auto &param : best_params) {
+    printf("%-6s: %g\n", param.first.c_str(), param.second);
+  }
+
+  return 0;
+}
+  \end{Code}
+
+  If the code above is saved in a file named
+  \texttt{code/example.cpp}\footnote{This is included in the supplementary
+    material as well.}, it can be compiled with the following command, provided
+  that GCC is installed along with the \pkg{slope} and \pkg{Eigen3} libraries.
+  \begin{Code}
+g++ -std=c++17 code/example.cpp -lslope -o example 
+  \end{Code}
+
+  If the resulting executable is run, it produces the following output:
+
+  \begin{CodeChunk}
+    \begin{CodeInput}
+./example
+  \end{CodeInput}
+    \begin{CodeOutput}
+Lasso Coefficients:
+ 0.385777
+-0.397482
+ 0.326973
+SLOPE Coefficients:
+ 0.385853
+-0.397463
+ 0.326919
+
+Best parameters from Cross-validation:
+alpha : 0.000154744
+gamma : 0
+q     : 0.1
+    \end{CodeOutput}
+  \end{CodeChunk}
 
   \section{Duality gap and convergence criteria}
   \label{sec:convergence-criteria-details}
