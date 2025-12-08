@@ -117,6 +117,7 @@
               "LinearAlgebra"
               "ProjectRoot"
               "SparseArrays"
+              "Runic"
             ])
           ];
         };
