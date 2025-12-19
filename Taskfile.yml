@@ -54,11 +54,24 @@ tasks:
       - git archive --format=tar HEAD | tar -x -C _build/jss/paper
       - git submodule foreach --recursive 'git archive --format=tar HEAD | tar
         -x -C $toplevel/_build/jss/paper/$sm_path'
-      - cp -r main.pdf cover-letter.pdf _build/jss/
+      - cp -r main.pdf cover-letter.pdf cover-letter-resubmission.pdf
+        _build/jss/
       - |
         cp -r \
           _build/packages/ \
           _build/jss/
+      - |
+        cd _build/jss/paper/benchmark_slope && rm -rf \
+          README.rst \
+          .github \
+          example_config.py \
+          test_config.py
+      - |
+        cd _build/jss/paper/benchmark_slope_path && rm -rf \
+          README.md \
+          .github \
+          example_config.py \
+          test_config.py
       - |
         cd _build/jss/paper && \
         find . -name ".*" -type f -delete && \
