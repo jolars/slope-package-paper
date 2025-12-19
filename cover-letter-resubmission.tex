@@ -76,6 +76,10 @@
     code for the other two packages.
   \end{quote}
 
+  Thanks for the suggestion! We have added simple step-by-step examples
+  for both the Python and Julia packages in the appendix of the manuscript and
+  in the replication materials.
+
   \begin{quote}
     The introduction must include a discussion on related software
     implementations available in all languages (e.g., software
@@ -83,6 +87,14 @@
     or even slope problem estimation), highlighting the specific
     contribution of slope.
   \end{quote}
+
+  We think there might be a misunderstanding here, as SLOPE is not related to
+  slopes in the geometric sense, but rather a type of regularized regression
+  problem. It is also distinct from standard \(\ell_1\)-penalized regression
+  (the lasso), which means that it would not be meaningful to include a full
+  background on packages that implement the lasso. We have, however, added a
+  discussion of existing SLOPE implementations in the introduction to clarify
+  this point.
 
   \begin{quote}
     None of the [package files] can be uncompressed (or used) using gunzip.
@@ -132,34 +144,18 @@
     replication code from the local directory).
   \end{quote}
 
+  Thanks, we have cleaned up the replication material and removed unnecessary
+  files. The README file has also been updated to ensure that it describes
+  both how to run the code from the local directory.
+
   \begin{quote}
     Following the instructions to run the benchmark given in the README
     file of \verb|benchmark_slope| (after activating a virtual environment for
     Python), we obtained: [...]
-
-    % benchopt install ./benchmark\_slope Traceback (most recent call
-    % last): File "myvenv/bin/benchopt", line 8, in
-    % \textless module\textgreater sys.exit(benchopt()) \^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{} File
-    % "myvenv/lib/python3.12/site-packages/click/core.py", line 1485, in
-    % \_\_call\_\_ return self.main(*args,
-    % **kwargs) \^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{} File
-    % "myvenv/lib/python3.12/site-packages/click/core.py", line 1406, in
-    % main rv =
-    % self.invoke(ctx) \^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{} File
-    % "myvenv/lib/python3.12/site-packages/click/core.py", line 1873, in
-    % invoke return
-    % \_process\_result(sub\_ctx.command.invoke(sub\_ctx)) \^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{} File
-    % "myvenv/lib/python3.12/site-packages/click/core.py", line 1269, in
-    % invoke return ctx.invoke(self.callback,
-    % **ctx.params) \^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{} File
-    % "myvenv/lib/python3.12/site-packages/click/core.py", line 824, in
-    % invoke return callback(*args,
-    % **kwargs) \^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{}\^{} File
-    % "myvenv/lib/python3.12/site-packages/benchopt/cli/main.py", line 452, in
-    % install raise RuntimeError( RuntimeError: No conda environment is
-    % activated. You should be in a conda environment to use
-    % \textquotesingle benchopt install\textquotesingle.\\
   \end{quote}
+
+  This is related to not having the conda environment activated. We have
+  updated the README file to clarify this.
 
   \begin{quote}
     If conda has to be used, this should be mentioned in the installation
@@ -168,10 +164,17 @@
     README files of subdirectories.
   \end{quote}
 
+  As in the previous answer, we have updated the README file to clarify
+  the use of conda environments. We have also removed redundant README files
+  from the subdirectories.
+
   \begin{quote}
     Also provide a more detailed information
     about setting the conda environment for user not familiar with it.
   \end{quote}
+
+  We have added more detailed instructions on setting up the conda
+  environment in the README file.
 
   \begin{quote}
     Running benchopt run in \verb|benchmark_slope| results in errors due to
@@ -180,33 +183,27 @@
     dependencies without the need to search what they are.
   \end{quote}
 
+  benchopt has built-in support for managing dependencies via
+  the benchmark definition files, through which the required dependencies
+  are declared and then automatically installed when \verb|benchopt install|
+  is run. We have updated the README file to clarify this.
+
   \begin{quote}
     Trying to run the same benchmark, we also had: [...]
     Can you instruct how this should be solved?
   \end{quote}
 
-  % Traceback (most recent call last): File
-  % "replication-material/benchmark\_slope/solvers/slope\_path.py", line 5,
-  % in \textless module\textgreater from modules import
-  % path\_solver ImportError: cannot import name
-  % \textquotesingle path\_solver\textquotesingle{} from
-  % \textquotesingle modules\textquotesingle{}
-  % anaconda3/lib/python3.12/site-packages/modules.py) \textbar-\/-SlopePath:
-  % not installed \textbar-\/-Newt-ALM{[}inner\_solver=standard{]}:
-  % done Traceback (most recent call last): File
-  % "replication-material/benchmark\_slope/solvers/pgd\_safe\_screening.py",
-  % line 6, in \textless module\textgreater from
-  % slopescreening.solver.parameters import
-  % SlopeParameters ModuleNotFoundError: No module named
-  % \textquotesingle slopescreening\textquotesingle \textbar-\/-PGD\_safe\_screening:
-  % not installed\\
-  % Can you instruct how this should be solved?\\
+  This too is related to not having the proper dependencies installed. The
+  new instructions in the README file should help avoid this issue.
 
   \begin{quote}
     Could you please also provide scripts with minimal command lines to
     run the equivalent of \verb|example.R| and/or \verb|real-data.R| with Python and
     Julia?
   \end{quote}
+
+  We have supplied \verb|example.py|, \verb|example.cpp|, and \verb|example.jl| scripts that
+  replicate the functionality of \verb|example.R| in Python, C++, and Julia, respectively.
 
   \begin{quote}
     \verb|help(package = "SLOPE")| shows that not man page titles are not in
