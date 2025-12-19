@@ -59,6 +59,11 @@ tasks:
         cp -r \
           _build/packages/ \
           _build/jss/
+      - |
+        cd _build/jss/paper && \
+        find . -name ".*" -type f -delete && \
+        rm -rf .git .github Taskfile.yml && \
+        rm -f cover-letter*.tex cover-letter*.pdf jss-example.* comments.md
       - cd _build/jss/paper && tar -czf ../replication-material.tar.gz .
       - rm -rf _build/jss/paper
       - cd _build/jss && tar -czf ../jss-{{.DATE}}.tar.gz .
