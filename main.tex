@@ -159,10 +159,18 @@ descent steps on the full problem and coordinate descent on a collapsed
 problem corresponding to the current cluster structure, to achieve
 robust and fast convergence.
 
-In this paper we make this algorithm available to a wide audience by
-presenting a collection of packages in \proglang{R}~\citep{rcoreteam2025},
+In this paper we make this algorithm available to a wide audience by presenting
+a collection of packages in \proglang{R}~\citep{rcoreteam2025},
 \proglang{Python}~\citep{pythonsoftwarefoundation2025},
-\proglang{Julia}~\citep{bezanson2017}, and \proglang{C++}.
+\proglang{Julia}~\citep{bezanson2017}, and \proglang{C++}. For \proglang{Julia}
+and \proglang{Python}, these are, to the best of our knowledge, the first and
+only available implementations of SLOPE. For \proglang{R}, our package
+was the first implementation of SLOPE, although there is now also support
+for SLOPE through the \pkg{sgs}~\citep{feser2023} and
+\pkg{grpSLOPE}~\citep{brzyski2018} packages.
+Additionally, an implementation for \proglang{MATLAB} is
+also available from \citet{candes2013} and is also included in
+TFOCS~\citep{becker2011}.
 
 \subsection{Outline of the paper}
 
@@ -1282,7 +1290,7 @@ julia> pcv = plot(fit_cv)
   the coefficients to the console.
 
   \begin{Code}
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 #include <iostream>
 #include <slope.h>
 
