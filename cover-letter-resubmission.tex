@@ -52,7 +52,6 @@
   We are thankful for the feedback on our previous submission and apologize for the
   issues encountered in the submission. Below, we provide a point-by-point response to the
   comments raised and outline the changes made to address them.
-
   We hope that you will find our revised submission suitable for publication in
   the Journal of Statistical Software.
 
@@ -108,9 +107,9 @@
 
   We are not sure we agree that the fields exposed in the objects should be
   considered internal structure (private) nor that it is idiomatic in R to hide
-  them behind accessor methods, so we have, respectfully, not made any changes
+  them behind accessor methods, so we have not made any changes
   in this regard. In the case of the SLOPE patterns, this object is computed as
-  part of the fitting procedure and can therefore not be (easily) externalized
+  part of the fitting procedure and can therefore not easily be externalized
   to a separate function.
 
   \begin{quote}
@@ -122,7 +121,7 @@
 
   Thank you! This was indeed a bug. In the new version of the package, we have
   added an entirely different (Cleveland dot plot) visualization of the
-  solution for single fits, which should resolve this bug.
+  solution for single fits.
 
   \begin{quote}
     Replication material should be cleaned and simplified a bit, in
@@ -134,7 +133,7 @@
     replication code from the local directory).
   \end{quote}
 
-  Thanks, we have cleaned up the replication material and removed unnecessary
+  We have cleaned up the replication material and removed unnecessary
   files. The README file has also been updated to ensure that it describes
   both how to run the code from the local directory.
 
