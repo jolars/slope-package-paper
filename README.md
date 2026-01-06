@@ -101,34 +101,47 @@ This repository is organized into several key components:
 
 ## Running Benchmarks
 
-The benchmarks use [Benchopt](https://benchopt.github.io/), a benchmarking
-framework for optimization algorithms. Each benchmark directory contains its own
-README with specific instructions.
+We provide two separate benchmarks for comparing SLOPE solvers, one for
+single-penalty problems and one for fitting the full SLOPE path. The benchmarks
+use [Benchopt](https://benchopt.github.io/), a benchmarking framework for
+optimization algorithms.
 
-See [benchmark_slope/README.rst](benchmark_slope/README.rst) and
-[bench_config_single.yml](bench_config_single.yml) for details on how to setup
-and run the benchmark. In particular, you might need to install the required
-dependencies of each solver, which can be automatically handled via
-`benchopt install .` after creating and activating a conda environment with
-benchopt installed in it.
+### Installing Benchopt
 
-### Single-Penalty Benchmark
-
-If all of the dependencies are installed, you can run the benchmark with:
+The recommended way to use benchopt is within a
+[conda](https://anaconda.org/anaconda/conda) environment. Make sure you first
+have a functioning version of conda. Then, create and activate a new conda
+environment and install benchopt in it:
 
 ```bash
-cd benchmark_slope
-benchopt run . --config ../bench_config_single.yml
+conda create -n benchopt python
+conda activate benchopt
+pip install -U benchopt
 ```
 
-### Path-Fitting Benchmark
+### Installing the Benchmarks
 
-If all of the dependencies are installed, you can run the benchmark with:
+After having installed benchopt, you can install all the required dependencies
+of the benchmarks with:
 
 ```bash
-cd benchmark_slope_path
-benchopt run . --config ../bench_config_path.yml
+benchopt install ./benchmark_slope
+benchopt install ./benchmark_slope_path
 ```
+
+### Running the Benchmarks
+
+To actually run the benchmarks, you can use the following commands:
+
+```bash
+benchopt run ./benchmark_slope  --config bench_config_single.yml
+benchopt run ./benchmark_slope_path  --config bench_config_path.yml
+```
+
+These commands use the configuration files used in the paper, but you can
+alternatively configure solvers and data sets either interactively on the
+command line or by writing and referencing your own YAML configuration files.
+See the [Benchopt documentation](https://benchopt.github.io/) for more details.
 
 ## Compiling the Paper
 
@@ -154,12 +167,12 @@ To enter the Nix shell, run:
 nix develop
 ```
 
-Each of the benchmark directories also contains `flake.nix` files that
-correspond to the exact dependencies used when running the benchmarks.
+Each of the benchmark directories also contain `flake.nix` files that correspond
+to the exact dependencies used when running the benchmarks.
 
-If you have direnv installed, we provide `.envrc` files for automatic
-environment loading, and you only have to enter the directories to activate the
-corresponding Nix shell.
+If you have [direnv](https://direnv.net/) installed, we provide `.envrc` files
+for automatic environment loading, and you only have to enter the directories to
+activate the corresponding Nix shell.
 
 ## Citation
 
