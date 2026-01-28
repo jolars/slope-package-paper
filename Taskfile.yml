@@ -27,10 +27,10 @@ tasks:
   get-packages:
     desc: "Download required external packages"
     vars:
-      CPP_VER: 6.1.1
-      PYTHON_VER: 1.7.0
-      R_VER: 1.2.0
-      JULIA_VER: 1.1.0
+      CPP_VER: 6.3.0
+      PYTHON_VER: 1.8.0
+      R_VER: 2.0.0
+      JULIA_VER: 1.3.0
     cmds:
       - rm -rf _build/packages
       - mkdir -p _build/packages/
