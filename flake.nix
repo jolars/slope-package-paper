@@ -24,21 +24,35 @@
         sortedl1 = (
           pkgs.python3.pkgs.buildPythonPackage rec {
             pname = "sortedl1";
-            version = "1.6.0";
+            version = "1.8.0";
             pyproject = true;
 
-            src = pkgs.fetchPypi {
-              inherit pname version;
-              hash = "sha256-b1IiGqG8dHWTYiCJAVFWRDjETixtEMvKTp8lGxsW+Z0=";
+            src = pkgs.fetchFromGitHub {
+              owner = "jolars";
+              repo = "sortedl1";
+              rev = "b9af74828a35d779cd366333158d5be021b24a7b";
+              hash = "sha256-+bF4dErGP37zW8Bn0mrTVfl4Dczji5ZU2YI4JJqpRVI=";
             };
 
-            dontUseCmakeConfigure = true;
+            # dontUseCmakeConfigure = true;
+
+            nativeBuildInputs = [
+              pkgs.cmake
+              pkgs.ninja
+            ];
+
+            buildInputs = [
+              pkgs.eigen
+              libslope.packages.${system}.default
+            ];
+
+            preConfigure = ''
+              export CMAKE_PREFIX_PATH="${libslope.packages.${system}.default}:${pkgs.eigen}:$CMAKE_PREFIX_PATH"
+            '';
 
             build-system = [
               pkgs.python3.pkgs.scikit-build-core
               pkgs.python3.pkgs.pybind11
-              pkgs.cmake
-              pkgs.ninja
             ];
 
             dependencies = with pkgs.python3.pkgs; [
@@ -64,12 +78,12 @@
         SLOPE = (
           pkgs.rPackages.buildRPackage rec {
             name = "SLOPE";
-            version = "1.2.0";
+            version = "2.0.0";
             src = pkgs.fetchFromGitHub {
               owner = "jolars";
               repo = "SLOPE";
               rev = "v${version}";
-              hash = "sha256-U+0cg02XnYSOORv488SAtNwiOCDC8YmkTbSCA8AWr8g=";
+              hash = "sha256-3JsxyvbzIQdj3KMvwsO1bwEpkXkFJnIUdy08Is5mERE=";
             };
             propagatedBuildInputs = with pkgs.rPackages; [
               Matrix
@@ -82,19 +96,30 @@
           }
         );
 
-        buildEnv = pkgs.buildFHSEnv {
-          name = "build-env";
-          targetPkgs = pkgs: [
-            pkgs.bashInteractive
-            pkgs.gcc-unwrapped
-            pkgs.binutils-unwrapped
-            pkgs.glibc
-            pkgs.cmake
-            pkgs.pkg-config
-            pkgs.nodejs
-            pkgs.julia-bin
+        exampleCpp = pkgs.stdenv.mkDerivation {
+          name = "slope-example";
+          src = ./code;
+
+          buildInputs = [
+            libslope.packages.${system}.default
+            pkgs.eigen
           ];
-          runScript = "bash";
+
+          dontUseCmakeConfigure = true;
+          dontConfigure = true;
+
+          buildPhase = ''
+            $CXX example.cpp -o slope-example \
+              -I${libslope.packages.${system}.default}/include \
+              -I${pkgs.eigen}/include/eigen3 \
+              -L${libslope.packages.${system}.default}/lib \
+              -lslope -std=c++17
+          '';
+
+          installPhase = ''
+            mkdir -p $out/bin
+            cp slope-example $out/bin/
+          '';
         };
       in
       {
@@ -136,18 +161,15 @@
               "SLOPE"
               "Plots"
               "LaTeXStrings"
-              "LanguageServer"
               "LinearAlgebra"
               "ProjectRoot"
               "SparseArrays"
-              "Runic"
               "CSV"
               "DataFrames"
             ])
+            exampleCpp
           ];
         };
-
-        devShells.fhs = buildEnv;
       }
     );
 }
