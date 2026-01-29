@@ -34,7 +34,7 @@ jobs:
 
       - name: Install benchmark_slope dependencies
         run: |
-          benchopt install ./benchmark_slope
+          benchopt install ./benchmark_slope -y
 
       - name: Run benchmark_slope with example config
         run: |
@@ -42,7 +42,7 @@ jobs:
 
       - name: Install benchmark_slope_path dependencies
         run: |
-          benchopt install ./benchmark_slope_path
+          benchopt install ./benchmark_slope_path -y
 
       - name: Run benchmark_slope_path with example config
         run: |
