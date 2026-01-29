@@ -1,0 +1,59 @@
+name: Test Reproducibility
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  test-benchmarks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}  # Use login shell for conda
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Setup Miniconda
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        auto-update-conda: true
+        python-version: "3.11"
+        miniforge-variant: Mambaforge
+        use-mamba: true
+    
+    - name: Install benchopt
+      run: |
+        pip install -U benchopt
+    
+    - name: Install benchmark_slope dependencies
+      run: |
+        benchopt install ./benchmark_slope
+    
+    - name: Run benchmark_slope with example config
+      run: |
+        benchopt run ./benchmark_slope --config benchmark_slope/example_config.yml
+    
+    - name: Install benchmark_slope_path dependencies
+      run: |
+        benchopt install ./benchmark_slope_path
+    
+    - name: Run benchmark_slope_path with example config
+      run: |
+        benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
+    
+    - name: Upload benchmark results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-results
+        path: |
+          benchmark_slope/outputs/
+          benchmark_slope_path/outputs/
+        retention-days: 30
