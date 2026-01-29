@@ -102,23 +102,14 @@
           name = "slope-example";
           src = ./code;
 
+          nativeBuildInputs = [
+            pkgs.cmake
+          ];
+
           buildInputs = [
             libslope.packages.${system}.default
             pkgs.eigen
           ];
-
-          buildPhase = ''
-            $CXX example.cpp -o slope-example \
-              -I${libslope.packages.${system}.default}/include \
-              -I${pkgs.eigen}/include/eigen3 \
-              -L${libslope.packages.${system}.default}/lib \
-              -lslope -std=c++17
-          '';
-
-          installPhase = ''
-            mkdir -p $out/bin
-            cp slope-example $out/bin/
-          '';
         };
       in
       {
