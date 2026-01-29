@@ -47,10 +47,6 @@
               libslope.packages.${system}.default
             ];
 
-            # preConfigure = ''
-            #   export CMAKE_PREFIX_PATH="${libslope.packages.${system}.default}:${pkgs.eigen}:$CMAKE_PREFIX_PATH"
-            # '';
-
             build-system = [
               pkgs.python3.pkgs.scikit-build-core
               pkgs.python3.pkgs.pybind11
