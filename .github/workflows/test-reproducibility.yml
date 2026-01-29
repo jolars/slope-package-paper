@@ -20,13 +20,13 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup Miniconda
+      - name: Setup Conda
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
-          python-version: "3.11"
+          python-version: "3.12"
           miniforge-version: latest
-          use-mamba: true
+          activate-environment: benchopt
 
       - name: Install benchopt
         run: |
