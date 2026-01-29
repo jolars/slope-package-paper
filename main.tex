@@ -1159,7 +1159,7 @@ julia> x_std = std(x, dims = 1)
 julia> x = (x .- x_means) ./ x_std
 \end{Code}
 
-  We then fit SLOPE and lasso models to the data. Note theat the \code{lambda}
+  We then fit SLOPE and lasso models to the data. Note that the \code{lambda}
   argument is actually the symbol $\lambda$ in the \proglang{Julia} package,
   so this code will not work if you write \code{lambda = "lasso"}.
 
