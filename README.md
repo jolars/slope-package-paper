@@ -131,14 +131,22 @@ benchopt install ./benchmark_slope_path
 
 ### Running the Benchmarks
 
-To actually run the benchmarks, you can use the following commands:
+For a quick test to verify the setup, you can run the benchmarks with the
+example configurations:
+
+```bash
+benchopt run ./benchmark_slope --config benchmark_slope/example_config.yml
+benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
+```
+
+To reproduce the results from the paper, use the full benchmark configurations:
 
 ```bash
 benchopt run ./benchmark_slope  --config bench_config_single.yml
 benchopt run ./benchmark_slope_path  --config bench_config_path.yml
 ```
 
-These commands use the configuration files used in the paper, but you can
+Note that the full benchmarks may take several hours to complete. You can
 alternatively configure solvers and data sets either interactively on the
 command line or by writing and referencing your own YAML configuration files.
 See the [Benchopt documentation](https://benchopt.github.io/) for more details.
