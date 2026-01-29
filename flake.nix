@@ -24,21 +24,23 @@
         sortedl1 = (
           pkgs.python3.pkgs.buildPythonPackage rec {
             pname = "sortedl1";
-            version = "1.8.0";
+            version = "1.9.0";
             pyproject = true;
 
             src = pkgs.fetchFromGitHub {
               owner = "jolars";
               repo = "sortedl1";
-              rev = "b9af74828a35d779cd366333158d5be021b24a7b";
-              hash = "sha256-+bF4dErGP37zW8Bn0mrTVfl4Dczji5ZU2YI4JJqpRVI=";
+              # rev = "v${version}";
+              rev = "3025946be951368b6be80e9fc2df549a043ef54e";
+              hash = "sha256-5OmNjom8i/LgkeyfaI+kMbKSJ9MXHo1s0iqYcSWihcc=";
             };
 
-            # dontUseCmakeConfigure = true;
+            dontUseCmakeConfigure = true;
 
             nativeBuildInputs = [
               pkgs.cmake
               pkgs.ninja
+              pkgs.eigen
             ];
 
             buildInputs = [
@@ -46,9 +48,9 @@
               libslope.packages.${system}.default
             ];
 
-            preConfigure = ''
-              export CMAKE_PREFIX_PATH="${libslope.packages.${system}.default}:${pkgs.eigen}:$CMAKE_PREFIX_PATH"
-            '';
+            # preConfigure = ''
+            #   export CMAKE_PREFIX_PATH="${libslope.packages.${system}.default}:${pkgs.eigen}:$CMAKE_PREFIX_PATH"
+            # '';
 
             build-system = [
               pkgs.python3.pkgs.scikit-build-core
@@ -104,9 +106,6 @@
             libslope.packages.${system}.default
             pkgs.eigen
           ];
-
-          dontUseCmakeConfigure = true;
-          dontConfigure = true;
 
           buildPhase = ''
             $CXX example.cpp -o slope-example \
