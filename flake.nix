@@ -30,9 +30,8 @@
             src = pkgs.fetchFromGitHub {
               owner = "jolars";
               repo = "sortedl1";
-              # rev = "v${version}";
-              rev = "3025946be951368b6be80e9fc2df549a043ef54e";
-              hash = "sha256-5OmNjom8i/LgkeyfaI+kMbKSJ9MXHo1s0iqYcSWihcc=";
+              rev = "v${version}";
+              hash = "sha256-ERBFFkqwRXVrxylDHb0xvfOY16QpLoX65/CAVgwqOG8=";
             };
 
             dontUseCmakeConfigure = true;
