@@ -41,7 +41,7 @@ tasks:
       - curl -L -o _build/packages/SLOPE-{{.R_VER}}.tar.gz
         "https://github.com/jolars/SLOPE/archive/refs/tags/v{{.R_VER}}.tar.gz"
       - curl -L -o _build/packages/SLOPE-jl-{{.JULIA_VER}}.tar.gz
-        "https://github.com/jolars/SLOPE/archive/refs/tags/v{{.JULIA_VER}}.tar.gz"
+        "https://github.com/jolars/SLOPE.jl/archive/refs/tags/v{{.JULIA_VER}}.tar.gz"
 
   jss-submission:
     desc: "Prepare JSS submission bundle"
