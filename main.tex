@@ -202,22 +202,21 @@ the path fitting procedure used to compute the full regularization path for SLOP
 % \label{sec:glm}
 
 Our packages are designed to solve SLOPE for generalized linear models (GLMs),
-in which the loss function is defined as
+in which the response \(y_i\) is modelled as a random variable from an exponential family,
+and is assumed to depend conditionally on the linear predictor \(\eta_i = x_i^\intercal \beta + \beta_0\) via
+\(\E(y_i \mid \eta_i) = \ilink(\eta_i)\), where \(\ilink\) is the inverse link
+function. This gives rise to the following form of the loss function:
 %
 \[
   F(\beta_0, \beta) = \frac{1}{n} \sum_{i=1}^n f(\eta_i, y_i),
 \]
 %
-letting \(\eta_i = x_i^\intercal \beta + \beta_0\) be the linear predictor. The
-response \(y_i\) is modelled as a random variable from an exponential family,
-and is assumed to depend conditionally on the linear predictor \(\eta_i\) via
-\(\E(y_i \mid \eta_i) = \ilink(\eta_i)\), where \(\ilink\) is the inverse link
-function.
+where \(f\) is the contribution of the \(i\)th observation to the negative
+log-likelihood of the model. To estimate the parameters of a generalized linear
+model, \((\beta_0, \beta)\), we minimize the loss function \(F\) with respect
+to \((\beta_0, \beta)\).
 
-To estimate the parameters of the model, \((\beta_0, \beta)\), we form a loss
-function, \(f\), from the negative log-likelihood of the target distribution, modeling
-its mean parameter through the inverse link function applied to the linear
-predictor. A special property of the resulting loss function is that its
+A special property of \(f\) is that its
 partial derivative with respect to \(\eta\) is
 %
 \[
@@ -347,7 +346,7 @@ omitted some details of the algorithm here.
     \For{\(i \gets 1,\dots,n\)}{
 
       \(\eta_i \gets x_i^T \beta + \beta_0 \)\;
-      \(w_i \gets \frac{\partial}{\partial \eta_i} f(\eta_i, y_i) \)\tcc*{Weights for IRLS}
+      \(w_i \gets \frac{\partial^2}{\partial \eta_i^2} f(\eta_i, y_i) \)\tcc*{Weights for IRLS}
       \(z_i \gets \eta_i - \frac{r_i(\eta_i, y_i)}{w_i} \)\tcc*{Working response for IRLS}
     }
     update \(c\), \(\mathcal{C}\)\;
