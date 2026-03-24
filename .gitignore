@@ -624,3 +624,8 @@ slope-package-paper*.pdf
 cover-letter.pdf
 
 _build/
+
+cover-letter.*
+cover-letter-resubmission.*
+*.rtf
+*.rtf#
