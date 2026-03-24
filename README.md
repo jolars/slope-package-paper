@@ -114,7 +114,7 @@ have a functioning version of conda. Then, create and activate a new conda
 environment and install benchopt in it:
 
 ```bash
-conda create -n benchopt python
+conda create -n benchopt -c conda-forge python=3.12
 conda activate benchopt
 pip install -U benchopt
 ```
