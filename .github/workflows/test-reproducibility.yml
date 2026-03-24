@@ -9,7 +9,11 @@ on:
 
 jobs:
   test-benchmarks:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     defaults:
       run:
         shell: bash -l {0} # Use login shell for conda
@@ -33,26 +37,50 @@ jobs:
           pip install -U benchopt
 
       - name: Install benchmark_slope dependencies
+        if: runner.os != 'Windows'
         run: |
           benchopt install ./benchmark_slope -y
 
+      - name: Install benchmark_slope dependencies (Windows subset)
+        if: runner.os == 'Windows'
+        run: |
+          benchopt install ./benchmark_slope -d Simulated -s PGD -s skglm -y
+
       - name: Run benchmark_slope with example config
+        if: runner.os != 'Windows'
         run: |
           benchopt run ./benchmark_slope --config benchmark_slope/example_config.yml
 
+      - name: Run benchmark_slope with Windows-safe solver subset
+        if: runner.os == 'Windows'
+        run: |
+          benchopt run ./benchmark_slope --config benchmark_slope/example_config.yml -s PGD[prox=prox_isotonic] -s skglm
+
       - name: Install benchmark_slope_path dependencies
+        if: runner.os != 'Windows'
         run: |
           benchopt install ./benchmark_slope_path -y
 
+      - name: Install benchmark_slope_path dependencies (Windows subset)
+        if: runner.os == 'Windows'
+        run: |
+          benchopt install ./benchmark_slope_path -d Simulated -s sortedl1 -y
+
       - name: Run benchmark_slope_path with example config
+        if: runner.os != 'Windows'
         run: |
           benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
+
+      - name: Run benchmark_slope_path with Windows-safe solver subset
+        if: runner.os == 'Windows'
+        run: |
+          benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml -s sortedl1
 
       - name: Upload benchmark results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: benchmark-results
+          name: benchmark-results-${{ matrix.os }}
           path: |
             benchmark_slope/outputs/
             benchmark_slope_path/outputs/
