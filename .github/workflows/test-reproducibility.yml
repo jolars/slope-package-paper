@@ -67,14 +67,14 @@ jobs:
       - name: Run benchmark_slope_path with example config (Unix)
         if: runner.os != 'Windows'
         run: |
-          benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml --env-name benchopt
+          benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
 
       - name: Run benchmark_slope_path with example config (Windows)
         if: runner.os == 'Windows'
         shell: powershell
         run: |
           conda activate benchopt
-          benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml --env-name benchopt
+          benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
 
       - name: Upload benchmark results
         if: always()
