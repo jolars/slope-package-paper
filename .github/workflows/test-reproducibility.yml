@@ -35,6 +35,7 @@ jobs:
       - name: Install benchopt (Unix)
         if: runner.os != 'Windows'
         run: |
+          conda activate benchopt
           BENCHOPT_DEBUG=1 pip install -U benchopt
 
       - name: Install benchopt (Windows)
@@ -42,6 +43,7 @@ jobs:
         shell: powershell
         run: |
           $env:BENCHOPT_DEBUG = "1"
+          conda activate benchopt
           pip install -U benchopt
 
       # - name: Install benchmark_slope dependencies
@@ -55,6 +57,7 @@ jobs:
       - name: Install benchmark_slope_path dependencies (Unix)
         if: runner.os != 'Windows'
         run: |
+          conda activate benchopt
           benchopt install ./benchmark_slope_path -y --config benchmark_slope_path/example_config.yml
 
       - name: Install benchmark_slope_path dependencies (Windows)
@@ -63,11 +66,13 @@ jobs:
         run: |
           $env:BENCHOPT_DEBUG = "1"
           $env:KMP_DUPLICATE_LIB_OK = "True"
+          conda activate benchopt
           benchopt install ./benchmark_slope_path -y --config benchmark_slope_path/example_config.yml
 
       - name: Run benchmark_slope_path with example config (Unix)
         if: runner.os != 'Windows'
         run: |
+          conda activate benchopt
           benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
 
       - name: Run benchmark_slope_path with example config (Windows)
@@ -76,6 +81,7 @@ jobs:
         run: |
           $env:BENCHOPT_DEBUG = "1"
           $env:KMP_DUPLICATE_LIB_OK = "True"
+          conda activate benchopt
           benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
 
       - name: Upload benchmark results
