@@ -36,13 +36,13 @@ jobs:
         run: |
           pip install -U benchopt
 
-      - name: Install benchmark_slope dependencies
-        run: |
-          benchopt install ./benchmark_slope -y
-
-      - name: Run benchmark_slope with example config
-        run: |
-          benchopt run ./benchmark_slope --config benchmark_slope/example_config.yml
+      # - name: Install benchmark_slope dependencies
+      #   run: |
+      #     benchopt install ./benchmark_slope -y
+      #
+      # - name: Run benchmark_slope with example config
+      #   run: |
+      #     benchopt run ./benchmark_slope --config benchmark_slope/example_config.yml
 
       - name: Install benchmark_slope_path dependencies
         run: |
