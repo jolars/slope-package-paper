@@ -41,7 +41,6 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          conda activate benchopt
           pip install -U benchopt
 
       # - name: Install benchmark_slope dependencies
@@ -55,14 +54,12 @@ jobs:
       - name: Install benchmark_slope_path dependencies (Unix)
         if: runner.os != 'Windows'
         run: |
-          benchopt install ./benchmark_slope_path -y --env-name benchopt
+          benchopt install ./benchmark_slope_path -y
 
       - name: Install benchmark_slope_path dependencies (Windows)
         if: runner.os == 'Windows'
         shell: powershell
-        run: |
-          conda activate benchopt
-          benchopt install ./benchmark_slope_path -y --env-name benchopt
+        run: benchopt install ./benchmark_slope_path -y
 
       - name: Run benchmark_slope_path with example config (Unix)
         if: runner.os != 'Windows'
@@ -73,7 +70,6 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          conda activate benchopt
           benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
 
       - name: Upload benchmark results
