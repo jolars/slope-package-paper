@@ -70,6 +70,8 @@ jobs:
         shell: powershell
         run: |
           conda activate benchopt
+          $env:PYTHONUTF8 = "1"
+          $env:KMP_DUPLICATE_LIB_OK = "TRUE"
           benchopt run ./benchmark_slope --config benchmark_slope/example_config.yml
 
       - name: Install benchmark_slope_path dependencies (Unix)
@@ -95,6 +97,7 @@ jobs:
         shell: powershell
         run: |
           conda activate benchopt
+          $env:PYTHONUTF8 = "1"
           $env:KMP_DUPLICATE_LIB_OK = "TRUE"
           benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
 
