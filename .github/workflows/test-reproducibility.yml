@@ -16,7 +16,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     defaults:
       run:
-        shell: bash -l {0} # Use login shell for conda
+        shell: bash -el {0} # Use login shell for conda
 
     steps:
       - name: Checkout repository
@@ -34,7 +34,7 @@ jobs:
 
       - name: Install benchopt
         run: |
-          conda activate && pip install -U benchopt
+          conda activate benchopt && pip install -U benchopt
 
       # - name: Install benchmark_slope dependencies
       #   run: |
@@ -46,11 +46,11 @@ jobs:
 
       - name: Install benchmark_slope_path dependencies
         run: |
-          conda activate && benchopt install ./benchmark_slope_path -y
+          conda activate benchopt && benchopt install ./benchmark_slope_path -y
 
       - name: Run benchmark_slope_path with example config
         run: |
-          conda activate && benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
+          conda activate benchopt && benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
 
       - name: Upload benchmark results
         if: always()
