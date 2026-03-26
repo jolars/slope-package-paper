@@ -41,7 +41,8 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          BENCHOPT_DEBUG=1 pip install -U benchopt
+          $env:BENCHOPT_DEBUG = "1"
+          pip install -U benchopt
 
       # - name: Install benchmark_slope dependencies
       #   run: |
