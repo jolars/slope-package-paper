@@ -60,8 +60,6 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          $env:KMP_DUPLICATE_LIB_OK = "TRUE"
-          $env:OMP_NUM_THREADS = "1"
           benchopt install ./benchmark_slope_path -y
 
       - name: Run benchmark_slope_path with example config (Unix)
@@ -73,8 +71,6 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          $env:KMP_DUPLICATE_LIB_OK = "TRUE"
-          $env:OMP_NUM_THREADS = "1"
           benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
 
       - name: Upload benchmark results
