@@ -77,7 +77,7 @@ jobs:
         shell: powershell
         run: |
           conda activate benchopt
-          benchopt install ./benchmark_slope_path -y --config bench_config_path.yml -s sortedl1 -s PGD -s ADMM -d Simulated
+          benchopt install ./benchmark_slope_path -y --config benchmark_slope_path/example_config.yml
 
       - name: Run benchmark_slope_path with example config (Unix)
         if: runner.os != 'Windows'
@@ -89,6 +89,7 @@ jobs:
         shell: powershell
         run: |
           conda activate benchopt
+          $env:KMP_DUPLICATE_LIB_OK = "TRUE"
           benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
 
       - name: Upload benchmark results
