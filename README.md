@@ -155,6 +155,9 @@ Nix flake environment, which provides a stable snapshot of all dependencies used
 in the benchmarks at the time of running them. See [Nix
 Environment](#nix-environment) below for more details.
 
+You can also bypass the installation step (`benchopt install`) and manually
+install the required dependencies if you prefer.
+
 Note that the full benchmarks may take several hours to complete. You can
 alternatively configure solvers and data sets either interactively on the
 command line or by writing and referencing your own YAML configuration files.
