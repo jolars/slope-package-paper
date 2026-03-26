@@ -50,13 +50,13 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           conda activate benchopt
-          benchopt install --config bench_config_single.yml -y ./benchmark_slope
+          benchopt install --config benchmark_slope/example_config.yml -y ./benchmark_slope
 
       - name: Run benchmark_slope with example config (Unix)
         if: runner.os != 'Windows'
         run: |
           conda activate benchopt
-          benchopt run ./benchmark_slope --config benchmark_slope/example_config.yml
+          benchopt run --config benchmark_slope/example_config.yml -y ./benchmark_slope
 
       - name: Install benchmark_slope dependencies (Windows)
         if: runner.os == 'Windows'
