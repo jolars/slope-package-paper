@@ -38,6 +38,17 @@ jobs:
           conda activate benchopt
           pip install -U benchopt
 
+      - name: Debug pip dependencies on macOS
+        if: runner.os == 'macOS'
+        continue-on-error: true
+        run: |
+          conda activate benchopt
+          python -m pip --version
+          python -m pip install -vvv --no-input \
+            sortedl1 \
+            "git+https://github.com/jolars/slope-path" \
+            libsvmdata
+
       - name: Install benchopt (Windows)
         if: runner.os == 'Windows'
         shell: powershell
@@ -58,14 +69,15 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           conda activate benchopt
-          benchopt install ./benchmark_slope_path -y --config bench_config_path.yml
+          benchopt install ./benchmark_slope_path -y --config bench_config_path.yml \
+            -s sortedl1 -s PGD -s ADMM -d Simulated
 
       - name: Install benchmark_slope_path dependencies (Windows)
         if: runner.os == 'Windows'
         shell: powershell
         run: |
           conda activate benchopt
-          benchopt install ./benchmark_slope_path -y --config bench_config_path.yml
+          benchopt install ./benchmark_slope_path -y --config bench_config_path.yml -s sortedl1 -s PGD -s ADMM -d Simulated
 
       - name: Run benchmark_slope_path with example config (Unix)
         if: runner.os != 'Windows'
