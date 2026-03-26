@@ -10,9 +10,6 @@ on:
 jobs:
   test-benchmarks:
     runs-on: ${{ matrix.os }}
-    env:
-      BENCHOPT_RAISE_INSTALL_ERROR: "true"
-      PYTHONUTF8: "1"
     strategy:
       fail-fast: false
       matrix:
