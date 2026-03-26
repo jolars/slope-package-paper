@@ -108,7 +108,7 @@ optimization algorithms.
 
 ### Installing Benchopt
 
-The recommended way to use benchopt is within a
+The recommended way to use Benchopt is within a
 [conda](https://anaconda.org/anaconda/conda) environment. Make sure you first
 have a functioning version of conda. Then, create and activate a new conda
 environment and install benchopt in it:
@@ -119,20 +119,19 @@ conda activate benchopt
 pip install -U benchopt
 ```
 
-### Installing the Benchmarks
-
-After having installed benchopt, you can install all the required dependencies
-of the benchmarks with:
-
-```bash
-benchopt install ./benchmark_slope
-benchopt install ./benchmark_slope_path
-```
-
 ### Running the Benchmarks
 
-For a quick test to verify the setup, you can run the benchmarks with the
-example configurations:
+After having installed Benchopt, you need to install all the required
+dependencies of the benchmarks. For a quick test to verify the setup, you can
+install the dependencies for the example configuration by running the following
+lines:
+
+```bash
+benchopt install ./benchmark_slope --config benchmark_slope/example_config.yml
+benchopt install ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
+```
+
+To run the benchmarks with the example configuration, you then run:
 
 ```bash
 benchopt run ./benchmark_slope --config benchmark_slope/example_config.yml
@@ -142,9 +141,19 @@ benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config
 To reproduce the results from the paper, use the full benchmark configurations:
 
 ```bash
+benchopt install ./benchmark_slope  --config bench_config_single.yml
+benchopt install ./benchmark_slope_path  --config bench_config_path.yml
+
 benchopt run ./benchmark_slope  --config bench_config_single.yml
 benchopt run ./benchmark_slope_path  --config bench_config_path.yml
 ```
+
+Note that it's possible that there are installation issues with some of the
+solvers due to the complexity of their dependencies and continuous upgrades. For
+full reproducibility, we therefore recommend that you instead use the provided
+Nix flake environment, which provides a stable snapshot of all dependencies used
+in the benchmarks at the time of running them. See [Nix
+Environment](#nix-environment) below for more details.
 
 Note that the full benchmarks may take several hours to complete. You can
 alternatively configure solvers and data sets either interactively on the
@@ -166,7 +175,7 @@ R and Python scripts for reproducing the figures and analyses in the paper are
 located in the `code/` directory. You can run these scripts after ensuring that
 the required dependencies are installed.
 
-## Nix Environment
+## Nix Environment {#nix-environment}
 
 A Nix flake is provided for setting up a reproducible development environment.
 To enter the Nix shell, run:
