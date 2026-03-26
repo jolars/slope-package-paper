@@ -58,14 +58,14 @@ jobs:
           conda activate benchopt
           benchopt run ./benchmark_slope --config benchmark_slope/example_config.yml
 
-      - name: Install benchmark_slope dependencies
+      - name: Install benchmark_slope dependencies (Windows)
         if: runner.os == 'Windows'
         shell: powershell
         run: |
           conda activate benchopt
           benchopt install --config bench_config_single.yml -y ./benchmark_slope
 
-      - name: Run benchmark_slope with example config
+      - name: Run benchmark_slope with example config (Windows)
         if: runner.os == 'Windows'
         shell: powershell
         run: |
