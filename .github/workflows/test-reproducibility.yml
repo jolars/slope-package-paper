@@ -72,7 +72,6 @@ jobs:
       - name: Run benchmark_slope_path with example config (Unix)
         if: runner.os != 'Windows'
         run: |
-          conda activate benchopt
           benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
 
       - name: Run benchmark_slope_path with example config (Windows)
