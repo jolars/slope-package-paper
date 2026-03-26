@@ -64,8 +64,6 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          $env:BENCHOPT_DEBUG = "1"
-          $env:KMP_DUPLICATE_LIB_OK = "True"
           conda activate benchopt
           benchopt install ./benchmark_slope_path -y --config benchmark_slope_path/example_config.yml
 
@@ -78,8 +76,6 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          $env:BENCHOPT_DEBUG = "1"
-          $env:KMP_DUPLICATE_LIB_OK = "True"
           conda activate benchopt
           benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
 
