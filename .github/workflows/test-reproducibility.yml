@@ -54,13 +54,13 @@ jobs:
       - name: Install benchmark_slope_path dependencies (Unix)
         if: runner.os != 'Windows'
         run: |
-          benchopt install ./benchmark_slope_path -y
+          benchopt install ./benchmark_slope_path -y --config benchmark_slope_path/example_config.yml
 
       - name: Install benchmark_slope_path dependencies (Windows)
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          benchopt install ./benchmark_slope_path -y
+          benchopt install ./benchmark_slope_path -y --config benchmark_slope_path/example_config.yml
 
       - name: Run benchmark_slope_path with example config (Unix)
         if: runner.os != 'Windows'
