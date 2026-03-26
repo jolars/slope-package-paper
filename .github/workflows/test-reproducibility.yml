@@ -38,16 +38,16 @@ jobs:
           conda activate benchopt
           pip install -U benchopt
 
-      - name: Debug pip dependencies on macOS
-        if: runner.os == 'macOS'
-        continue-on-error: true
-        run: |
-          conda activate benchopt
-          python -m pip --version
-          python -m pip install -vvv --no-input \
-            sortedl1 \
-            "git+https://github.com/jolars/slope-path" \
-            libsvmdata
+      # - name: Debug pip dependencies on macOS
+      #   if: runner.os == 'macOS'
+      #   continue-on-error: true
+      #   run: |
+      #     conda activate benchopt
+      #     python -m pip --version
+      #     python -m pip install -vvv --no-input \
+      #       sortedl1 \
+      #       "git+https://github.com/jolars/slope-path" \
+      #       libsvmdata
 
       - name: Install benchopt (Windows)
         if: runner.os == 'Windows'
