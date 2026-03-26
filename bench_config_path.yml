@@ -8,8 +8,9 @@ dataset:
   - breheny[dataset=brca1,standardize=True]
 
 solver:
-  - rSLOPE
   - sortedl1
   - SolutionPath
+  - ADMM
+  - PGD
 
 n-repetitions: 1
