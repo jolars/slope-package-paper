@@ -1,4 +1,5 @@
 from bisect import bisect_left
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -154,6 +155,7 @@ y2_vals = np.sort(np.hstack((-np.delete(c, 1), np.delete(c, 1))))
 
 if savefig:
     figpath = "images/slope-thresholding.pdf"
+    Path(figpath).parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(figpath, bbox_inches="tight", pad_inches=0.05)
 else:
     plt.show(block=False)

@@ -10,6 +10,7 @@ Plots.resetfontsizes()
 Plots.scalefontsizes(0.6)
 
 imgdir = @projectroot "images/"
+mkpath(imgdir)
 
 file = @projectroot "data/diabetes.csv"
 df = CSV.read(file, DataFrame)

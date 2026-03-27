@@ -8,7 +8,14 @@ library(dplyr)
 library(readxl)
 
 fig_name <- function(name) {
-  here::here("images", paste0(name, ".pdf"))
+  name <- here::here("images", paste0(name, ".pdf"))
+
+  dir <- dirname(name)
+  if (!dir.exists(dir)) {
+    dir.create(dir, recursive = TRUE)
+  }
+
+  name
 }
 
 x <- glioma$x

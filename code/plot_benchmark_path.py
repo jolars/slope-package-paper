@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -165,7 +166,7 @@ save_fig = True
 
 if save_fig:
     figpath = "images/benchmark_path_real.pdf"
-
+    Path(figpath).parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(figpath, bbox_inches="tight", pad_inches=0.05)
 else:
     plt.show(block=False)

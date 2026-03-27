@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from matplotlib import pyplot as plt
 from sklearn.datasets import load_diabetes
 from sklearn.preprocessing import StandardScaler
@@ -14,6 +16,7 @@ fit_lasso = model_lasso.path(x, y)
 fit_slope = model_slope.path(x, y)
 
 plt.rcParams["savefig.bbox"] = "tight"
+Path("images").mkdir(parents=True, exist_ok=True)
 
 figsize = (2.8, 2.5)
 
