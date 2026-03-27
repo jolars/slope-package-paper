@@ -1,0 +1,180 @@
+\PassOptionsToPackage{unicode,pdfusetitle}{hyperref}
+\PassOptionsToPackage{hyphens}{xurl}
+\PassOptionsToPackage{usenames,dvipsnames}{xcolor}
+
+\documentclass[english,a4paper,14pt]{letter}
+
+\usepackage{babel}
+
+% Font settings
+\usepackage[T1]{fontenc}
+\usepackage{libertine}
+\usepackage{inconsolata}
+
+\usepackage{textcomp}
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath}
+
+\usepackage{xcolor}
+
+
+% tables and lists
+\usepackage{enumitem}
+\usepackage{booktabs}
+
+\usepackage{graphicx}
+
+\usepackage{xurl}
+
+\usepackage{fancyhdr}
+\fancyhead{}
+\fancyhead[L]{Larsson, Bogdan, Grzesiak, Massias, Wallin}
+\fancyhead[R]{Cover Letter}
+
+\pagestyle{fancy}
+\thispagestyle{plain}
+
+\usepackage{hyperref}
+\hypersetup{
+  pdftitle   = {Cover Letter},
+  pdfauthor  = {Johan Larsson, Malgorzata Bogdan, Krystyna Grzesiak, Mathurin Massias, Jonas Wallin},
+  colorlinks = true,
+  linkcolor  = MidnightBlue,
+  citecolor  = MidnightBlue,
+  urlcolor   = MidnightBlue,
+  breaklinks = true
+}
+
+\begin{document}
+
+\begin{letter}{Journal of Statistical Software}
+  \opening{Dear editor,}
+
+  We are pleased to submit our manuscript titled ``Efficient Solvers for SLOPE
+  in R, Python, Julia, and C++'' for consideration for publication in the
+  Journal of Statistical Software.
+
+  This is the second resubmission of a manuscript that was originally submitted
+  as number 6061 in November 2025 and then as number 6222. We are thankful for
+  the feedback on our previous submission and, yet again, apologize for the
+  issues encountered in the submission. At the end of this letter, we provide a
+  point-by-point response to the comments raised and outline the changes made to
+  address them.
+
+  This paper presents a comprehensive suite of software packages implementing
+  efficient solvers for Sorted L-One Penalized Estimation (SLOPE) across four
+  programming languages: R, Python, Julia, and C++. The packages support
+  generalized linear models with various loss functions and handle diverse data
+  structures including dense, sparse, and out-of-memory matrices. Our
+  implementation features a highly efficient hybrid coordinate descent
+  algorithm and we provide comprehensive benchmarks to showcase its performance
+  as well as instructive examples on how to use our software in practice.
+
+  We believe this work makes a significant contribution to the statistical
+  software community by providing high-quality, well-documented, and performant
+  implementations of SLOPE that are readily accessible across multiple
+  programming environments. The packages are already available through standard
+  package repositories (CRAN, PyPI, and the Julia General Registry) and have
+  been designed with reproducibility and ease of use in mind.
+
+  The submission includes the complete manuscript, all source code for the
+  packages, and replication materials that allow readers to
+  reproduce all figures and results presented in the paper.
+
+  We confirm that this manuscript has not been published elsewhere and is not
+  under consideration by any other journal. All authors have approved the
+  manuscript and agree with its submission to JSS.
+
+  Thank you for considering our manuscript. We look forward to your feedback
+  and hope that you will find our revised submission suitable for publication in
+  the Journal of Statistical Software.
+
+  Here is a point-by-point list the issues raised in the previous submission
+  and our answers:
+
+  \begin{quote}
+    Two editors tried to run the replication material following the
+    installation instruction and we encountered problems: First, an error was found
+    trying to setup benchopt with conda environment (the conda environment
+    "benchopt" is activated):
+  \end{quote}
+
+  We are sorry about this, which seems to be an issue with dependency management
+  in conda and pip.
+
+  \begin{quote}
+    Thank you for updating the discussion on state-of-the-art methods with other
+    SLOPE implementations. There was no misunderstanding from our side in this
+    request and we think that it could also have been helpful to cite the most
+    important packages implementing other l1 penalization (like the Lasso), with a
+    comparison of what SLOPE contains and does not contain in comparison these
+    packages.
+  \end{quote}
+
+  % TODO: answer this
+
+  \begin{quote}
+    In the Python package, the class \verb|sortedl1.results.PathResults|
+    clearly misses methods to help the user explore the objects. \verb|__str__| is
+    not easy to exploit in its current form because the output is too long and
+    there is not summary method for instance. Usually, for this type of model
+    classes, we also recommend compatibility with scikit-learn so that the
+    \verb|model_selection| API can be used directly
+    \url{https://scikit-learn.org/stable/api/sklearn.model_selection.html#module-sklearn.model_selection}
+  \end{quote}
+
+  Thank you for this helpful suggestion. We
+  agree that the previous \verb|PathResults| representation was not
+  user-friendly, and have made the following improvements to enhance the exploration of results:
+
+  \begin{itemize}
+    \item We added a compact \verb|summary()| method to \verb|sortedl1.results.PathResults|
+          to provide key structural information (e.g., number of alphas,
+          features, targets,
+          and path-related diagnostics) without printing full arrays.
+    \item We implemented concise \verb|__str__|/\verb|__repr__| methods
+          for \verb|PathResults|,
+          so object printing now gives a short, human-readable overview
+          instead of a long dump.
+    \item For consistency, we also added the same exploration utilities
+          to \verb|CvResults|.
+  \end{itemize}
+
+  Regarding scikit-learn compatibility: \verb|Slope| is the estimator intended
+  to be used with \verb|sklearn.model_selection|, and we added documentation
+  showing direct usage with \verb|GridSearchCV|.
+
+  \begin{quote}
+    The authors have chosen to implement a refit method for their class
+    "trainedSlope". However, this choice does not seem completely valid: it
+    requires that the user re-specify x and y during the refit, which can lead to
+    inconsistencies with respect to what has been used initially to perform cross
+    validation.
+  \end{quote}
+
+  Thank you for pointing this out. We agree that requiring users to re-supply
+  \texttt{x} and \texttt{y} in \verb|refit()| is problematic, althogh
+  we would contend that the goal of refitting typically is to fit a model
+  on new data. In any case, we have updated the implementation so that
+  \verb|refit.TrainedSLOPE()| now uses the training data stored in the
+  \verb|TrainedSLOPE| object by default. Users may still provide new
+  \texttt{x}/\texttt{y} explicitly, but both must be given together.
+
+  \begin{quote}
+    A similar issue arises with the Python package that does not return the best trained model.
+  \end{quote}
+
+  We have updated the API so that
+  \verb|Slope.cv(..., refit=True)| returns both cross-validation results and the
+  best fitted model, i.e., \verb|(cv_results, best_model)|. The returned
+  \verb|best_model| is refit on the same \verb|X, y| passed to the CV call using
+  the selected best hyperparameters.
+
+  \closing{Yours sincerely,\\[1ex]
+    Johan Larsson, Ma\l{}gorzata Bogdan, Krystyna Grzesiak, Mathurin Massias, and Jonas Wallin
+  }
+
+  \encl{manuscript, software, replication materials}
+\end{letter}
+
+\end{document}
