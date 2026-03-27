@@ -65,7 +65,7 @@ jobs:
           conda activate benchopt
           $env:PYTHONUTF8 = "1"
           $env:KMP_DUPLICATE_LIB_OK = "TRUE"
-          benchopt install --config bench_config_single.yml -y ./benchmark_slope
+          benchopt install --config benchmark_slope/example_config.yml -y ./benchmark_slope
 
       - name: Run benchmark_slope with example config (Windows)
         if: runner.os == 'Windows'
