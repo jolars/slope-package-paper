@@ -139,31 +139,9 @@ xy = np.stack(
     axis=1,
 )
 
-# x2_labs = (
-#     r"$-\omega c^{\setminus k}_1 - S(c^{\setminus k}_1 + \varepsilon_c)$",
-#     r"$-\omega c^{\setminus k}_1 - S(c^{\setminus k}_1 - \varepsilon_c)$",
-#     r"$-\omega c^{\setminus k}_2 - S(c^{\setminus k}_2 + \varepsilon_c)$",
-#     r"$-\omega c^{\setminus k}_2 - S(c^{\setminus k}_2 - \varepsilon_c)$",
-#     r"-$S(0)$",
-#     r"$S(0)$",
-#     r"$\omega c^{\setminus k}_2 + S(c^{\setminus k}_2 - \varepsilon_c)$",
-#     r"$\omega c^{\setminus k}_2 + S(c^{\setminus k}_2 + \varepsilon_c)$",
-#     r"$\omega c^{\setminus k}_1 + S(c^{\setminus k}_1 - \varepsilon_c)$",
-#     r"$\omega c^{\setminus k}_1 + S(c^{\setminus k}_1 + \varepsilon_c)$",
-# )
-
 ax.plot(a_list, res, "-", color="black")
 ax.set_ylabel(r"\(T(\gamma, \omega; c, \lambda)\)")
 ax.set_xlabel(r"\(\gamma\)")
-
-# ax2_x = ax.secondary_xaxis("top")
-# ax2_x.set_xticks(
-#     lambda_sums,
-#     labels=x2_labs,
-#     rotation=60,
-#     verticalalignment="bottom",
-#     horizontalalignment="left",
-# )
 
 y2_labs = (
     r"$-c^{\setminus k}_1$",
@@ -173,9 +151,6 @@ y2_labs = (
 )
 
 y2_vals = np.sort(np.hstack((-np.delete(c, 1), np.delete(c, 1))))
-
-# ax2_y = ax.secondary_yaxis("right")
-# ax2_y.set_yticks(y2_vals, y2_labs)
 
 if savefig:
     figpath = "images/slope-thresholding.pdf"

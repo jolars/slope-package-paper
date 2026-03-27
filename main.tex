@@ -145,11 +145,29 @@ methods such as FISTA~\citep{beck2009}, which was for instance used by
 \citet{bogdan2015}. Other possibilities include proximal Newton~\citep{lee2014}
 and the alternating direction method of multipliers (ADMM) method~\citep{boyd2010}.
 
-For similar problems such as the lasso and
-elastic net\citep{zou2005}, however, these
-aforementioned methods have generally found themselves outperformed by coordinate
-descent methods~\citep{friedman2007,friedman2010}, which optimize one
-coefficient at a time. Unfortunately, coordinate descent requires that the
+For similar problems such as the lasso and elastic net\citep{zou2005}, however,
+these aforementioned methods have generally found themselves outperformed by
+coordinate descent methods~\citep{friedman2007,friedman2010}, which optimize
+one coefficient at a time. Several efficient implementations of coordinate
+descent algorithms exists for the lasso, elastic net, and other
+\(\ell_1\)-based regularization methods. For \proglang{R}, there is for
+instance \pkg{glmnet}~\citep{friedman2010}, which fits generalized linear
+models, including Cox-proportional hazards models, with elastic net
+regularization. Other notable packages are \pkg{ncvreg}~\citep{breheny2011},
+which in addition to the elastic net also supports non-convex penalties such as
+SCAD~\citep{fan2001} and MCP~\citep{zhang2010}. Another interesting package is
+\pkg{biglasso}~\citep{zeng2021}, which supports out-of-memory data to fit lasso
+models to large datasets. Finally, there is also \pkg{lars}~\citep{efron2004},
+which fits exact lasso solution paths using the least angle regression (LARS)
+algorithm. For \proglang{Python}, there is support for the elastic net in the
+widely used \pkg{scikit-learn}~\citep{pedregosa2011} module, which beyond the
+coordinate descent algorithm also features LARS and alternative solvers for the
+lasso and elastic net. For \proglang{Julia}, there is generally less support
+for regularized regression. There exists a wrapper for \pkg{glmnet} in
+\pkg{GLMNet.jl}~\citep{kornblith2024a} and a native \proglang{Julia} package
+in \pkg{Lasso.jl}~\citep{kornblith2024}.
+
+Unfortunately, coordinate descent requires that the
 objective is separable in \((\beta_0, \beta)\), which is not the case in SLOPE
 due to the permutations involved in the sorted \(\ell_1\) norm, which means
 that coordinate descent cannot be used directly. This problem was, however,
@@ -1092,18 +1110,21 @@ approximate homotopy method of \citet{dupuis2024}, across diverse problem
 settings and data types.
 
 Although our packages are full-fledged implementations of SLOPE, there are
-still some features that are missing. For instance, we do not yet support
-observation weights or the full suite of loss functions from the family of
-generalized linear models. We also do not yet support the group sorted \(\ell_1\)
-norm, which would allow for an alternative penalization scheme for multivariate
-response problems. In addition, several possible improvements to the hybrid
-method could be considered, such as accelerated and parallelized coordinate
-steps. We leave these possibilities to future work but want to stress that our
-packages are modular and have been designed with extensibility in mind, which
-we hope will facilitate the addition of new features in the future. Because all
-of the packages rely on the same \proglang{C++} library, contributions will
-also propagate directly to the higher-level packages in \proglang{R},
-\proglang{Julia}, and \proglang{Python}.
+still some features that are missing and feature coverage is generally not on
+with that of, for instance, \pkg{glmnet} for elastic net. For instance, we do
+not yet support observation weights or the full suite of loss functions from
+the family of generalized linear models. On the other hand, we \emph{do} support
+out-of-memory storage and much more granular normalization options, which are
+not support in \pkg{glmnet}. We also do not yet support the group sorted
+\(\ell_1\) norm, which would allow for an alternative penalization scheme for
+multivariate response problems. In addition, several possible improvements to
+the hybrid method could be considered, such as accelerated and parallelized
+coordinate steps. We leave these possibilities to future work but want to
+stress that our packages are modular and have been designed with extensibility
+in mind, which we hope will facilitate the addition of new features in the
+future. Because all of the packages rely on the same \proglang{C++} library,
+contributions will also propagate directly to the higher-level packages in
+\proglang{R}, \proglang{Julia}, and \proglang{Python}.
 
 We hope that our packages will be useful for researchers and practitioners
 alike and that the design of our software suite might inspire others to more

@@ -99,8 +99,15 @@
     "benchopt" is activated):
   \end{quote}
 
-  We are sorry about this, which seems to be an issue with dependency management
-  in conda and pip.
+  This appears to have been a Windows-only issue with R dependencies and Conda
+  environment resolution. We have tightened the installation instructions to only
+  use the solvers specified in the benchmark configuration and have also updated
+  the instructions with clearer guidance on what to do in case of dependency
+  issues. One of the authors has verified that the current instructions work
+  correctly on a Windows system and we have set up scheduled continuous
+  integration tests for all platforms (Windows, Linux, and macOS) to ensure that
+  the installation process remains stable. We apologize for the inconvenience
+  caused by this issue.
 
   \begin{quote}
     Thank you for updating the discussion on state-of-the-art methods with other
@@ -110,8 +117,6 @@
     comparison of what SLOPE contains and does not contain in comparison these
     packages.
   \end{quote}
-
-  % TODO: answer this
 
   \begin{quote}
     In the Python package, the class \verb|sortedl1.results.PathResults|
