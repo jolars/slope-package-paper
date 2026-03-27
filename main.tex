@@ -1113,18 +1113,18 @@ Although our packages are full-fledged implementations of SLOPE, there are
 still some features that are missing and feature coverage is generally not on
 with that of, for instance, \pkg{glmnet} for elastic net. For instance, we do
 not yet support observation weights or the full suite of loss functions from
-the family of generalized linear models. On the other hand, we \emph{do} support
-out-of-memory storage and much more granular normalization options, which are
-not support in \pkg{glmnet}. We also do not yet support the group sorted
-\(\ell_1\) norm, which would allow for an alternative penalization scheme for
-multivariate response problems. In addition, several possible improvements to
-the hybrid method could be considered, such as accelerated and parallelized
-coordinate steps. We leave these possibilities to future work but want to
-stress that our packages are modular and have been designed with extensibility
-in mind, which we hope will facilitate the addition of new features in the
-future. Because all of the packages rely on the same \proglang{C++} library,
-contributions will also propagate directly to the higher-level packages in
-\proglang{R}, \proglang{Julia}, and \proglang{Python}.
+the family of generalized linear models. On the other hand, we \emph{do}
+support out-of-memory storage and much more granular normalization options,
+which are not supported in \pkg{glmnet}. We also do not yet support the group
+sorted \(\ell_1\) norm, which would allow for an alternative penalization
+scheme for multivariate response problems. In addition, several possible
+improvements to the hybrid method could be considered, such as accelerated and
+parallelized coordinate steps. We leave these possibilities to future work but
+want to stress that our packages are modular and have been designed with
+extensibility in mind, which we hope will facilitate the addition of new
+features in the future. Because all of the packages rely on the same
+\proglang{C++} library, contributions will also propagate directly to the
+higher-level packages in \proglang{R}, \proglang{Julia}, and \proglang{Python}.
 
 We hope that our packages will be useful for researchers and practitioners
 alike and that the design of our software suite might inspire others to more
