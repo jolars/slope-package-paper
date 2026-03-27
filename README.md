@@ -33,9 +33,9 @@ minimize F(β₀, β) + α J(β; λ)
 where:
 
 - F is a smooth convex loss function (e.g., from GLMs)
-- J(β, λ) is the sorted ℓ₁ norm: J(β; λ) = Σⱼ λⱼ |β(j)|
+- J(β, λ) is the sorted ℓ₁ norm: J(β; λ) = Σⱼ λⱼ \|β(j)\|
 - λ is a non-increasing sequence of penalty weights
-- |β(1)| ≥ |β(2)| ≥ ... ≥ |β(p)| are the sorted absolute coefficients
+- \|β(1)\| ≥ \|β(2)\| ≥ ... ≥ \|β(p)\| are the sorted absolute coefficients
 
 SLOPE generalizes both the lasso (constant λ) and OSCAR (linearly decreasing λ),
 with the unique property of clustering coefficients by setting them to equal
@@ -174,9 +174,95 @@ latexmk -interaction=nonstopmode main.tex
 
 ## Code in Paper
 
-R and Python scripts for reproducing the figures and analyses in the paper are
-located in the `code/` directory. You can run these scripts after ensuring that
-the required dependencies are installed.
+The scripts in `code/` are lightweight examples for generating figures and
+demonstrating package usage. They are not intended to be strict, byte-for-byte
+reproducibility pipelines. For a fully reproducible environment, use the Nix
+setup in the next section.
+
+Run these from the repository root. Output figures are written to `images/` (the
+directory is created automatically if missing).
+
+### R Example
+
+To run the R examples, you need to have `SLOPE`, `knitr`, `here`, and `lars`
+installed:
+
+```r
+install.packages(c("SLOPE", "knitr", "here", "lars"))
+```
+
+Then, you can run the example script:
+
+```r
+Rscript code/example.R
+```
+
+### Python Example
+
+For Python, you need `sortedl1`, `matplotlib`, and `scikit-learn` installed:
+
+```bash
+pip install sortedl1 matplotlib scikit-learn
+```
+
+You can then run the example script with:
+
+```python
+python code/example.py
+```
+
+### Julia Example
+
+For Julia, we provide the dependencies in [`Project.toml`](./Project.toml). You
+can instantiate the environment and run the example with:
+
+```julia
+julia --project=. code/example.jl
+```
+
+### Plots
+
+Code for generating the plots in the paper are provided in `code/plot_*.py`
+files. In addition to the dependencies mentioned in [Python
+Example](#python-example), you also need `pandas`, `numpy`, and `scipy`
+installed to run these:
+
+```bash
+pip install pandas numpy scipy
+```
+
+You can then run the plotting scripts with:
+
+```bash
+python code/plot_benchmark_path.py
+python code/plot_benchmark_real.py
+python code/plot_benchmark_simul.py
+python code/plot_thresholding.py
+```
+
+## Real Data Analysis Example
+
+In `code/real-data.R`, we provide an extended example using the R `SLOPE`
+package, which is described i Section 6 in the paper. This requires the
+additional dependencies `caret`, `pROC`, `glmnet`, `MLmetrics`, `dplyr`, and
+`readxl`:
+
+```r
+install.packages(c(
+  "caret",
+  "pROC",
+  "glmnet",
+  "MLmetrics",
+  "dplyr",
+  "readxl"
+))
+```
+
+Then, you can run the real data analysis script with:
+
+```r
+Rscript code/real-data.R
+```
 
 ## Nix Environment {#nix-environment}
 
