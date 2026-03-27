@@ -118,6 +118,11 @@
     packages.
   \end{quote}
 
+  We have updated the introduction with a section on related \(\ell_1-\)based
+  methods and software. We have also expanded the discussion on
+  the differences between our software suite and the features of other
+  \(\ell_1\)-based packages.
+
   \begin{quote}
     In the Python package, the class \verb|sortedl1.results.PathResults|
     clearly misses methods to help the user explore the objects. \verb|__str__| is
@@ -158,12 +163,10 @@
   \end{quote}
 
   Thank you for pointing this out. We agree that requiring users to re-supply
-  \texttt{x} and \texttt{y} in \verb|refit()| is problematic, althogh
-  we would contend that the goal of refitting typically is to fit a model
-  on new data. In any case, we have updated the implementation so that
-  \verb|refit.TrainedSLOPE()| now uses the training data stored in the
-  \verb|TrainedSLOPE| object by default. Users may still provide new
-  \texttt{x}/\texttt{y} explicitly, but both must be given together.
+  \texttt{x} and \texttt{y} in \verb|refit()| is problematic. We have updated the
+  implementation so that \verb|refit.TrainedSLOPE()| now uses the training data
+  stored in the \verb|TrainedSLOPE| object by default. Users may still provide
+  new \texttt{x}/\texttt{y} explicitly, but both must be given together.
 
   \begin{quote}
     A similar issue arises with the Python package that does not return the best trained model.
@@ -174,6 +177,29 @@
   best fitted model, i.e., \verb|(cv_results, best_model)|. The returned
   \verb|best_model| is refit on the same \verb|X, y| passed to the CV call using
   the selected best hyperparameters.
+
+  \begin{quote}
+    It seems that the code in the folder code of the replication-material assumes
+    that a folder images is present.
+  \end{quote}
+
+  We have updated and improved the instructions for running the examples from
+  the replication materials considerably, listing dependencies for each file as
+  well as commands used to run them. The problem you encountered occurred because
+  the scripts were expected to be run from the root directory of the material,
+  which we have now clarified in the instructions. We have also added a
+  workaround to dynamically create the \texttt{images} folder if it does not
+  exist.
+
+  \begin{quote}
+    Trying out the code of the R package indicates issues. [...] raising the
+    raising the question why it works for the first 100 observations but then fails
+    for all as well as a subset.
+  \end{quote}
+
+  Thank you for pointing this out. This was real bug in the R package, which did
+  not correctly handle cases where classes differed between the training and test sets.
+  We have now fixed this and released a new version of the R package.
 
   \closing{Yours sincerely,\\[1ex]
     Johan Larsson, Ma\l{}gorzata Bogdan, Krystyna Grzesiak, Mathurin Massias, and Jonas Wallin
