@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+import sys
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+
 from slopeutils import FULL_WIDTH, legend_labels, merge_parquet_files, set_plot_defaults
 
 set_plot_defaults()

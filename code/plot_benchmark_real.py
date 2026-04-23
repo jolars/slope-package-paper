@@ -4,6 +4,10 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
+import sys
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+
 from slopeutils import (
     FULL_WIDTH,
     extract_reg_param,

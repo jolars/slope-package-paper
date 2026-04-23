@@ -1,9 +1,12 @@
+import sys
 from bisect import bisect_left
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from slopeutils import FULL_WIDTH, set_plot_defaults
 
