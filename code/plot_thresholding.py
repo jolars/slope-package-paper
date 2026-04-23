@@ -112,12 +112,12 @@ for a in a_list:
         l_sum = l_sums[k][0]
         r_sum = r_sums[k][0]
 
-        res.extend([np.sign(a) * c_wo_i[k]])
+        res.extend([float(np.sign(a) * c_wo_i[k][0])])
     else:
         ll = len(l_sums) - bisect_left(l_sums[::-1], np.abs(a))
         res.extend([np.sign(a) * (np.abs(a) - sums[ll])])
 
-res = np.asarray(res, dtype="object")
+res = np.asarray(res, dtype=float)
 
 plt.rcParams["text.usetex"] = True
 
