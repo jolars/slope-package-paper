@@ -118,10 +118,19 @@
     packages.
   \end{quote}
 
-  We have updated the introduction with a section on related \(\ell_1-\)based
-  methods and software. We have also expanded the discussion on
-  the differences between our software suite and the features of other
-  \(\ell_1\)-based packages.
+  We have updated the introduction with a paragraph on related
+  \(\ell_1\)-based methods and software, naming \texttt{glmnet},
+  \texttt{ncvreg}, \texttt{biglasso}, and \texttt{lars} in R;
+  \texttt{scikit-learn} in Python; and \texttt{GLMNet.jl} and
+  \texttt{Lasso.jl} in Julia, and indicating which type of penalties,
+  losses, and special features (non-convex penalties, out-of-memory
+  data, exact paths) each supports. We have also expanded the
+  discussion section to explicitly compare our packages against
+  \texttt{glmnet} as the most established reference: we list features
+  that we do not yet support (observation weights, the full GLM loss
+  suite, the group sorted \(\ell_1\) norm) as well as features in our
+  packages that \texttt{glmnet} does not provide (out-of-memory storage
+  and more granular centering/scaling options).
 
   \begin{quote}
     In the Python package, the class \verb|sortedl1.results.PathResults|
