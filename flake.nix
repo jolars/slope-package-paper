@@ -24,14 +24,14 @@
         sortedl1 = (
           pkgs.python3.pkgs.buildPythonPackage rec {
             pname = "sortedl1";
-            version = "1.9.0";
+            version = "1.11.0";
             pyproject = true;
 
             src = pkgs.fetchFromGitHub {
               owner = "jolars";
               repo = "sortedl1";
               rev = "v${version}";
-              hash = "sha256-ERBFFkqwRXVrxylDHb0xvfOY16QpLoX65/CAVgwqOG8=";
+              hash = "sha256-k6eKeX3s59vI9TUu/xQAWnZyrsBKFm66506ETdzqFLE=";
             };
 
             dontUseCmakeConfigure = true;
@@ -75,12 +75,12 @@
         SLOPE = (
           pkgs.rPackages.buildRPackage rec {
             name = "SLOPE";
-            version = "2.0.0";
+            version = "2.1.0";
             src = pkgs.fetchFromGitHub {
               owner = "jolars";
               repo = "SLOPE";
               rev = "v${version}";
-              hash = "sha256-3JsxyvbzIQdj3KMvwsO1bwEpkXkFJnIUdy08Is5mERE=";
+              hash = "sha256-B+R+3Q6xE8C/3ReMc61nYPhfq2Zqp7OdSbvrsGZdOnU=";
             };
             propagatedBuildInputs = with pkgs.rPackages; [
               Matrix
