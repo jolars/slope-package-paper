@@ -29,19 +29,27 @@
 \newcommand{\myurl}[1]{\href{https://#1}{\nolinkurl{#1}}}
 
 \author{
-  Johan Larsson~\orcidlink{0000-0002-4029-5945}\\University of Copenhagen
+  Johan Larsson~\orcidlink{0000-0002-4029-5945}\\
+  University of Copenhagen
   \And
-  Ma\l{}gorzata Bogdan~\orcidlink{0000-0002-0657-4342}\\University of Wroc\l{}aw
+  Ma\l{}gorzata Bogdan~\orcidlink{0000-0002-0657-4342}\\
+  University of Wroc\l{}aw
   \And
-  Krystyna Grzesiak~\orcidlink{0000-0003-2581-7722}\\University of Wroc\l{}aw
+  Krystyna Grzesiak~\orcidlink{0000-0003-2581-7722}\\
+  University of Wroc\l{}aw
   \AND
-  Mathurin Massias~\orcidlink{0000-0002-8950-0356}\\Inria, ENS de Lyon; CNRS, Lyon
+  Mathurin Massias~\orcidlink{0000-0002-8950-0356}\\
+  Inria, ENS de Lyon; CNRS, Lyon
   \And
-  Jonas Wallin~\orcidlink{0000-0003-0381-6593}\\Lund University
+  Jonas Wallin~\orcidlink{0000-0003-0381-6593}\\
+  Lund University
 }
 \Plainauthor{Johan Larsson, Malgorzata Bogdan, Krystyna Grzesiak, Mathurin Massias, Jonas Wallin}
 
-\title{Efficient Solvers for SLOPE in \proglang{R}, \proglang{Python}, \proglang{Julia}, and \proglang{C++}}
+\title{
+  Efficient Solvers for SLOPE in \proglang{R}, \proglang{Python},
+  \proglang{Julia}, and \proglang{C++}
+}
 \Plaintitle{Efficient Solvers for SLOPE in R, Python, Julia, and C++}
 \Shorttitle{Efficient Solvers for SLOPE}
 
@@ -82,79 +90,71 @@
 
 \section{Introduction}
 
-Sorted L-One Penalized Estimation
-(SLOPE)~\citep{bogdan2013,zeng2014,bogdan2015} is a type of regularized
-regression that consists of solving the following convex optimization problem:
+Sorted L-One Penalized Estimation (SLOPE)~\citep{bogdan2013,zeng2014,bogdan2015}
+is a type of regularized regression that consists of solving the following
+convex optimization problem:
 \begin{equation}
   \label{eq:slope}
-  \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p}
-  \Big(
-  P(\beta_0,\beta)
-  = F(\beta_0, \beta) + \alpha J_{\lambda}(\beta)
-  \Big)
+  \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} \Big(
+  P(\beta_0,\beta) = F(\beta_0, \beta) + \alpha J_{\lambda}(\beta) \Big)
 \end{equation}
 %
 where \(P\) is the primal problem, \(F\) is the loss function, \(\alpha\) is a
 parameter that controls the strength of regularization, and \(\lambda\) is a
 non-increasing sequence of penalty weights. \(J\) is the \emph{sorted $\ell_1$
-  norm}, defined as
-%
+norm}, defined as
 \begin{equation}
   % \label{eq:sl1}
   J_{\lambda}(\beta) = \sum_{j=1}^p \lambda_j |\beta_{(j)}|, \quad
   \text{where}\quad |\beta_{(1)}| \geq |\beta_{(2)}| \geq \ldots \geq
   |\beta_{(p)}|.
 \end{equation}
-%
 We will assume that \(F\) takes the following form:
-%
 \[
-  F(\beta_0, \beta) = \frac{1}{n} \sum_{i=1}^n f(\beta_0 + x_i^\intercal \beta, y_i),
+  F( \beta_0, \beta ) = \frac{1}{n} \sum_{i = 1}^n f( \beta_0 + x_i^\intercal \beta , y_i),
 \]
-%
 where \(f\) is a smooth, convex function and \(x_i\) is the \(i\)th row of the
 \(n \times p\) design matrix \(X\). Throughout the paper, we will use the
 convention of denoting a row of a matrix \(X\) as \(x_i\) and a column as
 \(x_j\). \(y_i\) is the \(i\)th row of the \(n \times m\) response matrix
-\(Y\),\footnote{In our case, \(m = 1\) unless the model is multinomial
-  logistic regression.}
-and we let \((\hat{\beta}_0,
-\hat{\beta})\) denote a solution to the problem in \autoref{eq:slope}.
+\(Y\),\footnote{In our case, \(m = 1\) unless the model is multinomial logistic
+regression.} and we let \((\hat{\beta}_0, \hat{\beta})\) denote a solution to
+the problem in \autoref{eq:slope}.
 
 SLOPE is a generalization of both the lasso\footnote{The lasso is attained by
-  taking a constant
-  \(\lambda\).}~~\citep{santosa1986,donoho1994,donoho1995,tibshirani1996} and
-OSCAR\footnote{OSCAR is attained by setting \(\lambda\) to be a linear
-  sequence, where \(\lambda_j = \theta_1 + \theta_2(p - j)\) with \(\theta_1,
-  \theta_2 \geq 0\)~\citep{figueiredo2014}.} (octagonal shrinkage and clustering
-algorithm for regression)~\citep{bondell2008}. One of the most important
-properties of SLOPE is that it can cluster coefficients by setting them to the
-same magnitude~\citep{figueiredo2016,hejny2025,bogdan2026}. This is a natural consequence
-of the sorted \(\ell_1\) norm, stemming from the fact that the contribution to
-the norm of a given coefficient increases disproportionately if it changes
-order. This also allows SLOPE to better recover the ordering pattern in the
-solution.
+taking a constant
+\(\lambda\).}~~\citep{santosa1986,donoho1994,donoho1995,tibshirani1996} and
+OSCAR\footnote{OSCAR is attained by setting \(\lambda\) to be a linear sequence,
+where \(\lambda_j = \theta_1 + \theta_2(p - j)\) with
+\(\theta_1, \theta_2 \geq 0\)~\citep{figueiredo2014}.} (octagonal shrinkage and
+clustering algorithm for regression)~\citep{bondell2008}. One of the most
+important properties of SLOPE is that it can cluster coefficients by setting
+them to the same magnitude~\citep{figueiredo2016,hejny2025,bogdan2026}. This is
+a natural consequence of the sorted \(\ell_1\) norm, stemming from the fact that
+the contribution to the norm of a given coefficient increases disproportionately
+if it changes order. This also allows SLOPE to better recover the ordering
+pattern in the solution.
 
-Like the lasso, SLOPE is a convex but non-smooth optimization problem. And since the
-pool-adjacent-violators algorithm~(PAVA)~\citep{barlow1972} can be used to
+Like the lasso, SLOPE is a convex but non-smooth optimization problem. And since
+the pool-adjacent-violators algorithm~(PAVA)~\citep{barlow1972} can be used to
 efficiently\footnote{At an average \(p \log p\) rate, due to the limiting
-  sorting operation.} compute the proximal operator of the sorted \(\ell_1\)
-norm, it is possible to use a wide range of proximal algorithms, such
-as proximal gradient descent, to solve SLOPE. This also includes accelerated
-methods such as FISTA~\citep{beck2009}, which was for instance used by
-\citet{bogdan2015}. Other possibilities include proximal Newton~\citep{lee2014}
-and the alternating direction method of multipliers (ADMM) method~\citep{boyd2010}.
+sorting operation.} compute the proximal operator of the sorted \(\ell_1\) norm,
+it is possible to use a wide range of proximal algorithms, such as proximal
+gradient descent, to solve SLOPE\@. This also includes accelerated methods such
+as FISTA~\citep{beck2009}, which was for instance used by \citet{bogdan2015}.
+Other possibilities include proximal Newton~\citep{lee2014} and the alternating
+direction method of multipliers (ADMM) method~\citep{boyd2010}.
 
 For similar problems such as the lasso and elastic net\citep{zou2005}, however,
 these aforementioned methods have generally found themselves outperformed by
-coordinate descent methods~\citep{friedman2007,friedman2010}, which optimize
-one coefficient at a time. Several efficient implementations of coordinate
-descent algorithms exists for the lasso, elastic net, and other
-\(\ell_1\)-based regularization methods. For \proglang{R}, there is for
-instance \pkg{glmnet}~\citep{friedman2010}, which fits generalized linear
-models, including Cox-proportional hazards models, with elastic net
-regularization. Other notable packages are \pkg{ncvreg}~\citep{breheny2011},
-which in addition to the elastic net also supports non-convex penalties such as
+coordinate descent methods~\citep{friedman2007,friedman2010}, which optimize one
+coefficient at a time. Several efficient implementations of coordinate descent
+algorithms exists for the lasso, elastic net, and other \(\ell_1\)-based
+regularization methods. For \proglang{R}, there is for instance
+\pkg{glmnet}~\citep{friedman2010}, which fits generalized linear models,
+including Cox-proportional hazards models, with elastic net regularization.
+Other notable packages are \pkg{ncvreg}~\citep{breheny2011}, which in addition
+to the elastic net also supports non-convex penalties such as
 SCAD~\citep{fan2001} and MCP~\citep{zhang2010}. Another interesting package is
 \pkg{biglasso}~\citep{zeng2021}, which supports out-of-memory data to fit lasso
 models to large datasets. Finally, there is also \pkg{lars}~\citep{efron2004},
@@ -162,93 +162,90 @@ which fits exact lasso solution paths using the least angle regression (LARS)
 algorithm. For \proglang{Python}, there is support for the elastic net in the
 widely used \pkg{scikit-learn}~\citep{pedregosa2011} module, which beyond the
 coordinate descent algorithm also features LARS and alternative solvers for the
-lasso and elastic net. For \proglang{Julia}, there is generally less support
-for regularized regression. There exists a wrapper for \pkg{glmnet} in
-\pkg{GLMNet.jl}~\citep{kornblith2024a} and a native \proglang{Julia} package
-in \pkg{Lasso.jl}~\citep{kornblith2024}.
+lasso and elastic net. For \proglang{Julia}, there is generally less support for
+regularized regression. There exists a wrapper for \pkg{glmnet} in
+\pkg{GLMNet.jl}~\citep{kornblith2024a} and a native \proglang{Julia} package in
+\pkg{Lasso.jl}~\citep{kornblith2024}.
 
-Unfortunately, coordinate descent requires that the
-objective is separable in \((\beta_0, \beta)\), which is not the case in SLOPE
-due to the permutations involved in the sorted \(\ell_1\) norm, which means
-that coordinate descent cannot be used directly. This problem was, however,
-overcome by \citet{larsson2023}, who invented a hybrid combination of proximal
-gradient and coordinate descent. The algorithm alternates between proximal gradient
-descent steps on the full problem and coordinate descent on a collapsed
-problem corresponding to the current cluster structure, to achieve
-robust and fast convergence.
+Unfortunately, coordinate descent requires that the objective is separable in
+\((\beta_0, \beta)\), which is not the case in SLOPE due to the permutations
+involved in the sorted \(\ell_1\) norm, which means that coordinate descent
+cannot be used directly. This problem was, however, overcome by
+\citet{larsson2023}, who invented a hybrid combination of proximal gradient and
+coordinate descent. The algorithm alternates between proximal gradient descent
+steps on the full problem and coordinate descent on a collapsed problem
+corresponding to the current cluster structure, to achieve robust and fast
+convergence.
 
 In this paper we make this algorithm available to a wide audience by presenting
 a collection of packages in \proglang{R}~\citep{rcoreteam2025},
 \proglang{Python}~\citep{pythonsoftwarefoundation2025},
 \proglang{Julia}~\citep{bezanson2017}, and \proglang{C++}. For \proglang{Julia}
 and \proglang{Python}, these are, to the best of our knowledge, the first and
-only available implementations of SLOPE. For \proglang{R}, our package
-was the first implementation of SLOPE, although there is now also support
-for SLOPE through the \pkg{sgs}~\citep{feser2023} and
-\pkg{grpSLOPE}~\citep{brzyski2018} packages.
-Additionally, an implementation for \proglang{MATLAB} is
-also available from \citet{candes2013} and is also included in
+only available implementations of SLOPE\@. For \proglang{R}, our package was the
+first implementation of SLOPE, although there is now also support for SLOPE
+through the \pkg{sgs}~\citep{feser2023} and \pkg{grpSLOPE}~\citep{brzyski2018}
+packages. Additionally, an implementation for \proglang{MATLAB} is also
+available from \citet{candes2013} and is also included in
 TFOCS~\citep{becker2011}.
 
 \subsection{Outline of the paper}
 
 In \autoref{sec:math-details}, we introduce the statistical problem that our
-packages solve, namely generalized linear models (GLMs) regularized with the sorted
-\(\ell_1\) norm (SLOPE)\footnote{SLOPE is sometimes used only as the procedure
-  that uses quadratic loss, but here we adopt a more general terminology and
-  let SLOPE be defined for any loss function.}, and provide a brief overview of
-the mathematical properties of GLMs and the particular properties of SLOPE.
-We discuss the optimization problem and describe the hybrid
-coordinate descent algorithm we use for solving SLOPE.
-In \autoref{sec:implementation-details}, we provide a detailed overview of the
-software implementations, highlighting technical aspects such as
-memory management, parallelization, and convergence criteria.
-In \autoref{sec:examples}, we showcase how our packages work in practice,
-providing examples of fitting models, plotting, and performing cross-validation.
-Finally, in \autoref{sec:discussion}, we summarize the contributions of this paper
-and discuss future work.
+packages solve, namely generalized linear models (GLMs) regularized with the
+sorted \(\ell_1\) norm (SLOPE)\footnote{SLOPE is sometimes used only as the
+procedure that uses quadratic loss, but here we adopt a more general terminology
+and let SLOPE be defined for any loss function.}, and provide a brief overview
+of the mathematical properties of GLMs and the particular properties of SLOPE.
+We discuss the optimization problem and describe the hybrid coordinate descent
+algorithm we use for solving SLOPE\@. In \autoref{sec:implementation-details},
+we provide a detailed overview of the software implementations, highlighting
+technical aspects such as memory management, parallelization, and convergence
+criteria. In \autoref{sec:examples}, we showcase how our packages work in
+practice, providing examples of fitting models, plotting, and performing
+cross-validation. Finally, in \autoref{sec:discussion}, we summarize the
+contributions of this paper and discuss future work.
 
 \section{Mathematical details}\label{sec:math-details}
 
-In this section, we provide a brief overview of the mathematical
-details of the SLOPE optimization problem, including the objective and
-the hybrid coordinate descent algorithm used to solve it. We also discuss the
-convergence criteria used to determine when the algorithm has converged, and
-the path fitting procedure used to compute the full regularization path for SLOPE.
+In this section, we provide a brief overview of the mathematical details of the
+SLOPE optimization problem, including the objective and the hybrid coordinate
+descent algorithm used to solve it. We also discuss the convergence criteria
+used to determine when the algorithm has converged, and the path fitting
+procedure used to compute the full regularization path for SLOPE.
 
 \subsection{Generalized linear models}
 % \label{sec:glm}
 
 Our packages are designed to solve SLOPE for generalized linear models (GLMs),
-in which the response \(y_i\) is modelled as a random variable from an exponential family,
-and is assumed to depend conditionally on the linear predictor \(\eta_i = x_i^\intercal \beta + \beta_0\) via
+in which the response \(y_i\) is modelled as a random variable from an
+exponential family, and is assumed to depend conditionally on the linear
+predictor \(\eta_i = x_i^\intercal \beta + \beta_0\) via
 \(\E(y_i \mid \eta_i) = \ilink(\eta_i)\), where \(\ilink\) is the inverse link
 function. This gives rise to the following form of the loss function:
 %
 \[
-  F(\beta_0, \beta) = \frac{1}{n} \sum_{i=1}^n f(\eta_i, y_i),
+  F( \beta_0, \beta ) = \frac{1}{n} \sum_{i = 1}^n f( \eta_i, y_i),
 \]
 %
 where \(f\) is the contribution of the \(i\)th observation to the negative
 log-likelihood of the model. To estimate the parameters of a generalized linear
-model, \((\beta_0, \beta)\), we minimize the loss function \(F\) with respect
-to \((\beta_0, \beta)\).
+model, \((\beta_0, \beta)\), we minimize the loss function \(F\) with respect to
+\((\beta_0, \beta)\).
 
-A special property of \(f\) is that its
-partial derivative with respect to \(\eta\) is
+A special property of \(f\) is that its partial derivative with respect to
+\(\eta\) is
 %
 \[
-  \frac{\partial}{\partial \eta_i} f(\eta_i, y_i) = \ilink(\eta_i) - y_i = r_i,
+  \frac{\partial}{\partial \eta_i} f( \eta_i, y_i) = \ilink ( \eta_i) - y_i = r_i,
 \]
 %
-where we define \(r_i\) to be the \emph{generalized residual}. As a
-consequence, the gradient of the loss function with respect to \(\beta\) can be
-expressed as
+where we define \(r_i\) to be the \emph{generalized residual}. As a consequence,
+the gradient of the loss function with respect to \(\beta\) can be expressed as
 %
 \[
-  \frac{\partial}{\partial \beta_j} F(\beta_0,\beta)
-  = \frac{1}{n} \sum_{i=1}^n x_{ij} \frac{\partial}{\partial \eta_i} f(\eta_i, y_i)
-  = \frac{1}{n} \sum_{i=1}^n x_{ij} r_i.
+  \frac{\partial}{\partial \beta_j} F( \beta_0, \beta ) = \frac{1}{n} \sum_{i = 1}^n x_{ij} \frac{\partial}{\partial \eta_i} f( \eta_i, y_i)
+                                                        = \frac{1}{n} \sum_{i = 1}^n x_{ij} r_i.
 \]
 
 We summarize the loss, link, and inverse link functions for the GLMs supported
@@ -258,69 +255,67 @@ by the SLOPE packages in \autoref{tab:glm}.
   \centering
   \begin{tabular}{lccc}
     \toprule
-    Model       & \(f(\eta, y)\)                                                                                       & \(\link(\mu)\)                            & \(\ilink(\eta)\)                                       \\
+    Model       & \(f(\eta, y)\)                                                                                              & \(\link(\mu)\)                              & \(\ilink(\eta)\) \\
     \midrule
-    Gaussian    & \(\frac{1}{2}(y - \eta)^2\)                                                                          & \(\mu\)                                   & \(\eta\)                                               \\
+    Gaussian    & \(\frac{1}{2}(y - \eta)^2\)                                                                                 & \(\mu\)                                     & \(\eta\) \\
     \addlinespace
-    Binomial    & \(\log(1 + e^\eta) - \eta y\)                                                                        & \(\log \left(\frac{\mu}{1 - \mu}\right)\) & \(\frac{e^\eta}{1 + e^\eta}\)                          \\
+    Binomial    & \(\log(1 + e^\eta) - \eta y\)                                                                               & \(\log \left( \frac{\mu}{1 - \mu} \right)\) & \(\frac{e^\eta}{1 + e^\eta}\) \\
     \addlinespace
-    Poisson     & \(e^\eta - \eta y\)                                                                                  & \(\log(\mu)\)                             & \(e^\eta\)                                             \\
+    Poisson     & \(e^\eta - \eta y\)                                                                                         & \(\log(\mu)\)                               & \(e^\eta\) \\
     \addlinespace
-    Multinomial & \(\sum_{k=1}^{m-1}\left( \log \left( 1 +  \sum_{j=1}^{m-1} e^{\eta_j}\right) - y_k \eta_k  \right)\) & \(\log\left(\frac{\mu}{1 - \mu}\right) \) & \(\frac{\exp(\eta)}{1 + \sum_{j=1}^{m-1} e^{\eta_j}}\) \\
+    Multinomial & \(\sum_{k = 1}^{m - 1}\left( \log \left( 1 + \sum_{j = 1}^{m - 1} e^{\eta_j} \right) - y_k \eta_k \right)\) & \(\log\left( \frac{\mu}{1 - \mu} \right)\)  & \(\frac{\exp(\eta)}{1 + \sum_{j=1}^{m-1} e^{\eta_j}}\) \\
     \bottomrule
   \end{tabular}
-  \caption{Loss functions, link functions, and inverse link functions for
-    generalized linear models in the SLOPE package. Note that in the case of
-    multinomial logistic regression, the input is vector-valued, and we allow
-    \(\log\) and \(\exp\) to be overloaded to apply element-wise in these cases.
+  \caption{
+    Loss functions, link functions, and inverse link functions for generalized
+    linear models in the SLOPE package. Note that in the case of multinomial
+    logistic regression, the input is vector-valued, and we allow \(\log\) and
+    \(\exp\) to be overloaded to apply element-wise in these cases.
   }
   \label{tab:glm}
 \end{table}
 
-A particular case of interest is the multinomial logistic regression model.
-Many implementations of regularized multinomial logistic regression models,
-such as those by \citet{friedman2010} and \citet{fercoq2015}, use the
-\emph{redundant} \(m\)-class formulation. Here, however, we have opted to use
-the non-redundant formulation of the loss function, with the last class serving
-as the reference category. This choice slightly complicates the notation and
-leads to a more complex formulation for the dual problem. For SLOPE, however,
-this is a more natural choice, since it generalizes to the binary case as well
-(in which the last class is also implicit).\footnote{SLOPE needs a \(\lambda\)
-  sequence of length \(mp\), so the loss function for the multinomial case
-  would not be equivalent to the binary case if we used the redundant
-  formulation.} Furthermore, it also relieves the problem of the parameter
-ambiguity that affects the redundant formulation, where rows of the coefficient
-matrix can be shifted without changing the value of \(F(\beta_0, \beta)\). This
-also means that the redundant formulation needs to be accompanied by a bounds
-adjustment step~\citep{friedman2010}. This is trivial in the case of the lasso
-and ridge, and only slightly more complicated for the elastic net. For SLOPE,
-however, the situation is much more involved since rows of the coefficient
-matrix cannot be arbitrarily shifted, since this could affect the entire
-clustering structure.
+A particular case of interest is the multinomial logistic regression model. Many
+implementations of regularized multinomial logistic regression models, such as
+those by \citet{friedman2010} and \citet{fercoq2015}, use the \emph{redundant}
+\(m\)-class formulation. Here, however, we have opted to use the non-redundant
+formulation of the loss function, with the last class serving as the reference
+category. This choice slightly complicates the notation and leads to a more
+complex formulation for the dual problem. For SLOPE, however, this is a more
+natural choice, since it generalizes to the binary case as well (in which the
+last class is also implicit).\footnote{SLOPE needs a \(\lambda\) sequence of
+length \(mp\), so the loss function for the multinomial case would not be
+equivalent to the binary case if we used the redundant formulation.}
+Furthermore, it also relieves the problem of the parameter ambiguity that
+affects the redundant formulation, where rows of the coefficient matrix can be
+shifted without changing the value of \(F(\beta_0, \beta)\). This also means
+that the redundant formulation needs to be accompanied by a bounds adjustment
+step~\citep{friedman2010}. This is trivial in the case of the lasso and ridge,
+and only slightly more complicated for the elastic net. For SLOPE, however, the
+situation is much more involved since rows of the coefficient matrix cannot be
+arbitrarily shifted, since this could affect the entire clustering structure.
 
 \subsection{Hybrid algorithm}
 
 The primary algorithm of the \pkg{SLOPE} packages is the hybrid coordinate
-descent algorithm by \citet{larsson2023}. Since it is described in detail
-there, we will only summarize its key points here and highlight some of the
+descent algorithm by \citet{larsson2023}. Since it is described in detail there,
+we will only summarize its key points here and highlight some of the
 improvements that we have made to the original algorithm. The basic idea is to
-perform the coordinate descent updates on the clusters' coefficients rather
-than directly on the coefficients.
+perform the coordinate descent updates on the clusters' coefficients rather than
+directly on the coefficients.
 
 For a fixed $\beta$ such that $|\beta_j|$ takes $m$ distinct values, we let
 \(\mathcal{C}_1, \mathcal{C}_2 , \dots, \mathcal{C}_m\) and
-\(c_1, c_2, \dots,
-c_m\) be the indices and coefficients, respectively, of the \(m\) clusters of
-$\beta$, such that $\mathcal{C}_i = \{j : |\beta_j| = c_i\}$ and $c_1 > c_2 >
-  \cdots > c_m \geq 0.$
+\(c_1, c_2, \dots, c_m\) be the indices and coefficients, respectively, of the
+\(m\) clusters of $\beta$, such that $\mathcal{C}_i = \{j : |\beta_j| = c_i\}$
+and $c_1 > c_2 > \cdots > c_m \geq 0.$
 
-In our algorithm, we fix the current cluster, e.g. $\mathcal{C}_k$, and
-update all coefficients belonging to it in a single step. By itself, this
-algorithm is not guaranteed to converge, since it can only reorder or merge
-clusters. To circumvent this, the algorithm must be combined with proximal
-gradient descent steps. These steps are able to split the clusters, which
-eventually means that the full algorithm converges to the correct clusters and
-global minimum.
+In our algorithm, we fix the current cluster, e.g. $\mathcal{C}_k$, and update
+all coefficients belonging to it in a single step. By itself, this algorithm is
+not guaranteed to converge, since it can only reorder or merge clusters. To
+circumvent this, the algorithm must be combined with proximal gradient descent
+steps. These steps are able to split the clusters, which eventually means that
+the full algorithm converges to the correct clusters and global minimum.
 
 We have outlined the algorithm in \autoref{alg:hybrid}. Unlike the
 implementation in \citet{larsson2023}, this algorithm is extended to any
@@ -336,12 +331,12 @@ omitted some details of the algorithm here.
 \begin{algorithm}[tp]
   \caption{
     The Hybrid coordinate descent algorithm for generalized linear models, using
-    the IRLS where weights \(w\) and a working response \(z\) are computed
-    after a proximal gradient descent step. We describe the cyclical version of
-    the algorithm here and have omitted the intercept for simplicity.
-    \(c^{\setminus k}\) is a version of the vector \(c\)
-    with the \(k\)th coefficient omitted and \(T\) is the SLOPE thresholding
-    operator, which we have illustrated in \autoref{fig:slope-thresholding}.
+    the IRLS where weights \(w\) and a working response \(z\) are computed after
+    a proximal gradient descent step. We describe the cyclical version of the
+    algorithm here and have omitted the intercept for simplicity.
+    \(c^{\setminus k}\) is a version of the vector \(c\) with the \(k\)th
+    coefficient omitted and \(T\) is the SLOPE thresholding operator, which we
+    have illustrated in \autoref{fig:slope-thresholding}.
   }
   \label{alg:hybrid}
   \SetKwInOut{Input}{input}
@@ -349,23 +344,21 @@ omitted some details of the algorithm here.
   \SetCommentSty{textit}
 
   \Input{%
-    \(X \in \mathbb{R}^{n\times p}\),
-    \(y\in \mathbb{R}^n\),
+    \(X \in \mathbb{R}^{n \times p}\),
+    \(y \in \mathbb{R}^n\),
     \(\lambda \in \{\mathbb{R}^p : \lambda_1 \geq \lambda_2 \geq \cdots > 0\}\),
     \(v \in \mathbb{N}\)
   }
 
   \Repeat{\(P(\beta_0, \beta) - D(\theta) \leq \varepsilon|P(\beta_0, \beta)|\)}{
-
     set \(t\) with backtracking line search\;
 
     \(\beta \gets \beta - t \nabla F(\beta_0, \beta)\)\;
 
     \For{\(i \gets 1,\dots,n\)}{
-
-      \(\eta_i \gets x_i^T \beta + \beta_0 \)\;
-      \(w_i \gets \frac{\partial^2}{\partial \eta_i^2} f(\eta_i, y_i) \)\tcc*{Weights for IRLS}
-      \(z_i \gets \eta_i - \frac{r_i(\eta_i, y_i)}{w_i} \)\tcc*{Working response for IRLS}
+      \(\eta_i \gets x_i^T \beta + \beta_0\)\;
+      \(w_i \gets \frac{\partial^2}{\partial \eta_i^2} f(\eta_i, y_i)\)\tcc*{Weights for IRLS}
+      \(z_i \gets \eta_i - \frac{r_i(\eta_i, y_i)}{w_i}\)\tcc*{Working response for IRLS}
     }
     update \(c\), \(\mathcal{C}\)\;
     \For{\texttt{it} \(\gets 1,\dots,\)\texttt{cd\_maxit}}{
@@ -373,10 +366,10 @@ omitted some details of the algorithm here.
       \(\beta^\text{old} \gets \beta\)\;
 
       \While{\(k \leq \lvert \mathcal{C} \rvert\)}{
-        \(\tilde x \gets \sum_{j \in \cC_k} x_j \sign \beta_j \)\;
+        \(\tilde x \gets \sum_{j \in \cC_k} x_j \sign \beta_j\)\;
         \(\tilde{r} \gets X \beta + \beta_0 - z\)\tcc*{Residuals}
-        \(\gamma \gets \frac{1}{n} \sum_{i=1}^n w_i \tilde{x}_i \tilde{r}_i\)\tcc*{Gradient}
-        \(\xi \gets \frac{1}{n} \sum_{i=1}^n w_i \tilde{x}_i^2 \)\tcc*{Hessian}
+        \(\gamma \gets \frac{1}{n} \sum_{i = 1}^n w_i \tilde{x}_i \tilde{r}_i\)\tcc*{Gradient}
+        \(\xi \gets \frac{1}{n} \sum_{i = 1}^n w_i \tilde{x}_i^2\)\tcc*{Hessian}
         \(\tilde {c} \gets T(c_k \xi - \gamma; \xi, c^{\setminus k}, \lambda)\)\;
         \(\beta_{\cC_k} \gets \tilde{c} \sign(\beta_{\cC_k})\)\;
         Update \(c\), \(\mathcal{C}\)\;
@@ -396,13 +389,14 @@ omitted some details of the algorithm here.
   \centering
   \includegraphics[width=\natwidth]{images/slope-thresholding.pdf}
   \caption{
-  An illustration of the SLOPE thresholding operator for \(\beta = [0.5,
-  -0.5, 0.3, 0.7]^\intercal\), and thus $c = \{0.7, 0.5, 0.3\}$, where we consider
-  an update for the second cluster, \(C_2 = \{1, 2\}\). We have omitted the
-  particular value of $\omega$ for brevity. The example is adapted from
-  \citet{larsson2023}. Across regions where the function is constant, the
-  operator sets the result to be either exactly 0 or merges the cluster
-  with another cluster, setting their magnitudes to be equal.
+    An illustration of the SLOPE thresholding operator for
+    \(\beta = [0.5, - 0.5, 0.3, 0.7]^\intercal\), and thus
+    $c = \{0.7, 0.5, 0.3\}$, where we consider an update for the second cluster,
+    \(C_2 = \{1, 2\}\). We have omitted the particular value of $\omega$ for
+    brevity. The example is adapted from \citet{larsson2023}. Across regions
+    where the function is constant, the operator sets the result to be either
+    exactly 0 or merges the cluster with another cluster, setting their
+    magnitudes to be equal.
   }
   \label{fig:slope-thresholding}
 \end{figure}
@@ -412,53 +406,54 @@ coordinate descent steps, but also comes with benefits due to the inclusion of
 the PGD steps. Proximal gradient descent algorithms are known to converge under
 more general assumptions than coordinate descent algorithms~\citep{wright2015},
 which means that the PGD part of the algorithm can serve as a fallback in case
-the coordinate descent part does not converge. In practice, we store the
-current solution before updating and revert to the previous solution if the
-coordinate descent step does not improve the primal objective.
+the coordinate descent part does not converge. In practice, we store the current
+solution before updating and revert to the previous solution if the coordinate
+descent step does not improve the primal objective.
 
 The implementation in \citet{larsson2023} used a type of cyclical coordinate
-descent in which the algorithm iterated over the clusters in descending order
-by their coefficients' magnitudes. Although simple to implement and efficient
-for many problems, cyclical coordinate descent is known to suffer from
-convergence issues in some cases~\citep{wright2015}, which we found to be the
-case for SLOPE as well. For the current implementation, we therefore include,
-and default to, a version using random permutations, which is slightly slower
-but more robust.
+descent in which the algorithm iterated over the clusters in descending order by
+their coefficients' magnitudes. Although simple to implement and efficient for
+many problems, cyclical coordinate descent is known to suffer from convergence
+issues in some cases~\citep{wright2015}, which we found to be the case for SLOPE
+as well. For the current implementation, we therefore include, and default to, a
+version using random permutations, which is slightly slower but more robust.
 
 \subsection{Convergence criteria}
 
-Our packages use a duality-based stopping criterion, providing an upper bound
-on suboptimality at convergence. We transform the primal problem, \(P(\beta_0,
-\beta)\), into a constrained formulation and derive a dual problem,
-\(D(\delta)\), that allows us to compute a duality gap. As a stopping
-criterion, we use the relative duality gap: \[ P(\beta_0, \beta) - D(\delta)
-  \leq \varepsilon | P(\beta_0, \beta) |, \] where \(\varepsilon >0\) is the
-user-defined tolerance level. This provides a reliable, solver-independent
-measure of convergence. The complete derivation of the dual problem and the
-calculation of the duality gap is provided in
+Our packages use a duality-based stopping criterion, providing an upper bound on
+suboptimality at convergence. We transform the primal problem,
+\(P(\beta_0, \beta)\), into a constrained formulation and derive a dual problem,
+\(D(\delta)\), that allows us to compute a duality gap. As a stopping criterion,
+we use the relative duality gap:
+\[
+  P( \beta_0, \beta ) - D( \delta ) \leq \varepsilon | P( \beta_0, \beta ) |,
+\]
+where \(\varepsilon > 0\) is the user-defined tolerance level. This provides a
+reliable, solver-independent measure of convergence. The complete derivation of
+the dual problem and the calculation of the duality gap is provided in
 \autoref{sec:convergence-criteria-details}.
 
 \subsection{Path fitting}
 % \label{sec:path-fitting}
 
-Since optimal settings of \(\alpha\) are only available under strict
-assumptions that are typically hard to test, it is common to instead use
-cross-validation to tune \(\alpha\) over a grid of values. In practice, this
-means that we repeatedly have to fit the full regularization path, which is the
-sequence of solutions to the problem in \autoref{eq:slope} as \(\alpha\) is
-varied from \(\alpha_\text{max}\) (the value at which the first cluster enters
-the model) to a small value of \(\alpha\) at which the model is almost
-saturated. Our packages are optimized to efficiently compute the full
-regularization path, and make use of  screening
-rules~(\autoref{sec:screening-rules}) to speed up the process of doing so.
+Since optimal settings of \(\alpha\) are only available under strict assumptions
+that are typically hard to test, it is common to instead use cross-validation to
+tune \(\alpha\) over a grid of values. In practice, this means that we
+repeatedly have to fit the full regularization path, which is the sequence of
+solutions to the problem in \autoref{eq:slope} as \(\alpha\) is varied from
+\(\alpha_\text{max}\) (the value at which the first cluster enters the model) to
+a small value of \(\alpha\) at which the model is almost saturated. Our packages
+are optimized to efficiently compute the full regularization path, and make use
+of screening rules~(\autoref{sec:screening-rules}) to speed up the process of
+doing so.
 
 We use the same criteria as \citet{friedman2010} for stopping the path early,
-except that we stop if the number of \emph{clusters}, excluding the zero-cluster,
-exceeds \(n + 1\) (by default), since the support of SLOPE is limited at \(n\)
-clusters\footnote{As opposed to the lasso, which at most allows \(n\) non-zero
-  \emph{coefficients}.}. This can potentially exceed the number of non-zero
-coefficients, although in practice this is rare since clusters do not form
-easily at low levels of regularization.
+except that we stop if the number of \emph{clusters}, excluding the
+zero-cluster, exceeds \(n + 1\) (by default), since the support of SLOPE is
+limited at \(n\) clusters\footnote{As opposed to the lasso, which at most allows
+\(n\) non-zero \emph{coefficients}.}. This can potentially exceed the number of
+non-zero coefficients, although in practice this is rare since clusters do not
+form easily at low levels of regularization.
 
 \subsection{Screening rules}\label{sec:screening-rules}
 
@@ -466,7 +461,7 @@ Sparse models like lasso and SLOPE are well-known to benefit from
 \emph{screening rules}, which are used to reduce the dimension of \(\beta\) for
 a fixed \(\lambda\) in the optimization problem and thereby speed up
 optimization. The intuition for this is that it is possible to estimate the
-gradient \(\nabla F(\beta) \) for a given SLOPE problem and, via the
+gradient \(\nabla F(\beta)\) for a given SLOPE problem and, via the
 subdifferential, estimate the support of the solution: the identity of the
 nonzero coefficients. Screening rules are either \emph{heuristic} or
 \emph{safe}. In the latter case the rule guarantees that excluded predictors
@@ -484,8 +479,8 @@ for the strong screening rule for the lasso~\citep{tibshirani2012}.
 \label{sec:implementation-details}
 
 In this section, we provide an overview of the implementation details of the
-SLOPE packages, including the data structures used to represent clusters,
-the thresholding operator, and parallelization strategies.
+SLOPE packages, including the data structures used to represent clusters, the
+thresholding operator, and parallelization strategies.
 
 \subsection{Software architecture}
 % \label{sec:software}
@@ -499,31 +494,33 @@ all serve as thin wrappers to the \proglang{C++} library, with some additional
 functionality for handling data and plotting the results. This means that new
 features and bug fixes propagate quickly and easily to all these wrappers and
 enable users to promptly take advantage of the latest developments. The entire
-suite of packages is open source and available in version-controlled
-online repositories~(\autoref{tab:slope-packages}).
+suite of packages is open source and available in version-controlled online
+repositories~(\autoref{tab:slope-packages}).
 
 \begin{table}[tp]
   \centering
   \begin{tabular}{llll}
     \toprule
-    Language          & Package        & Repository                         & Documentation                     \\
+    Language          & Package        & Repository                         & Documentation \\
     \midrule
-    \proglang{R}      & \pkg{SLOPE}    & \myurl{github.com/jolars/SLOPE}    & \myurl{jolars.github.io/SLOPE}    \\
+    \proglang{R}      & \pkg{SLOPE}    & \myurl{github.com/jolars/SLOPE}    & \myurl{jolars.github.io/SLOPE} \\
     \proglang{Python} & \pkg{sortedl1} & \myurl{github.com/jolars/sortedl1} & \myurl{jolars.github.io/sortedl1} \\
     \proglang{Julia}  & \pkg{SLOPE.jl} & \myurl{github.com/jolars/SLOPE.jl} & \myurl{jolars.github.io/SLOPE.jl} \\
     \proglang{C++}    & \pkg{slope}    & \myurl{github.com/jolars/libslope} & \myurl{jolars.github.io/libslope} \\
     \bottomrule
   \end{tabular}
-  \caption{A summary of the suite of packages that we have developed for solving SLOPE, along
-    with links to the source code repositories and documentation.}
+  \caption{
+    A summary of the suite of packages that we have developed for solving SLOPE,
+    along with links to the source code repositories and documentation.
+  }
   \label{tab:slope-packages}
 \end{table}
 
 This is made possible via several pieces of software that enable us to link the
 API from our \proglang{C++} library to the high-level languages. This includes
 \pkg{Rcpp}~\citep{eddelbuettel2011} and \pkg{RcppEigen}~\citep{bates2013} for
-\proglang{R}, \pkg{pybind11}~\citep{jakob2025}, and \pkg{CxxWrap}~\citep{janssens2020} for
-\proglang{Julia}.
+\proglang{R}, \pkg{pybind11}~\citep{jakob2025}, and
+\pkg{CxxWrap}~\citep{janssens2020} for \proglang{Julia}.
 
 \subsection{Core algorithmic components}
 
@@ -538,37 +535,38 @@ implementation, we represent the clusters as a collection of three vectors:
   \item[\code{c\_ptr}] Values of the cluster pointers
 \end{description}
 
-In this representation, the indices for the \(k\)th cluster are given by \code{
-c_idx[c_ptr[k] : c_ptr[k+1]]} and the coefficient is simply \code{c[k]}.
-This structure is the same basic setup as in \citet{larsson2023}. Unlike
-their implementation, however, we have made improvements to the
-handling of updating the clusters (merging,
-reordering, removal), which can now be performed with negligible
-overhead and with minimal copying.
+In this representation, the indices for the \(k\)th cluster are given by
+\code{
+c_idx[c_ptr[k] : c_ptr[k+1]]}
+and the coefficient is simply \code{c[k]}. This structure is the same basic
+setup as in \citet{larsson2023}. Unlike their implementation, however, we have
+made improvements to the handling of updating the clusters (merging, reordering,
+removal), which can now be performed with negligible overhead and with minimal
+copying.
 
-The SLOPE thresholding operator~(\autoref{fig:slope-thresholding}) is the analogue
-to the soft-thresholding operator for the lasso. But unlike the latter, which
-is trivial to compute, the SLOPE thresholding operator needs to conduct a
+The SLOPE thresholding operator~(\autoref{fig:slope-thresholding}) is the
+analogue to the soft-thresholding operator for the lasso. But unlike the latter,
+which is trivial to compute, the SLOPE thresholding operator needs to conduct a
 search over the clusters in order to find correct solution. This leads to a
 worst-case complexity that depends on the number of clusters, which might seem
-to be prohibitive when both \(n\) and \(p\) are large. Fortunately, however,
-the situation is much less dire in practice, since the order of the clusters
+to be prohibitive when both \(n\) and \(p\) are large. Fortunately, however, the
+situation is much less dire in practice, since the order of the clusters
 typically stabilizes early during optimization. This also means that, contrary
-to conventional wisdom, it is in fact more efficient to conduct a linear, as opposed
-to binary, search over the clusters. Note also that the partial \(\lambda\) sums
-do not need to be computed directly. Instead, we simply compute the
-cumulative sum of the \(\lambda\) array once and use this to retrieve
-the partial sums as needed.
+to conventional wisdom, it is in fact more efficient to conduct a linear, as
+opposed to binary, search over the clusters. Note also that the partial
+\(\lambda\) sums do not need to be computed directly. Instead, we simply compute
+the cumulative sum of the \(\lambda\) array once and use this to retrieve the
+partial sums as needed.
 
 \subsection{Data handling and optimization}
 
 Our package is based on the \pkg{Eigen} \proglang{C++} library and provides
-support for both dense and sparse design matrices. The latter can be
-constructed through the \pkg{Matrix}~(\proglang{R}),
-\pkg{scipy}~(\proglang{Python}), and \pkg{SparseArrays}~(\proglang{Julia})
-packages in and are passed to the \proglang{C++} API without copying
-and with negligible overhead. Coefficients are returned in a sparse format, which
-allows for efficient storage and retrieval of the coefficients.
+support for both dense and sparse design matrices. The latter can be constructed
+through the \pkg{Matrix}~(\proglang{R}), \pkg{scipy}~(\proglang{Python}), and
+\pkg{SparseArrays}~(\proglang{Julia}) packages in and are passed to the
+\proglang{C++} API without copying and with negligible overhead. Coefficients
+are returned in a sparse format, which allows for efficient storage and
+retrieval of the coefficients.
 
 For dense matrices, the packages implement memory-efficient views of the input
 matrices to avoid copying the data. This means, for instance, that no copies
@@ -579,15 +577,14 @@ cross-validation procedure over arbitrarily many folds and repetitions without
 needing to ever copy the data, which makes for a much more memory-friendly
 implementation (at the cost of worse runtime performance).
 
-The SLOPE packages also support out-of-memory storage for the design matrix, which
-means that users can fit SLOPE models on data sets that are larger than the
-available memory. Storage in RAM is therefore limited to the order of \(O(n) +
-O(p)\), which means that the packages can be used on huge data sets.
+The SLOPE packages also support out-of-memory storage for the design matrix,
+which means that users can fit SLOPE models on data sets that are larger than
+the available memory. Storage in RAM is therefore limited to the order of
+\(O(n) + O(p)\), which means that the packages can be used on huge data sets.
 This is supported via the generic \code{Eigen::Map} class, which allows
-arbitrary data to be mapped into \pkg{Eigen} data structures. At the
-time of writing, this is only supported for \proglang{R},
-which is possible via the \pkg{bigmemory} package~\citep{kane2013},
-and currently only for dense designs.
+arbitrary data to be mapped into \pkg{Eigen} data structures. At the time of
+writing, this is only supported for \proglang{R}, which is possible via the
+\pkg{bigmemory} package~\citep{kane2013}, and currently only for dense designs.
 
 As shown by \citet{larsson2025}, predictor normalization (centering and scaling
 the design matrix) may have large consequences for the solutions. Our packages
@@ -599,10 +596,10 @@ Normalization is performed as predictors of the design matrix are accessed
 during optimization, which allows us to support centering even of sparse design
 matrices. This also allows us to completely avoid copying the design matrix.
 
-The software is parallelized using \pkg{OpenMP}, which is supported on all
-major platforms. Our functions employ several heuristics based on problem size to
-determine whether to spawn multiple threads, except
-for the case of cross-validation, which is always parallelized.
+The software is parallelized using \pkg{OpenMP}, which is supported on all major
+platforms. Our functions employ several heuristics based on problem size to
+determine whether to spawn multiple threads, except for the case of
+cross-validation, which is always parallelized.
 
 \section{Examples}\label{sec:examples}
 
@@ -616,9 +613,9 @@ language and can be installed using the following commands:
 \end{description}
 
 Installing the \proglang{C++} library is slightly more involved, and requires
-\pkg{CMake}~\citep{kitware2025} together with a working \proglang{C++} toolchain, including
-the \pkg{Eigen} library~\citep{guennebaud2010a} and \pkg{OpenMP}~\citep{dagum1998} (optionally,
-to enable parallelization).
+\pkg{CMake}~\citep{kitware2025} together with a working \proglang{C++}
+toolchain, including the \pkg{Eigen} library~\citep{guennebaud2010a} and
+\pkg{OpenMP}~\citep{dagum1998} (optionally, to enable parallelization).
 
 Assuming we have loaded a data set consisting of a design matrix \code{x} and
 response vector \code{y}, we can fit the full regularization path for the SLOPE
@@ -651,9 +648,8 @@ julia> fit = slope(x, y)
 
 \medskip
 
-You can also use the C++ library directly, in
-which case the above would translate into the
-following:
+You can also use the C++ library directly, in which case the above would
+translate into the following:
 \begin{Code}
 #include <slope/slope.h>
 slope::Slope model;
@@ -667,10 +663,10 @@ please see \autoref{sec:examples-julia-python} for equivalent examples in
 \subsection{First steps}
 \label{sec:first-steps}
 
-We start with a simple example of fitting a full SLOPE path to the diabetes
-data set~\citep{efron2004}, including plotting it.\footnote{Note that the
-  actual code for the plotting examples here is slightly more complex to allow
-  for better control over the aesthetics.}
+We start with a simple example of fitting a full SLOPE path to the diabetes data
+set~\citep{efron2004}, including plotting it.\footnote{Note that the actual code
+for the plotting examples here is slightly more complex to allow for better
+control over the aesthetics.}
 
 \begin{Code}
 R> library(SLOPE)
@@ -684,18 +680,18 @@ R> plot(fit_slope)
 The \code{q} parameter is a parameter of the sequence of \(\lambda\) values,
 which by default~(\code{lambda = "bh"}) uses the Benjamini--Hochberg (BH)
 sequence~\citep{bogdan2015}. If the design matrix is orthogonal, then the
-\code{q} parameter sets a desired false discovery rate (FDR) in terms
-of the identification of true signals (nonzero coefficients).
+\code{q} parameter sets a desired false discovery rate (FDR) in terms of the
+identification of true signals (nonzero coefficients).
 
-Other types of sequences are also supported,
-including \code{lambda = "lasso"} for the lasso,
-\code{lambda = "oscar"} for the OSCAR sequence~\citep{bondell2008}, and
-\code{lambda = "gaussian"} for the Gaussian-type sequence~\citep{bogdan2015},
-which is a modification of the BH sequence that has been empirically shown to
-provide similar FDR control in non-orthogonal, low-dimensional settings.
+Other types of sequences are also supported, including \code{lambda = "lasso"}
+for the lasso, \code{lambda = "oscar"} for the OSCAR
+sequence~\citep{bondell2008}, and \code{lambda = "gaussian"} for the
+Gaussian-type sequence~\citep{bogdan2015}, which is a modification of the BH
+sequence that has been empirically shown to provide similar FDR control in
+non-orthogonal, low-dimensional settings.
 
-To show how the choice of the \(\lambda\) sequence affects the
-results, we will refit the diabetes data using the lasso sequence.
+To show how the choice of the \(\lambda\) sequence affects the results, we will
+refit the diabetes data using the lasso sequence.
 
 \begin{Code}
 R> fit_lasso <- SLOPE(x, y, lambda = "lasso")
@@ -703,23 +699,22 @@ R> plot(fit_lasso)
 \end{Code}
 
 The resulting paths are plotted in \autoref{fig:diabetes}. Observe that the
-paths are similar but that SLOPE has clustered
-some coefficients along parts of the path. Predictors 3 and 9, for instance,
-enter the path together and remain clustered at the beginning, then
-split apart and again cluster together briefly, before diverging again.
-We also see that predictors 4, 10, and 8 enter the model together, only
-to then, one by one, split apart later on. Unlike the lasso path, there
-are many more \emph{kinks} in the SLOPE path, since they occur not only when
-new predictors become active, but also when they merge into or split
-from clusters.
+paths are similar but that SLOPE has clustered some coefficients along parts of
+the path. Predictors 3 and 9, for instance, enter the path together and remain
+clustered at the beginning, then split apart and again cluster together briefly,
+before diverging again. We also see that predictors 4, 10, and 8 enter the model
+together, only to then, one by one, split apart later on. Unlike the lasso path,
+there are many more \emph{kinks} in the SLOPE path, since they occur not only
+when new predictors become active, but also when they merge into or split from
+clusters.
 
 \begin{figure}[tp]
   \centering
   {\includegraphics[width=\natwidth]{images/diabetes-slope-lasso.pdf}}
-  \caption{%
-    SLOPE and lasso paths on the diabetes
-    data set. Note that the \(x\) axis is reversed. Numbers indicate
-    the indices of the predictors.
+  \caption{
+    %
+    SLOPE and lasso paths on the diabetes data set. Note that the \(x\) axis is
+    reversed. Numbers indicate the indices of the predictors.
   }
   \label{fig:diabetes}
 \end{figure}
@@ -732,17 +727,18 @@ To attain sparsity, SLOPE shrinks coefficients towards zero. This introduces
 bias, which, although it helps to combat overfitting, may also lead to worse
 predictions in some cases. To mitigate this, it is possible to \emph{relax} the
 SLOPE solutions by fitting an ordinary least-squares model to the collapsed
-cluster structure from running SLOPE~\citep{skalski2022}\footnote{Note that
-  this paper refers to the relaxed SLOPE as the ``debiased'' SLOPE. Here, we
-  prefer the term ``relaxed''' to stay closer to the nomenclature from the lasso
-  literature and avoid confusion with the debiased lasso~\citep{geer2014},
-  which represents a different approach.}. The level of relaxation is
-parameterized by \(\gamma\), which controls the mix between the original SLOPE
-solution (\(\gamma = 1\)) and the fully relaxed solution (\(\gamma = 0\)), so
-that the end result is given by
+cluster structure from running SLOPE~\citep{skalski2022}\footnote{Note that this
+paper refers to the relaxed SLOPE as the ``debiased'' SLOPE\@. Here, we prefer
+the term ``relaxed''' to stay closer to the nomenclature from the lasso
+literature and avoid confusion with the debiased lasso~\citep{geer2014}, which
+represents a different approach.}. The level of relaxation is parameterized by
+\(\gamma\), which controls the mix between the original SLOPE solution
+(\(\gamma = 1\)) and the fully relaxed solution (\(\gamma = 0\)), so that the
+end result is given by
 %
 \[
-  \hat{\beta} = \gamma \hat{\beta}_\text{SLOPE} + (1 - \gamma) \hat{\beta}_\text{relaxed}.
+  \hat{\beta} = \gamma \hat{\beta}_\text{SLOPE}
+                + (1 - \gamma ) \hat{\beta}_\text{relaxed} .
 \]
 
 Our packages support regularization through the \code{gamma} argument. Here, we
@@ -754,17 +750,18 @@ R> fit_relaxed <- SLOPE(x, y, q = 0.1, gamma = 0)
 R> fit_semirelaxed <- SLOPE(x, y, q = 0.1, gamma = 0.5)
 \end{Code}
 
-We plot the resulting paths in \autoref{fig:relaxed-slope}. Observe
-the jaggedness of the relaxed paths, which change dramatically
-as clusters form, merge, and split.
+We plot the resulting paths in \autoref{fig:relaxed-slope}. Observe the
+jaggedness of the relaxed paths, which change dramatically as clusters form,
+merge, and split.
 
 \begin{figure}[tp]
   \centering
   \includegraphics[width=\natwidth]{images/slope-relaxed.pdf}
-  \caption{%
-    SLOPE with various level of relaxation \(\gamma\), with
-    \(\gamma = 0\) (fully relaxed), \(\gamma = 0.5\) (semi-relaxed),
-    and \(\gamma = 1\) (standard SLOPE).
+  \caption{
+    %
+    SLOPE with various level of relaxation \(\gamma\), with \(\gamma = 0\)
+    (fully relaxed), \(\gamma = 0.5\) (semi-relaxed), and \(\gamma = 1\)
+    (standard SLOPE).
   }
   \label{fig:relaxed-slope}
 \end{figure}
@@ -772,11 +769,11 @@ as clusters form, merge, and split.
 \subsection{Cross-validation}
 
 Our packages support hyper-parameter tuning via iterated \(k\)-fold
-cross-validation (CV), with parameterization over \(\alpha\), \(\lambda\) type (BH,
-Gaussian type, etc.), \(\gamma\) (SLOPE relaxation parameter).
-Here, we demonstrate the CV functionality by cross-validating across
-to values of the \(q\) parameter and printing the results,
-which displays the optimal values for all the cross-validated parameters.
+cross-validation (CV), with parameterization over \(\alpha\), \(\lambda\) type
+(BH, Gaussian type, etc.), \(\gamma\) (SLOPE relaxation parameter). Here, we
+demonstrate the CV functionality by cross-validating across to values of the
+\(q\) parameter and printing the results, which displays the optimal values for
+all the cross-validated parameters.
 
 \begin{CodeChunk}
   \begin{CodeInput}
@@ -795,8 +792,8 @@ Optimum values:
 \end{CodeChunk}
 
 It is also easy to plot the cross-validation results~(\autoref{fig:cv}), which
-show the cross-validation error with 95\% confidence intervals and a dashed
-line indicating the optimal value of \(\alpha\) for the best value of \(q\).
+show the cross-validation error with 95\% confidence intervals and a dashed line
+indicating the optimal value of \(\alpha\) for the best value of \(q\).
 
 \begin{Code}
 R> plot(fit_cv)
@@ -805,11 +802,11 @@ R> plot(fit_cv)
 \begin{figure}[tp]
   \centering
   \includegraphics[width=\natwidth]{images/slope-cv.pdf}
-  \caption{%
-    Mean-squared error (MSE) from cross-validation of
-    \(q\) and \(\alpha\) for SLOPE fit to the diabetes data set.
-    The dashed line marks the optimal value of \(\alpha\) in the
-    panel corresponding to the optimal value of \(q\).
+  \caption{
+    %
+    Mean-squared error (MSE) from cross-validation of \(q\) and \(\alpha\) for
+    SLOPE fit to the diabetes data set. The dashed line marks the optimal value
+    of \(\alpha\) in the panel corresponding to the optimal value of \(q\).
   }
   \label{fig:cv}
 \end{figure}
@@ -817,10 +814,10 @@ R> plot(fit_cv)
 \section{Benchmarks}
 
 In this section, we present benchmarks of the numerical performance of our
-implementation for solving SLOPE. In \autoref{sec:single-solution-benchmark}, we examine the performance of SLOPE
-when fitting for a single value of \(\alpha\), while in
-\autoref{sec:path-benchmark}, we benchmark the performance of fitting
-the full regularization path.
+implementation for solving SLOPE\@. In \autoref{sec:single-solution-benchmark},
+we examine the performance of SLOPE when fitting for a single value of
+\(\alpha\), while in \autoref{sec:path-benchmark}, we benchmark the performance
+of fitting the full regularization path.
 
 Our benchmarks are organized and run using \pkg{benchopt}~\citep{moreau2022a}.
 They are available as public git repositories at
@@ -828,60 +825,60 @@ They are available as public git repositories at
 \myurl{github.com/jolars/benchmark\_slope\_path} for the single solution and
 path benchmarks, respectively. Both feature the Python version of our
 implementation, \pkg{sortedl1}\footnote{The \proglang{R} package \pkg{SLOPE} is
-  also included, but we have omitted it from the benchmark here since it is
-  essentially equivalent to the \proglang{Python} package \pkg{sortedl1}.}. The
-single solution benchmark includes four variations on proximal gradient
-descent (PGD), using Anderson acceleration~\citep{anderson1965,zhang2020},
+also included, but we have omitted it from the benchmark here since it is
+essentially equivalent to the \proglang{Python} package \pkg{sortedl1}.}. The
+single solution benchmark includes four variations on proximal gradient descent
+(PGD), using Anderson acceleration~\citep{anderson1965,zhang2020},
 Barzilai--Borwein step sizes, safe screening rules, and the fast iterative
 shrinking and thresholding algorithm (FISTA)~\citep{beck2009}. The latter of
-these is also included through the \pkg{skglm} package~\citep{bertrand2022}.
-We also include the alternating direction method of multipliers
-(ADMM)~\citep{boyd2010}, a semi-smooth Newton-based method~\citep{luo2019},
-and an approximate homotopy method, \pkg{SolutionPath}~\citep{dupuis2024}.
-See \autoref{sec:solver-details} for more details on the solvers and their
-implementations. The path benchmark includes a subset of these solvers,
-namely \pkg{FISTA}, \pkg{SolutionPath}, and \pkg{ADMM}. All of
-the benchmarks were run on a Lenovo Thinkpad T14 Gen 5 (Intel) laptop
-with a Intel Core Ultra 7 155U CPU (12 cores, max 4.8 GHz), 32 GB of RAM,
-and NixOS 25.05 (Linux).
+these is also included through the \pkg{skglm} package~\citep{bertrand2022}. We
+also include the alternating direction method of multipliers
+(ADMM)~\citep{boyd2010}, a semi-smooth Newton-based method~\citep{luo2019}, and
+an approximate homotopy method, \pkg{SolutionPath}~\citep{dupuis2024}. See
+\autoref{sec:solver-details} for more details on the solvers and their
+implementations. The path benchmark includes a subset of these solvers, namely
+\pkg{FISTA}, \pkg{SolutionPath}, and \pkg{ADMM}. All of the benchmarks were run
+on a Lenovo Thinkpad T14 Gen 5 (Intel) laptop with a Intel Core Ultra 7 155U CPU
+(12 cores, max 4.8 GHz), 32 GB of RAM, and NixOS 25.05 (Linux).
 
 For this paper, we have also created a separate benchmark for fitting the full
 regularization path, which is available at
-\myurl{github.com/jolars/benchmark\_slope\_path} and which features a subset
-of the solvers from the previous benchmark.
+\myurl{github.com/jolars/benchmark\_slope\_path} and which features a subset of
+the solvers from the previous benchmark.
 
 We have run the benchmarks for both simulated~(\autoref{tab:simulated-data}) as
-well as real data~(\autoref{tab:real-data}). For all real data, we standardize the
-predictors to have mean zero and unit variance if \(X\) is dense and scale with
-the maximum absolute value of each predictor otherwise. For all data we use the
-Benjamini--Hochberg sequence for \(\lambda\) with \(q=0.2\). Since some of the
-solvers cannot handle intercepts, we have omitted the intercepts from the
+well as real data~(\autoref{tab:real-data}). For all real data, we standardize
+the predictors to have mean zero and unit variance if \(X\) is dense and scale
+with the maximum absolute value of each predictor otherwise. For all data we use
+the Benjamini--Hochberg sequence for \(\lambda\) with \(q = 0.2\). Since some of
+the solvers cannot handle intercepts, we have omitted the intercepts from the
 models. Also note that not all solvers support sparse design matrices, which is
 why they are not included everywhere.
 
 \begin{table}[tp]
   \centering
   \begin{tabular}{
-      l
-      S[table-format=5.0]
-      S[table-format=7.0]
-      S[table-format=1.5,round-mode=figures,round-precision=2]
-      p{5cm}
-    }
+    l
+    S[table-format=5.0]
+    S[table-format=7.0]
+    S[table-format=1.5,round-mode=figures,round-precision=2]
+    p{5cm}
+  }
     \toprule
-    Dataset                    & {\(n\)} & {\(p\)} & {\(X\) density} & {References}                        \\
+    Dataset                    & {\(n\)} & {\(p\)} & {\(X\) density} & {References} \\
     \midrule
     \dataset{BRCA1}            & 536     & 17322   & 1               & \citet{nationalcancerinstitute2022} \\
-    \dataset{Koussounadis2014} & 101     & 34694   & 1               & \citet{koussounadis2014}            \\
-    \dataset{Real-Sim}         & 72309   & 20958   & 1               & \citet{mccallum2010}                \\
-    \dataset{RCV1}             & 20242   & 44504   & 0.00166         & \citet{lewis2004}                   \\
-    \dataset{Rhee2006}         & 842     & 360     & 0.02469         & \citet{rhee2006}                    \\
-    \dataset{Scheetz2006}      & 120     & 18975   & 1               & \citet{scheetz2006}                 \\
+    \dataset{Koussounadis2014} & 101     & 34694   & 1               & \citet{koussounadis2014} \\
+    \dataset{Real-Sim}         & 72309   & 20958   & 1               & \citet{mccallum2010} \\
+    \dataset{RCV1}             & 20242   & 44504   & 0.00166         & \citet{lewis2004} \\
+    \dataset{Rhee2006}         & 842     & 360     & 0.02469         & \citet{rhee2006} \\
+    \dataset{Scheetz2006}      & 120     & 18975   & 1               & \citet{scheetz2006} \\
     \bottomrule
   \end{tabular}
-  \caption{%
-    List of real datasets used in our experiments, along with some of
-    their properties, including the number of samples \(n\) and predictors \(p\).
+  \caption{
+    %
+    List of real datasets used in our experiments, along with some of their
+    properties, including the number of samples \(n\) and predictors \(p\).
     \dataset{BRCA1}, \dataset{Koussounadis2014}, and \dataset{Scheetz2006} were
     obtained from \citet{breheny2022} and the rest from \citet{chang2016}.
   }
@@ -891,98 +888,103 @@ why they are not included everywhere.
 \begin{table}[tp]
   \centering
   \begin{tabular}{
-      l
-      S[table-format=6.0]
-      S[table-format=6.0]
-      S[table-format=2.0]
-      S[table-format=1.3]
-      S[table-format=0.1]
-    }
+    l
+    S[table-format=6.0]
+    S[table-format=6.0]
+    S[table-format=2.0]
+    S[table-format=1.3]
+    S[table-format=0.1]
+  }
     \toprule
     {Scenario}       & {\(n\)} & {\(p\)} & {\(k\)} & {\(X\) density} & {\(\rho\)} \\
     \midrule
-    High Dim         & 200     & 20000   & 20      & 1               & 0.6        \\
-    High Dim, Sparse & 200     & 200000  & 20      & 0.001           & 0.6        \\
-    Low Dim          & 200000  & 200     & 40      & 1               & 0.2        \\
+    High Dim         & 200     & 20000   & 20      & 1               & 0.6 \\
+    High Dim, Sparse & 200     & 200000  & 20      & 0.001           & 0.6 \\
+    Low Dim          & 200000  & 200     & 40      & 1               & 0.2 \\
     \bottomrule
   \end{tabular}
   \caption{
-    Scenarios for the simulated data in our benchmarks. \(\rho\) is the auto-correlation
-    between adjacent predictors, \(k\) is the number of clusters, and
-    \(n\) and \(p\) are the number of samples and predictors, respectively.
+    Scenarios for the simulated data in our benchmarks. \(\rho\) is the
+    auto-correlation between adjacent predictors, \(k\) is the number of
+    clusters, and \(n\) and \(p\) are the number of samples and predictors,
+    respectively.
   }
   \label{tab:simulated-data}
 \end{table}
 
 \subsection{Single solution}\label{sec:single-solution-benchmark}
 
-We have parameterized our single-solution benchmarks by \(\alpha\) as a
-fraction of \(\alpha_\text{max}\) (the value at which the first cluster enters
-the model), and run the benchmarks for \(\alpha = \alpha_\text{max}/2\),
-\(\alpha_\text{max}/10\), and \(\alpha_\text{max}/50\). We present convergence using
-the duality gap.
+We have parameterized our single-solution benchmarks by \(\alpha\) as a fraction
+of \(\alpha_\text{max}\) (the value at which the first cluster enters the
+model), and run the benchmarks for \(\alpha = \alpha_\text{max} / 2\),
+\(\alpha_\text{max} / 10\), and \(\alpha_\text{max} / 50\). We present
+convergence using the duality gap.
 
-The results for the simulated data are presented in \autoref{fig:simulated-data-single}.
-We can observe that our algorithm is fastest in every case except
-the (\(\alpha_\text{max}/50\), High Dim) combination, where the Newt-ALM
-method seems to perform better (although does not quite converge). The difference
-is especially pronounced for high levels of regularization, where our method is
-often many times faster than the next best method. Our current implementation shows
-improved performance compared to \citet{larsson2023}, which also featured
-the hybrid method. We believe this is likely due to the addition
-of screening rules as well as algorithmic improvements. The Newt-ALM method also
-performs better than in \citet{larsson2023}, which is the result of
-algorithmic improvements made in the implemention we use here.
+The results for the simulated data are presented in
+\autoref{fig:simulated-data-single}. We can observe that our algorithm is
+fastest in every case except the (\(\alpha_\text{max} / 50\), High Dim)
+combination, where the Newt-ALM method seems to perform better (although does
+not quite converge). The difference is especially pronounced for high levels of
+regularization, where our method is often many times faster than the next best
+method. Our current implementation shows improved performance compared to
+\citet{larsson2023}, which also featured the hybrid method. We believe this is
+likely due to the addition of screening rules as well as algorithmic
+improvements. The Newt-ALM method also performs better than in
+\citet{larsson2023}, which is the result of algorithmic improvements made in the
+implemention we use here.
 
 \begin{figure}[tp]
   \centering
   \includegraphics[width=\natwidth]{images/benchmark_single_simulated.pdf}
-  \caption{%
-    Performance of the solvers for the single solution benchmark for three different settings
-    of simulated data~(\autoref{tab:simulated-data}).
-    Please see the text for information about the data and setup of the experiment.
+  \caption{
+    %
+    Performance of the solvers for the single solution benchmark for three
+    different settings of simulated data~(\autoref{tab:simulated-data}). Please
+    see the text for information about the data and setup of the experiment.
   }
   \label{fig:simulated-data-single}
 \end{figure}
 
 For real data~\autoref{fig:real-data-single}, we see a mostly similar pattern.
 Our algorithm (sortedl1) performs best for most combinations---again dominating
-in the high-regularization regime, whereas Newt-ALM and occasionally some version of
-the accelerated PGD methods or ADMM perform well. Notice, however, that the other algorithms
-performance appears to be much more sensitive to the problem, especially the
-ADMM method, which sometimes diverges.
+in the high-regularization regime, whereas Newt-ALM and occasionally some
+version of the accelerated PGD methods or ADMM perform well. Notice, however,
+that the other algorithms performance appears to be much more sensitive to the
+problem, especially the ADMM method, which sometimes diverges.
 
 \begin{figure}[tp]
   \centering
   \includegraphics[width=\natwidth]{images/benchmark_single_real.pdf}
-  \caption{%
+  \caption{
+    %
     Performance of the solvers for the single solution benchmark for five
     different real data sets~(\autoref{tab:real-data}) and three levels of
-    regularization. Please see the text for information about the data and
-    setup of the experiment.
+    regularization. Please see the text for information about the data and setup
+    of the experiment.
   }
   \label{fig:real-data-single}
 \end{figure}
 
 \subsection{Path}\label{sec:path-benchmark}
 
-Here, we present benchmarks
-on a subset of the real data sets from \autoref{tab:real-data}. We parameterize
-the benchmark using the length of the path, using 50, 100, and 200 steps. We
-present the results as the maximum relative duality gap along the path.
+Here, we present benchmarks on a subset of the real data sets from
+\autoref{tab:real-data}. We parameterize the benchmark using the length of the
+path, using 50, 100, and 200 steps. We present the results as the maximum
+relative duality gap along the path.
 
-The results are presented in \autoref{fig:real-data-path}. Note that the interpretation
-of progress towards convergence does not hold quite the same way as for the single
-solution benchmarks since we fit a full path. Nevertheless, we note that our
-implementation is the fastest by a large margin.
+The results are presented in \autoref{fig:real-data-path}. Note that the
+interpretation of progress towards convergence does not hold quite the same way
+as for the single solution benchmarks since we fit a full path. Nevertheless, we
+note that our implementation is the fastest by a large margin.
 
 \begin{figure}[tp]
   \centering
   \includegraphics[width=\natwidth]{images/benchmark_path_real.pdf}
-  \caption{%
+  \caption{
+    %
     Benchmark for fitting the full regularization path on real data sets with
-    varying path lengths. The plot show the maximum relative duality gap across all
-    solutions along the regularization path.
+    varying path lengths. The plot show the maximum relative duality gap across
+    all solutions along the regularization path.
   }
   \label{fig:real-data-path}
 \end{figure}
@@ -993,19 +995,18 @@ comparing their approximate homotopy method to the hybrid algorithm from
 \citet{larsson2023}, we consistently find our algorithm to be superior across
 all tested scenarios. This improved performance can be attributed to several
 factors: \citet{dupuis2024} used a more stringent stopping criterion (duality
-gap of \(10^{-10}\)), our benchmarks generally involve larger problem sizes,
-and our implementation includes enhancements over the original version from
+gap of \(10^{-10}\)), our benchmarks generally involve larger problem sizes, and
+our implementation includes enhancements over the original version from
 \citet{larsson2023}.
 
 \section{Application to real-world data}\label{sec:realdat}
 
 To illustrate the practical utility of SLOPE, we applied it to a metabolomics
 dataset from \citet{Godlewski2023}, comprising plasma measurements from glioma
-patients and healthy controls. The dataset contains 165 samples (94 glioma
-cases and 71 controls), each with 138 metabolite features.
+patients and healthy controls. The dataset contains 165 samples (94 glioma cases
+and 71 controls), each with 138 metabolite features.
 
-We first create the design matrix \texttt{x} and the response vector
-\texttt{y}:
+We first create the design matrix \texttt{x} and the response vector \texttt{y}:
 
 \begin{Code}
 R> x <- glioma$x
@@ -1042,14 +1043,14 @@ R> x_test  <- x[-train_index, ]
 R> y_test  <- y[-train_index]
 \end{Code}
 
-In this example, SLOPE achieved an AUC of 0.978 on the test set, while the
-lasso obtained 0.94. More importantly, SLOPE selected a richer set of features
-(25 metabolites grouped into 10 clusters), compared to the 10 variables
-selected by the lasso. One of the unique features of the R implementation is
-the ability to visualize the clustering of coefficients with the
-\texttt{plotClusters()} function\footnote{This functionality is specific to the
-  R package.}. The plot highlights groups of variables with coefficients of the
-same magnitude (up to sign):
+In this example, SLOPE achieved an AUC of 0.978 on the test set, while the lasso
+obtained 0.94. More importantly, SLOPE selected a richer set of features (25
+metabolites grouped into 10 clusters), compared to the 10 variables selected by
+the lasso. One of the unique features of the R implementation is the ability to
+visualize the clustering of coefficients with the \texttt{plotClusters()}
+function\footnote{This functionality is specific to the R package.}. The plot
+highlights groups of variables with coefficients of the same magnitude (up to
+sign):
 
 \begin{Code}
 R> fit_pat <- SLOPE(x, y, q = 0.1, pattern = TRUE, family = "binomial")
@@ -1059,20 +1060,23 @@ R> plotClusters(fit_pat, include_zeroes = FALSE)
 \begin{figure}[tp]
   \centering
   \includegraphics[width=\textwidth]{images/glioma-clusters.pdf}
-  \caption{Cluster structure of metabolites selected by SLOPE. Variables are
-    grouped by effect size, with colors indicating distinct clusters.}
+  \caption{
+    Cluster structure of metabolites selected by SLOPE@\. Variables are grouped
+    by effect size, with colors indicating distinct clusters.
+  }
   \label{fig:real-data-clusters}
 \end{figure}
 
 This produces a cluster map of selected metabolites, revealing biologically
-meaningful groupings~(\autoref{fig:real-data-clusters}). For example, both
-SLOPE and the lasso consistently identified \textit{kynurenine}, a known glioma
-biomarker~\citep{du2020both}. SLOPE additionally highlighted
-\textit{tryptophan} and several carnitine derivatives (e.g., acetylcarnitine
-and propionylcarnitine), which have recently been proposed as glioma
+meaningful groupings~(\autoref{fig:real-data-clusters}). For example, both SLOPE
+and the lasso consistently identified \textit{kynurenine}, a known glioma
+biomarker~\citep{du2020both}. SLOPE additionally highlighted \textit{tryptophan}
+and several carnitine derivatives (e.g., acetylcarnitine and
+propionylcarnitine), which have recently been proposed as glioma
 biomarkers~\citep{wang2024genomic}. Other significant amino acids such as
-\textit{phenylalanine} and \textit{lysine}~\citep{koslinski2023comparative,
-  srivastava2025amino} were selected by both SLOPE and lasso.
+\textit{phenylalanine} and
+\textit{lysine}~\citep{koslinski2023comparative, srivastava2025amino} were
+selected by both SLOPE and lasso.
 
 Overall, this example demonstrates how the package can be applied in practice.
 Beyond predictive performance, its functionality, such as cross-validation,
@@ -1090,7 +1094,7 @@ penalty term's inseparability.
 
 Despite the complexity of the problem, we have here presented a collection of
 packages (in \proglang{R}, \proglang{Python}, and \proglang{Julia}) that offer
-efficient and feature-rich implementations of SLOPE. We hope that this
+efficient and feature-rich implementations of SLOPE\@. We hope that this
 endeavour will make SLOPE accessible to a wider audience. Ours are the first
 packages that implement SLOPE in these languages. At the time of writing, the
 only other implementation of SLOPE is \pkg{skglm}, which is available in
@@ -1109,34 +1113,34 @@ demonstrate consistent superiority over competing methods, including the
 approximate homotopy method of \citet{dupuis2024}, across diverse problem
 settings and data types.
 
-Although our packages are full-fledged implementations of SLOPE, there are
-still some features that are missing and feature coverage is generally not on
-with that of, for instance, \pkg{glmnet} for elastic net. For instance, we do
-not yet support observation weights or the full suite of loss functions from
-the family of generalized linear models. On the other hand, we \emph{do}
-support out-of-memory storage and much more granular normalization options,
-which are not supported in \pkg{glmnet}. We also do not yet support the group
-sorted \(\ell_1\) norm, which would allow for an alternative penalization
-scheme for multivariate response problems. In addition, several possible
-improvements to the hybrid method could be considered, such as accelerated and
-parallelized coordinate steps. We leave these possibilities to future work but
-want to stress that our packages are modular and have been designed with
-extensibility in mind, which we hope will facilitate the addition of new
-features in the future. Because all of the packages rely on the same
-\proglang{C++} library, contributions will also propagate directly to the
-higher-level packages in \proglang{R}, \proglang{Julia}, and \proglang{Python}.
+Although our packages are full-fledged implementations of SLOPE, there are still
+some features that are missing and feature coverage is generally not on with
+that of, for instance, \pkg{glmnet} for elastic net. For instance, we do not yet
+support observation weights or the full suite of loss functions from the family
+of generalized linear models. On the other hand, we \emph{do} support
+out-of-memory storage and much more granular normalization options, which are
+not supported in \pkg{glmnet}. We also do not yet support the group sorted
+\(\ell_1\) norm, which would allow for an alternative penalization scheme for
+multivariate response problems. In addition, several possible improvements to
+the hybrid method could be considered, such as accelerated and parallelized
+coordinate steps. We leave these possibilities to future work but want to stress
+that our packages are modular and have been designed with extensibility in mind,
+which we hope will facilitate the addition of new features in the future.
+Because all of the packages rely on the same \proglang{C++} library,
+contributions will also propagate directly to the higher-level packages in
+\proglang{R}, \proglang{Julia}, and \proglang{Python}.
 
-We hope that our packages will be useful for researchers and practitioners
-alike and that the design of our software suite might inspire others to more
-closely couple the available features of \proglang{R}, \proglang{Python}, and
+We hope that our packages will be useful for researchers and practitioners alike
+and that the design of our software suite might inspire others to more closely
+couple the available features of \proglang{R}, \proglang{Python}, and
 \proglang{Julia}, and avoid redundant implementations of the same algorithms in
 each language.
 
 \section*{Acknowledgments}
 
 This research was also supported in part by the French National Research
-Agency~(ANR) through the BenchArk project~(ANR-24-IAS2-0003) and by the National Science
-Centre Poland through the grant no. 2021/43/O/ST6/02805.
+Agency~(ANR) through the BenchArk project~(ANR-24-IAS2-0003) and by the National
+Science Centre Poland through the grant no. 2021/43/O/ST6/02805.
 
 \bibliography{main}
 
@@ -1144,20 +1148,20 @@ Centre Poland through the grant no. 2021/43/O/ST6/02805.
 
 \begin{appendix}
 
-  \section{Examples in Julia, Python, and C++}%
-  \label{sec:examples-julia-python}
+\section{Examples in Julia, Python, and C++}%
+\label{sec:examples-julia-python}
 
-  In this section, we provide \proglang{Python}, \proglang{Julia}, and
-  \proglang{C++} equivalents of the \proglang{R} examples from
-  \autoref{sec:first-steps}. As in the \proglang{R} case, some of the plotting
-  code has been simplified for clarity. Please refer to the code repository for
-  the full code.
+In this section, we provide \proglang{Python}, \proglang{Julia}, and
+\proglang{C++} equivalents of the \proglang{R} examples from
+\autoref{sec:first-steps}. As in the \proglang{R} case, some of the plotting
+code has been simplified for clarity. Please refer to the code repository for
+the full code.
 
-  \subsection{Julia}
+\subsection{Julia}
 
-  We begin by loading the necessary packages.
+We begin by loading the necessary packages.
 
-  \begin{Code}
+\begin{Code}
 julia> using SLOPE
 julia> using CSV
 julia> using ProjectRoot
@@ -1166,11 +1170,11 @@ julia> using Statistics
 julia> using Plots
   \end{Code}
 
-  Next, we load the diabetes data set, which we have
-  made available as a CSV file in the \texttt{data} directory of the
-  repository. As before, we standardize the features to have mean zero and unit variance.
+Next, we load the diabetes data set, which we have made available as a CSV file
+in the \texttt{data} directory of the repository. As before, we standardize the
+features to have mean zero and unit variance.
 
-  \begin{Code}
+\begin{Code}
 julia> df = CSV.read(file, DataFrame)
 julia> x = Matrix(df[:, 2:end])
 julia> y = df[:, 1]
@@ -1180,20 +1184,20 @@ julia> x_std = std(x, dims = 1)
 julia> x = (x .- x_means) ./ x_std
 \end{Code}
 
-  We then fit SLOPE and lasso models to the data. Note that the \code{lambda}
-  argument is actually the symbol $\lambda$ in the \proglang{Julia} package,
-  so this code will not work if you write \code{lambda = "lasso"}.
+We then fit SLOPE and lasso models to the data. Note that the \code{lambda}
+argument is actually the symbol $\lambda$ in the \proglang{Julia} package, so
+this code will not work if you write \code{lambda = "lasso"}.
 
-  \begin{Code}
+\begin{Code}
 julia> fit_lasso = slope(x, y, lambda = :lasso)
 julia> fit_slope = slope(x, y, lambda = :bh)
   \end{Code}
 
-  Just like the \proglang{R} package, the \proglang{Julia} package
-  supports plotting the solution paths directly. Here, we create a combined plot
-  showing both the lasso and SLOPE paths side by side~(\autoref{fig:diabetes-julia}).
+Just like the \proglang{R} package, the \proglang{Julia} package supports
+plotting the solution paths directly. Here, we create a combined plot showing
+both the lasso and SLOPE paths side by side~(\autoref{fig:diabetes-julia}).
 
-  \begin{Code}
+\begin{Code}
 julia> plot(
 julia>     plot(fit_lasso)
 julia>     plot(fit_slope)
@@ -1203,79 +1207,81 @@ julia>     title = ["Lasso" "SLOPE"],
 julia> )
   \end{Code}
 
-  \begin{figure}[htpb]
-    \centering
-    \includegraphics[width=\natwidth]{images/diabetes-slope-lasso-julia.pdf}
-    \caption{%
-      SLOPE and lasso paths on the diabetes
-      data set. Note that the \(x\) axis is reversed.
-    }
-    \label{fig:diabetes-julia}
-  \end{figure}
+\begin{figure}[htpb]
+  \centering
+  \includegraphics[width=\natwidth]{images/diabetes-slope-lasso-julia.pdf}
+  \caption{
+    %
+    SLOPE and lasso paths on the diabetes data set. Note that the \(x\) axis is
+    reversed.
+  }
+  \label{fig:diabetes-julia}
+\end{figure}
 
-  To perform cross-validation, we use the \code{slopecv} function,
-  which also features a dedicated \code{plot} method\footnote{Note that our
-    package only provides a recipe for the \pkg{Plots.jl} package, and
-    does not depend on it directly. Users need to load the \pkg{Plots.jl} package (as
-    we do here) to have access to these plotting methods.}.
+To perform cross-validation, we use the \code{slopecv} function, which also
+features a dedicated \code{plot} method\footnote{Note that our package only
+provides a recipe for the \pkg{Plots.jl} package, and does not depend on it
+directly. Users need to load the \pkg{Plots.jl} package (as we do here) to have
+access to these plotting methods.}.
 
-  \begin{Code}
+\begin{Code}
 julia> fit_cv = slopecv(x, y)
 julia> pcv = plot(fit_cv)
   \end{Code}
 
-  The result is shown in \autoref{fig:cv-julia}.
+The result is shown in \autoref{fig:cv-julia}.
 
-  \begin{figure}[htpb]
-    \centering
-    \includegraphics[width=\natwidth]{images/slope-cv-julia.pdf}
-    \caption{%
-      Mean-squared error (MSE) from cross-validation of
-      \(q\) and \(\alpha\) for SLOPE fit to the diabetes data set.
-      The ribbons represent 95\% confidence intervals.
-    }
-    \label{fig:cv-julia}
-  \end{figure}
+\begin{figure}[htpb]
+  \centering
+  \includegraphics[width=\natwidth]{images/slope-cv-julia.pdf}
+  \caption{
+    %
+    Mean-squared error (MSE) from cross-validation of \(q\) and \(\alpha\) for
+    SLOPE fit to the diabetes data set. The ribbons represent 95\% confidence
+    intervals.
+  }
+  \label{fig:cv-julia}
+\end{figure}
 
-  \subsection{Python}
+\subsection{Python}
 
-  We begin by loading the necessary packages.
+We begin by loading the necessary packages.
 
-  \begin{Code}
+\begin{Code}
 >>> from matplotlib import pyplot as plt
 >>> from sklearn.datasets import load_diabetes
 >>> from sklearn.preprocessing import StandardScaler
 >>> from sortedl1 import Slope
   \end{Code}
 
-  Next, we load the diabetes data set from \pkg{scikit-learn} and
-  standardize the features to have mean zero and unit variance.
+Next, we load the diabetes data set from \pkg{scikit-learn} and standardize the
+features to have mean zero and unit variance.
 
-  \begin{Code}
+\begin{Code}
 >>> x, y = load_diabetes(return_X_y=True)
 >>> scaler = StandardScaler()
 >>> x = scaler.fit_transform(x)
   \end{Code}
 
-  We then create SLOPE models with lasso and BH penalty sequences.
+We then create SLOPE models with lasso and BH penalty sequences.
 
-  \begin{Code}
+\begin{Code}
 >>> model_lasso = Slope(lambda_type="lasso")
 >>> model_slope = Slope(lambda_type="bh", q=0.4)
   \end{Code}
 
-  We fit the models to the data using the \code{path} method.
+We fit the models to the data using the \code{path} method.
 
-  \begin{Code}
+\begin{Code}
 >>> fit_lasso = model_lasso.path(x, y)
 >>> fit_slope = model_slope.path(x, y)
   \end{Code}
 
-  Just like the \proglang{R} and \proglang{Julia} packages, the \proglang{Python}
-  package supports plotting the solution paths. The result is shown in
-  \autoref{fig:diabetes-python}.
+Just like the \proglang{R} and \proglang{Julia} packages, the \proglang{Python}
+package supports plotting the solution paths. The result is shown in
+\autoref{fig:diabetes-python}.
 
-  \begin{Code}
+\begin{Code}
 >>> fit_lasso.plot()
 >>> plt.title("Lasso")
 >>> plt.show()
@@ -1285,32 +1291,33 @@ julia> pcv = plot(fit_cv)
 >>> plt.show()
   \end{Code}
 
-  \begin{figure}[htpb]
-    \centering
-    \includegraphics[width=\natwidth]{images/diabetes-slope-python.pdf}%
-    \includegraphics[width=\natwidth]{images/diabetes-lasso-python.pdf}%
-    \caption{%
-      SLOPE and lasso paths on the diabetes
-      data set. Note that the \(x\) axis is reversed.
-    }
-    \label{fig:diabetes-python}
-  \end{figure}
+\begin{figure}[htpb]
+  \centering
+  \includegraphics[width=\natwidth]{images/diabetes-slope-python.pdf}%
+  \includegraphics[width=\natwidth]{images/diabetes-lasso-python.pdf}%
+  \caption{
+    %
+    SLOPE and lasso paths on the diabetes data set. Note that the \(x\) axis is
+    reversed.
+  }
+  \label{fig:diabetes-python}
+\end{figure}
 
-  To perform cross-validation, we use the \code{cv} method.
+To perform cross-validation, we use the \code{cv} method.
 
-  \begin{Code}
+\begin{Code}
 >>> fit_cv = model_slope.cv(x, y, q=[0.1, 0.2])
 >>> fit_cv.plot()
   \end{Code}
 
-  \subsection{C++}
+\subsection{C++}
 
-  Finally, we provide an example in \proglang{C++} with similar functionality.
-  Since our \proglang{C++} library does not have built-in plotting capabilities, nor
-  serialization functionality, we focus here on fitting the models and printing
-  the coefficients to the console.
+Finally, we provide an example in \proglang{C++} with similar functionality.
+Since our \proglang{C++} library does not have built-in plotting capabilities,
+nor serialization functionality, we focus here on fitting the models and
+printing the coefficients to the console.
 
-  \begin{Code}
+\begin{Code}
 #include <Eigen/Dense>
 #include <iostream>
 #include <slope.h>
@@ -1365,21 +1372,21 @@ int main() {
 }
   \end{Code}
 
-  If the code above is saved in a file named
-  \texttt{code/example.cpp}\footnote{This is included in the supplementary
-    material as well.}, it can be compiled with the following command, provided
-  that GCC is installed along with the \pkg{slope} and \pkg{Eigen3} libraries.
-  \begin{Code}
+If the code above is saved in a file named
+\texttt{code/example.cpp}\footnote{This is included in the supplementary
+material as well.}, it can be compiled with the following command, provided that
+GCC is installed along with the \pkg{slope} and \pkg{Eigen3} libraries.
+\begin{Code}
 g++ -std=c++17 code/example.cpp -lslope -o example 
   \end{Code}
 
-  If the resulting executable is run, it produces the following output:
+If the resulting executable is run, it produces the following output:
 
-  \begin{CodeChunk}
-    \begin{CodeInput}
+\begin{CodeChunk}
+  \begin{CodeInput}
 ./example
   \end{CodeInput}
-    \begin{CodeOutput}
+  \begin{CodeOutput}
 Lasso Coefficients:
  0.385777
 -0.397482
@@ -1394,159 +1401,162 @@ alpha : 0.000154744
 gamma : 0
 q     : 0.1
     \end{CodeOutput}
-  \end{CodeChunk}
+\end{CodeChunk}
 
-  \section{Duality gap and convergence criteria}
-  \label{sec:convergence-criteria-details}
+\section{Duality gap and convergence criteria}
+\label{sec:convergence-criteria-details}
 
-  In detail, we transform the primal problem \(P(\beta_0,\beta)\), defined in \autoref{eq:slope}, into a
-  constrained problem, taking \(\alpha = 1\) without loss of generality:
-  \begin{equation}
-    % \label{eq:slope-constrained}
-    \begin{aligned}
-       & \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} &  & \frac{1}{n} \sum_{i=1}^n f(x_i^\intercal \beta + \beta_0, y_i) + J_{\lambda}(\beta) \\
-      % & \text{subject to}                                              &  & r_i = \link(\bm{x}_i^\intercal \bm{\beta}) - y_i, \quad i = 1, \ldots, n                                            \\
-       & \text{subject to}                                         &  & r_i = \ilink(\beta_0 + x_i^\intercal \beta) - y_i, \quad i = 1, \ldots, n           \\
-    \end{aligned}
-  \end{equation}
+In detail, we transform the primal problem \(P(\beta_0,\beta)\), defined in
+\autoref{eq:slope}, into a constrained problem, taking \(\alpha = 1\) without
+loss of generality:
+\begin{equation}
+  % \label{eq:slope-constrained}
+  \begin{aligned}
+     & \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} &  & \frac{1}{n} \sum_{i=1}^n f(x_i^\intercal \beta + \beta_0, y_i) + J_{\lambda}(\beta) \\
+    % & \text{subject to}                                              &  & r_i = \link(\bm{x}_i^\intercal \bm{\beta}) - y_i, \quad i = 1, \ldots, n                                            \\
+     & \text{subject to}                                         &  & r_i = \ilink(\beta_0 + x_i^\intercal \beta) - y_i, \quad i = 1, \ldots, n \\
+  \end{aligned}
+\end{equation}
 
-  Since \(\beta_0 + x_i^\intercal \beta = g(r_i + y_i)\), we can write the Lagrangian as
-  \[
-    L(\beta_0,\beta,r,\delta) = \frac{1}{n} \sum_{i=1}^n f\big(g(r_i + y_i), y_i\big) + J_{\lambda}(\beta) - \sum_{i=1}^n \delta_i \left(g(r_i + y_i) - x_i^\intercal \beta - \beta_0 \right).
-  \]
-  This allows us to write the dual problem as
-  \[
-    D(\delta)  = \inf_r\left( \frac{1}{n} \sum_{i=1}^n f\left(g(r_i+y_i), y_i\right) - \delta_i g(r_i+ y_i)\right)
-    % & \phantom{={}} + \inf_\beta \left(J_\lambda(\beta) - \delta^\intercal X\beta\right)   \\
-    % & \phantom{={}} + \inf_{\beta_0} \left( -\delta^\intercal \bm{1} \beta_0\right)        \\
-    - \sup_\beta \big((-X^\intercal \delta)^\intercal \beta -  J_\lambda(\beta) \big)
-    - \sup_{\beta_0} \left( \delta^\intercal \bm{1} \beta_0\right).
-  \]
-  Here, we begin by noting that the infimum is attained at the point where
-  \(r = \delta\)~\citep{fercoq2015}, which means that the value is
-  \[
-    \frac{1}{n} \sum_{i=1}^n f\left(g(\delta_i+y_i), y_i\right) - \delta_i g(\delta_i + y_i)
-  \]
-  in general, although loss-specific simplifications can be made. For instance, in the case of
-  quadratic loss the expression evaluates to \(\frac{1}{2} \lVert y \rVert_2^2 - \frac{1}{2} \lVert \delta + y \lVert^2_2 \).
+Since \(\beta_0 + x_i^\intercal \beta = g(r_i + y_i)\), we can write the
+Lagrangian as
+\[
+  L( \beta_0, \beta ,r, \delta ) = \frac{1}{n} \sum_{i = 1}^n f \big (g(r_i + y_i), y_i \big )
+                                   + J_\lambda ( \beta )
+                                   - \sum_{i = 1}^n \delta_i \left( g(r_i + y_i) - x_i^\intercal \beta - \beta_0 \right) .
+\]
+This allows us to write the dual problem as
+\[
+  D(\delta) = \inf_r\left( \frac{1}{n} \sum_{i = 1}^n f\left( g(r_i+y_i), y_i \right) - \delta_i g(r_i+ y_i) \right) % & \phantom{={}} + \inf_\beta \left(J_\lambda(\beta) - \delta^\intercal X\beta\right)   \\% & \phantom{={}} + \inf_{\beta_0} \left( -\delta^\intercal \bm{1} \beta_0\right)        \\
+  - \sup_\beta \big(( - X^\intercal \delta)^\intercal \beta - J_\lambda(\beta) \big) - \sup_{\beta_0} \left( \delta^\intercal \bm{1} \beta_0 \right).
+\]
+Here, we begin by noting that the infimum is attained at the point where
+\(r = \delta\)~\citep{fercoq2015}, which means that the value is
+\[
+  \frac{1}{n} \sum_{i = 1}^n f \left( g(\delta_i+y_i), y_i \right)
+  - \delta_i g( \delta_i + y_i)
+\]
+in general, although loss-specific simplifications can be made. For instance, in
+the case of quadratic loss the expression evaluates to
+\(\frac{1}{2} \lVert y \rVert_2^2 - \frac{1}{2} \lVert \delta + y \lVert^2_2\).
 
-  Next, we observe that \(\sup_\beta \big((-X^\intercal
-  \delta)^\intercal \beta -  J_\lambda(\beta) \big)\) is the Fenchel conjugate of
-  the sorted \(\ell_1\) norm, which is the indicator function of the sorted
-  \(\ell_1\) dual norm unit ball. Its value is
-  \[
-    \sup_\beta \big(z^\intercal \beta -  J_\lambda(\beta) \big) =
-    \begin{cases}
-      0      & \text{if } J^*_\lambda(z) \leq 1, \\
-      \infty & \text{otherwise},
-    \end{cases}
-  \]
-  where \(J^*_\lambda(z)\) is the sorted \(\ell_1\) dual norm, defined as~\citep{negrinho2014}
-  \begin{equation}
-    J^*_\lambda(z) = \max_{j=1,2,\dots,p}\left\{ \frac{\sum_{k=1}^j|z_{(k)}|}{\sum_{k=1}^j\lambda_k}\right\}
-  \end{equation}
+Next, we observe that
+\(\sup_\beta \big(( - X^\intercal \delta)^\intercal \beta - J_\lambda(\beta) \big)\)
+is the Fenchel conjugate of the sorted \(\ell_1\) norm, which is the indicator
+function of the sorted \(\ell_1\) dual norm unit ball. Its value is
+\[
+  \sup_\beta \big (z^\intercal \beta - J_\lambda ( \beta ) \big ) = \begin{cases}
+                                                                      0      & \text{if } J^*_\lambda(z) \leq 1, \\
+                                                                      \infty & \text{otherwise},
+                                                                    \end{cases}
+\]
+where \(J^*_\lambda(z)\) is the sorted \(\ell_1\) dual norm, defined
+as~\citep{negrinho2014}
+\begin{equation}
+  J^*_\lambda(z) = \max_{j=1,2,\dots,p}\left\{
+  \frac{\sum_{k=1}^j|z_{(k)}|}{\sum_{k=1}^j\lambda_k}\right\}
+\end{equation}
 
-  Next, observe that \(\sup_{\beta_0} (\delta^\intercal \bm{1} \beta_0) = \infty\) unless
-  \(\delta^\intercal \bm{1} = 0\).
+Next, observe that \(\sup_{\beta_0} (\delta^\intercal \bm{1} \beta_0) = \infty\)
+unless \(\delta^\intercal \bm{1} = 0\).
 
-  Taken together, this means that we have the following dual function:
-  \begin{equation}
-    D(\delta) = \begin{cases}
-      \frac{1}{n} \sum_{i=1}^n f\left(g(\delta_i+y_i), y_i\right) - \delta_i g(\delta_i+ y_i) & \text{if } J^*_\lambda(-X^\intercal \delta) \leq 1 \text{ and } \delta^\intercal \bm{1} = 0 \\
-      -\infty,                                                                                & \text{otherwise}.
-    \end{cases}
-  \end{equation}
+Taken together, this means that we have the following dual function:
+\begin{equation}
+  D(\delta) =
+  \begin{cases}
+    \frac{1}{n} \sum_{i=1}^n f\left(g(\delta_i+y_i), y_i\right) - \delta_i g(\delta_i+ y_i) & \text{if } J^*_\lambda(-X^\intercal \delta) \leq 1 \text{ and } \delta^\intercal \bm{1} = 0 \\
+    -\infty,                                                                                & \text{otherwise}.
+  \end{cases}
+\end{equation}
 
-  A natural dual point candidate for this problem is to pick
-  \(\delta = r\), since
-  at the optimum we have
-  \[
-    \bm{0} \in X^\intercal r + \partial J_\lambda(X^\intercal r)
-  \]
-  and, in addition require that the signs between agree.
-  % TODO: Hand-wavy, clean up later.
+A natural dual point candidate for this problem is to pick \(\delta = r\), since
+at the optimum we have
+\[
+  \bm{0} \in X^\intercal r + \partial J_\lambda (X^\intercal r)
+\]
+and, in addition require that the signs between agree.
+% TODO: Hand-wavy, clean up later.
 
-  % To obtain a feasible dual point for this problem, we can use the
-  % following fact about the stationarity condition of the primal problem,
-  % namely that
-  % \[
-  %   \sum_{j=1}^k | g_{(j)} | \leq \sum_{j=1}^k \lambda_j |\beta_{(j)}| \quad \forall\; k = 1,2,\dots,p.
-  % \]
-  % where  \(g_j = x_j^\intercal r\) is the \(j\)th component of the gradient of loss function
-  % with respect to \(\beta_j\)
-  % and \(r\) the generalized residual, for which \(r_i = \ilink(x_i^\intercal \beta + \beta_0) - y_i\).
+% To obtain a feasible dual point for this problem, we can use the
+% following fact about the stationarity condition of the primal problem,
+% namely that
+% \[
+%   \sum_{j=1}^k | g_{(j)} | \leq \sum_{j=1}^k \lambda_j |\beta_{(j)}| \quad \forall\; k = 1,2,\dots,p.
+% \]
+% where  \(g_j = x_j^\intercal r\) is the \(j\)th component of the gradient of loss function
+% with respect to \(\beta_j\)
+% and \(r\) the generalized residual, for which \(r_i = \ilink(x_i^\intercal \beta + \beta_0) - y_i\).
 
-  To be a feasible point, however, we first center the point by its mean and
-  scale it:
-  \[
-    \delta_j = \frac{r_i - \bar{r}}{\max\left\{1, J_\lambda^*\left(X^\intercal(r - \bar{r})\right) \right\}}
-  \]
-  which guarantees feasibility. We then obtain the following duality gap:
-  \[
-    P(\beta_0, \beta) - D(\delta).
-  \]
-  As a stopping criterion for the algorithm, we use the relative duality gap
-  \[
-    P(\beta_0, \beta) - D(\delta) \leq \varepsilon P(\beta_0),
-  \]
-  where \(\varepsilon >0\) is the user-defined tolerance level.
-  The duality gap provides an upper bound on suboptimality for the problem, independent
-  of solver and conditioning of the problem, which is not the case of
-  convergence criteria based on changes in objective, gradients, or coefficients.
+To be a feasible point, however, we first center the point by its mean and scale
+it:
+\[
+  \delta_j = \frac{r_i - \bar{r}}{\max\left\{1, J_\lambda^*\left(X^\intercal(r - \bar{r})\right) \right\}}
+\]
+which guarantees feasibility. We then obtain the following duality gap:
+\[
+  P( \beta_0, \beta ) - D( \delta ).
+\]
+As a stopping criterion for the algorithm, we use the relative duality gap
+\[
+  P( \beta_0, \beta ) - D( \delta ) \leq \varepsilon P( \beta_0),
+\]
+where \(\varepsilon > 0\) is the user-defined tolerance level. The duality gap
+provides an upper bound on suboptimality for the problem, independent of solver
+and conditioning of the problem, which is not the case of convergence criteria
+based on changes in objective, gradients, or coefficients.
 
-  The availability of the duality gap would also allow us to employ
-  duality-gap based safe screening rules~\citep{fercoq2015} and
-  working set strategies derived from these~\citep{massias2018}, which
-  could furthermore be used to enhance our strategy with look-ahead
-  screening rules~\citep{larsson2021a}. However,
-  as noted in \citet{larsson2022d}, the marginal improvement
-  of using duality-based screening strategies is minor, so we have
-  opted not to implement these in our packages.
+The availability of the duality gap would also allow us to employ duality-gap
+based safe screening rules~\citep{fercoq2015} and working set strategies derived
+from these~\citep{massias2018}, which could furthermore be used to enhance our
+strategy with look-ahead screening rules~\citep{larsson2021a}. However, as noted
+in \citet{larsson2022d}, the marginal improvement of using duality-based
+screening strategies is minor, so we have opted not to implement these in our
+packages.
 
-  \section{Solver details}\label{sec:solver-details}
+\section{Solver details}\label{sec:solver-details}
 
-  \begin{description}
-    \item[sortedl1] The python package of our implementation of the hybrid
-          proximal gradient/coordinate descent algorithm described in this work and
-          \citet{larsson2023}. We use the randomized version of the coordinate descent
-          updates.
-    \item[Anderson PGD] The proximal gradient descent (PGD) algorithm with Anderson acceleration, which is a
-          method for accelerating the convergence of fixed-point
-          iterations~\citep{anderson1965,zhang2020}.
-    \item[BB PGD] PGD with Barizilai--Borwein~\citep{barzilai1988} step sizes.
+\begin{description}
+  \item[sortedl1] The python package of our implementation of the hybrid
+        proximal gradient/coordinate descent algorithm described in this work
+        and \citet{larsson2023}. We use the randomized version of the coordinate
+        descent updates.
+  \item[Anderson PGD] The proximal gradient descent (PGD) algorithm with
+        Anderson acceleration, which is a method for accelerating the
+        convergence of fixed-point iterations~\citep{anderson1965,zhang2020}.
+  \item[BB PGD] PGD with Barizilai--Borwein~\citep{barzilai1988} step sizes.
 
-    \item[FISTA] The fast iterative shrinking and thresholding
-          algorithm~\citep{beck2009}, which is an accelerated version of iterative
-          soft-thresholding algorithm (ISTA)~\citep{wright2009}.
+  \item[FISTA] The fast iterative shrinking and thresholding
+        algorithm~\citep{beck2009}, which is an accelerated version of iterative
+        soft-thresholding algorithm (ISTA)~\citep{wright2009}.
 
-    \item[Safe PGD] FISTA with acceleration using safe screening
-          rules~\citep{elvira2023}.
+  \item[Safe PGD] FISTA with acceleration using safe screening
+        rules~\citep{elvira2023}.
 
-    \item[ADMM] The alternating direction method of
-          multipliers~\citep{glowinski1975,boyd2010}, which is a popular algorithm
-          for solving convex optimization problems with constraints. In our experiments,
-          we have used \(\rho = 100\) as a step size based on the
-          results from \citet{larsson2023}.
-          We considered using the heuristic \(\rho\) selection method from
-          \citet{boyd2010}, but have avoided doing so since it, as shown by \citet{larsson2023},
-          may lead to erratic convergence behavior in practice. We use \fct{lsqr}
-          from \pkg{SciPy}~\citep{virtanen2020} to solve the linear system if
-          \(\min\{n, p\} > \num{1000}\) and otherwise solve the linear system
-          as suggested by \citet{boyd2010}.
+  \item[ADMM] The alternating direction method of
+        multipliers~\citep{glowinski1975,boyd2010}, which is a popular algorithm
+        for solving convex optimization problems with constraints. In our
+        experiments, we have used \(\rho = 100\) as a step size based on the
+        results from \citet{larsson2023}. We considered using the heuristic
+        \(\rho\) selection method from \citet{boyd2010}, but have avoided doing
+        so since it, as shown by \citet{larsson2023}, may lead to erratic
+        convergence behavior in practice. We use \fct{lsqr} from
+        \pkg{SciPy}~\citep{virtanen2020} to solve the linear system if
+        \(\min\{n, p\} > \num{1000}\) and otherwise solve the linear system as
+        suggested by \citet{boyd2010}.
 
-    \item[Newt-ALM] A semi-smooth Newton-based method~\citep{luo2019}. Our
-          implementation of this method is based on that from \citet{larsson2023},
-          but improved with better heuristics for selecting the inner solver,
-          improved conjugate gradient solver, and
-          a bug fix for the Woodbury-based solver. For the conjugate gradient solver,
-          we use \fct{cg} from \pkg{SciPy}~\citep{virtanen2020}.
+  \item[Newt-ALM] A semi-smooth Newton-based method~\citep{luo2019}. Our
+        implementation of this method is based on that from \citet{larsson2023},
+        but improved with better heuristics for selecting the inner solver,
+        improved conjugate gradient solver, and a bug fix for the Woodbury-based
+        solver. For the conjugate gradient solver, we use \fct{cg} from
+        \pkg{SciPy}~\citep{virtanen2020}.
 
-    \item[skglm] Another implementation of FISTA from the
-          \pkg{skglm} package~\citep{bertrand2022}.
+  \item[skglm] Another implementation of FISTA from the \pkg{skglm}
+        package~\citep{bertrand2022}.
 
-    \item[SolutionPath] An approximate homotopy method by \citet{dupuis2024},
-          which is similar to the lars algorithm for the lasso~\citep{efron2004}.
-  \end{description}
+  \item[SolutionPath] An approximate homotopy method by \citet{dupuis2024},
+        which is similar to the lars algorithm for the lasso~\citep{efron2004}.
+\end{description}
 
 \end{appendix}
 
