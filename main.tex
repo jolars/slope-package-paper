@@ -95,8 +95,7 @@ is a type of regularized regression that consists of solving the following
 convex optimization problem:
 \begin{equation}
   \label{eq:slope}
-  \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} \Big(
-  P(\beta_0,\beta) = F(\beta_0, \beta) + \alpha J_{\lambda}(\beta) \Big)
+  \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} \Big( P(\beta_0,\beta) = F(\beta_0, \beta) + \alpha J_{\lambda}(\beta) \Big)
 \end{equation}
 %
 where \(P\) is the primal problem, \(F\) is the loss function, \(\alpha\) is a
@@ -105,9 +104,7 @@ non-increasing sequence of penalty weights. \(J\) is the \emph{sorted $\ell_1$
 norm}, defined as
 \begin{equation}
   % \label{eq:sl1}
-  J_{\lambda}(\beta) = \sum_{j=1}^p \lambda_j |\beta_{(j)}|, \quad
-  \text{where}\quad |\beta_{(1)}| \geq |\beta_{(2)}| \geq \ldots \geq
-  |\beta_{(p)}|.
+  J_{\lambda}(\beta) = \sum_{j = 1}^p \lambda_j |\beta_{(j)}|, \quad \text{where}\quad |\beta_{(1)}| \geq |\beta_{(2)}| \geq \ldots \geq |\beta_{(p)}|.
 \end{equation}
 We will assume that \(F\) takes the following form:
 \[
@@ -123,7 +120,7 @@ the problem in \autoref{eq:slope}.
 
 SLOPE is a generalization of both the lasso\footnote{The lasso is attained by
 taking a constant
-\(\lambda\).}~~\citep{santosa1986,donoho1994,donoho1995,tibshirani1996} and
+\(\lambda\).}~\citep{santosa1986,donoho1994,donoho1995,tibshirani1996} and
 OSCAR\footnote{OSCAR is attained by setting \(\lambda\) to be a linear sequence,
 where \(\lambda_j = \theta_1 + \theta_2(p - j)\) with
 \(\theta_1, \theta_2 \geq 0\)~\citep{figueiredo2014}.} (octagonal shrinkage and
@@ -255,13 +252,13 @@ by the SLOPE packages in \autoref{tab:glm}.
   \centering
   \begin{tabular}{lccc}
     \toprule
-    Model       & \(f(\eta, y)\)                                                                                              & \(\link(\mu)\)                              & \(\ilink(\eta)\) \\
+    Model       &                                               \(f(\eta, y)\)                                                &               \(\link(\mu)\)                &                    \(\ilink(\eta)\) \\
     \midrule
-    Gaussian    & \(\frac{1}{2}(y - \eta)^2\)                                                                                 & \(\mu\)                                     & \(\eta\) \\
+    Gaussian    &                                         \(\frac{1}{2}(y - \eta)^2\)                                         &                   \(\mu\)                   &                        \(\eta\) \\
     \addlinespace
-    Binomial    & \(\log(1 + e^\eta) - \eta y\)                                                                               & \(\log \left( \frac{\mu}{1 - \mu} \right)\) & \(\frac{e^\eta}{1 + e^\eta}\) \\
+    Binomial    &                                        \(\log(1 + e^\eta) - \eta y\)                                        & \(\log \left( \frac{\mu}{1 - \mu} \right)\) &             \(\frac{e^\eta}{1 + e^\eta}\) \\
     \addlinespace
-    Poisson     & \(e^\eta - \eta y\)                                                                                         & \(\log(\mu)\)                               & \(e^\eta\) \\
+    Poisson     &                                             \(e^\eta - \eta y\)                                             &                \(\log(\mu)\)                &                       \(e^\eta\) \\
     \addlinespace
     Multinomial & \(\sum_{k = 1}^{m - 1}\left( \log \left( 1 + \sum_{j = 1}^{m - 1} e^{\eta_j} \right) - y_k \eta_k \right)\) & \(\log\left( \frac{\mu}{1 - \mu} \right)\)  & \(\frac{\exp(\eta)}{1 + \sum_{j=1}^{m-1} e^{\eta_j}}\) \\
     \bottomrule
@@ -1412,9 +1409,9 @@ loss of generality:
 \begin{equation}
   % \label{eq:slope-constrained}
   \begin{aligned}
-     & \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} &  & \frac{1}{n} \sum_{i=1}^n f(x_i^\intercal \beta + \beta_0, y_i) + J_{\lambda}(\beta) \\
+    & \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} &  & \frac{1}{n} \sum_{i = 1}^n f(x_i^\intercal \beta + \beta_0, y_i) + J_{\lambda}(\beta) \\
     % & \text{subject to}                                              &  & r_i = \link(\bm{x}_i^\intercal \bm{\beta}) - y_i, \quad i = 1, \ldots, n                                            \\
-     & \text{subject to}                                         &  & r_i = \ilink(\beta_0 + x_i^\intercal \beta) - y_i, \quad i = 1, \ldots, n \\
+    & \text{subject to}                                         &  & r_i = \ilink(\beta_0 + x_i^\intercal \beta) - y_i, \quad i = 1, \ldots, n \\
   \end{aligned}
 \end{equation}
 
@@ -1453,8 +1450,7 @@ function of the sorted \(\ell_1\) dual norm unit ball. Its value is
 where \(J^*_\lambda(z)\) is the sorted \(\ell_1\) dual norm, defined
 as~\citep{negrinho2014}
 \begin{equation}
-  J^*_\lambda(z) = \max_{j=1,2,\dots,p}\left\{
-  \frac{\sum_{k=1}^j|z_{(k)}|}{\sum_{k=1}^j\lambda_k}\right\}
+  J^*_\lambda(z) = \max_{j = 1,2,\dots,p}\left\{ \frac{\sum_{k=1}^j|z_{(k)}|}{\sum_{k=1}^j\lambda_k} \right\}
 \end{equation}
 
 Next, observe that \(\sup_{\beta_0} (\delta^\intercal \bm{1} \beta_0) = \infty\)
@@ -1462,11 +1458,10 @@ unless \(\delta^\intercal \bm{1} = 0\).
 
 Taken together, this means that we have the following dual function:
 \begin{equation}
-  D(\delta) =
-  \begin{cases}
-    \frac{1}{n} \sum_{i=1}^n f\left(g(\delta_i+y_i), y_i\right) - \delta_i g(\delta_i+ y_i) & \text{if } J^*_\lambda(-X^\intercal \delta) \leq 1 \text{ and } \delta^\intercal \bm{1} = 0 \\
-    -\infty,                                                                                & \text{otherwise}.
-  \end{cases}
+  D(\delta) = \begin{cases}
+                \frac{1}{n} \sum_{i = 1}^n f\left( g(\delta_i+y_i), y_i \right) - \delta_i g(\delta_i+ y_i) & \text{if } J^*_\lambda(-X^\intercal \delta) \leq 1 \text{ and } \delta^\intercal \bm{1} = 0 \\
+                -\infty,                                                                                    & \text{otherwise}.
+              \end{cases}
 \end{equation}
 
 A natural dual point candidate for this problem is to pick \(\delta = r\), since
@@ -1520,9 +1515,11 @@ packages.
         proximal gradient/coordinate descent algorithm described in this work
         and \citet{larsson2023}. We use the randomized version of the coordinate
         descent updates.
+
   \item[Anderson PGD] The proximal gradient descent (PGD) algorithm with
         Anderson acceleration, which is a method for accelerating the
         convergence of fixed-point iterations~\citep{anderson1965,zhang2020}.
+
   \item[BB PGD] PGD with Barizilai--Borwein~\citep{barzilai1988} step sizes.
 
   \item[FISTA] The fast iterative shrinking and thresholding
