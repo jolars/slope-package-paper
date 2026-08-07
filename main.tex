@@ -95,7 +95,7 @@ is a type of regularized regression that consists of solving the following
 convex optimization problem:
 \begin{equation}
   \label{eq:slope}
-  \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} \Big( P(\beta_0,\beta) = F(\beta_0, \beta) + \alpha J_{\lambda}(\beta) \Big)
+  \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} \Big( P(\beta_0,\beta) = F(\beta_0, \beta) + \alpha J_\lambda(\beta) \Big)
 \end{equation}
 %
 where \(P\) is the primal problem, \(F\) is the loss function, \(\alpha\) is a
@@ -104,7 +104,7 @@ non-increasing sequence of penalty weights. \(J\) is the \emph{sorted $\ell_1$
 norm}, defined as
 \begin{equation}
   % \label{eq:sl1}
-  J_{\lambda}(\beta) = \sum_{j = 1}^p \lambda_j |\beta_{(j)}|, \quad \text{where}\quad |\beta_{(1)}| \geq |\beta_{(2)}| \geq \ldots \geq |\beta_{(p)}|.
+  J_\lambda(\beta) = \sum_{j = 1}^p \lambda_j |\beta_{(j)}|, \quad \text{where}\quad |\beta_{(1)}| \geq |\beta_{(2)}| \geq \ldots \geq |\beta_{(p)}|.
 \end{equation}
 We will assume that \(F\) takes the following form:
 \[
@@ -234,7 +234,8 @@ A special property of \(f\) is that its partial derivative with respect to
 \(\eta\) is
 %
 \[
-  \frac{\partial}{\partial \eta_i} f( \eta_i, y_i) = \ilink ( \eta_i) - y_i = r_i,
+  \frac{\partial}{\partial \eta_i} f( \eta_i, y_i) = \ilink ( \eta_i) - y_i
+                                                   = r_i,
 \]
 %
 where we define \(r_i\) to be the \emph{generalized residual}. As a consequence,
@@ -1409,7 +1410,7 @@ loss of generality:
 \begin{equation}
   % \label{eq:slope-constrained}
   \begin{aligned}
-    & \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} &  & \frac{1}{n} \sum_{i = 1}^n f(x_i^\intercal \beta + \beta_0, y_i) + J_{\lambda}(\beta) \\
+    & \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} &  & \frac{1}{n} \sum_{i = 1}^n f(x_i^\intercal \beta + \beta_0, y_i) + J_\lambda(\beta) \\
     % & \text{subject to}                                              &  & r_i = \link(\bm{x}_i^\intercal \bm{\beta}) - y_i, \quad i = 1, \ldots, n                                            \\
     & \text{subject to}                                         &  & r_i = \ilink(\beta_0 + x_i^\intercal \beta) - y_i, \quad i = 1, \ldots, n \\
   \end{aligned}
