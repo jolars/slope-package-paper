@@ -4,8 +4,6 @@ library(pROC)
 library(here)
 library(glmnet)
 library(MLmetrics)
-library(dplyr)
-library(readxl)
 
 fig_name <- function(name) {
   name <- here::here("images", paste0(name, ".pdf"))
