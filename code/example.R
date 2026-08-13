@@ -64,14 +64,7 @@ par(
   oma = c(0.1, 4.5, 0.1, 0.1)
 )
 plot(fit_cv, index = 1)
-plot(
-  fit_cv,
-  plot_args = list(
-    ylab = "",
-    yaxt = "n"
-  ),
-  index = 2
-)
+plot(fit_cv, plot_args = list(ylab = "", yaxt = "n"), index = 2)
 mtext("MSE", side = 2, line = 2, outer = TRUE)
 dev.off()
 knitr::plot_crop(cv_file)
