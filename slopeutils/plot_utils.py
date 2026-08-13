@@ -11,8 +11,6 @@ def reg_labels(reg):
 
 
 def extract_reg_param(df):
-    import re
-
     df["reg"] = df["objective_name"].str.extract(r"reg=([0-9.]+)")
     df["reg"] = pd.to_numeric(df["reg"])
 
