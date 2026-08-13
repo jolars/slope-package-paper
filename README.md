@@ -1,6 +1,7 @@
 # Efficient Solvers for SLOPE in R, Python, Julia, and C++
 
 [![arXiv](https://img.shields.io/badge/arXiv-2511.02430-b31b1b.svg)](https://arxiv.org/abs/2511.02430)
+[![Test Reproducibility](https://github.com/jolars/slope-package-paper/actions/workflows/test-reproducibility.yml/badge.svg)](https://github.com/jolars/slope-package-paper/actions/workflows/test-reproducibility.yml)
 
 This repository contains the research paper **"Efficient Solvers for SLOPE in R,
 Python, Julia, and C++"** and associated reproducibility materials, including
@@ -73,9 +74,16 @@ This repository is organized into several key components:
 ├── code/                       # Analysis and visualization scripts
 │   ├── plot_benchmark_path.py  # Benchmark plotting scripts
 │   ├── plot_benchmark_real.py  # for real data
-│   ├── plot_benchmark_simul.py # for real data
+│   ├── plot_benchmark_simul.py # for simulated data
+│   ├── plot_thresholding.py    # SLOPE thresholding illustration
 │   ├── example.R               # Usage examples for paper
+│   ├── example.py
+│   ├── example.jl
+│   ├── example.cpp
+│   ├── CMakeLists.txt          # Build definition for the C++ example
 │   └── real-data.R             # Real data analysis for paper
+├── data/                       # Data used by the examples
+│   └── diabetes.csv
 ├── images/                     # Generated figures from paper
 │   ├── benchmark_path_real.pdf
 │   ├── benchmark_single_simulated.pdf
@@ -91,6 +99,8 @@ This repository is organized into several key components:
 ├── bench_config_single.yml     # Benchopt configuration for single-penalty
 ├── bench_config_path.yml       # Benchopt configuration for path-fitting
 ├── flake.nix                   # Nix flake for reproducible environment
+├── Project.toml                # Julia environment for the Julia example
+├── Manifest.toml
 ├── Taskfile.yml                # Task automation
 ├── main.tex                    # Paper LaTeX source
 ├── main.bib                    # Bibliography
@@ -98,6 +108,22 @@ This repository is organized into several key components:
 ```
 
 </details>
+
+## Cloning the Repository
+
+The two benchmarks are included as git submodules, so clone the repository
+recursively:
+
+```bash
+git clone --recurse-submodules https://github.com/jolars/slope-package-paper.git
+```
+
+If you have already cloned the repository without `--recurse-submodules`, you
+can fetch the submodules afterwards with:
+
+```bash
+git submodule update --init --recursive
+```
 
 ## Running Benchmarks
 
@@ -152,8 +178,8 @@ Note that it's possible that there are installation issues with some of the
 solvers due to the complexity of their dependencies and continuous upgrades. For
 full reproducibility, we therefore recommend that you instead use the provided
 Nix flake environment, which provides a stable snapshot of all dependencies used
-in the benchmarks at the time of running them. See [Nix
-Environment](#nix-environment) below for more details.
+in the benchmarks at the time of running them. See
+[Nix Environment](#nix-environment) below for more details.
 
 You can also bypass the installation step (`benchopt install`) and manually
 install the required dependencies if you prefer.
@@ -169,7 +195,7 @@ To compile the LaTeX source of the paper, ensure you have a LaTeX distribution
 installed, then run:
 
 ```bash
-latexmk -interaction=nonstopmode main.tex
+latexmk -pdf -interaction=nonstopmode main.tex
 ```
 
 ## Code in Paper
@@ -207,28 +233,62 @@ pip install sortedl1 matplotlib scikit-learn
 
 You can then run the example script with:
 
-```python
+```bash
 python code/example.py
 ```
 
 ### Julia Example
 
-For Julia, we provide the dependencies in [`Project.toml`](./Project.toml). You
-can instantiate the environment and run the example with:
+For Julia, we provide the dependencies in [`Project.toml`](./Project.toml).
+First instantiate the environment:
 
-```julia
+```bash
+julia --project=. -e 'using Pkg; Pkg.instantiate()'
+```
+
+Then run the example with:
+
+```bash
 julia --project=. code/example.jl
 ```
+
+### C++ Example
+
+The C++ example in [`code/example.cpp`](./code/example.cpp) requires
+[libslope](https://github.com/jolars/libslope) (version 6.5.0 was used for the
+paper), Eigen 3.4 or later, and CMake 3.15 or later. If libslope is not already
+installed on your system, you can build and install it from source with:
+
+```bash
+git clone --depth 1 --branch v6.5.0 https://github.com/jolars/libslope.git
+cmake -S libslope -B libslope/build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+cmake --build libslope/build
+cmake --install libslope/build
+```
+
+The last step needs `sudo` if you install into a system-wide prefix. Then build
+and run the example:
+
+```bash
+cmake -S code -B build
+cmake --build build
+./build/slope-example
+```
+
+The Nix environment described in [Nix Environment](#nix-environment) provides
+libslope and builds the example for you, in which case you only have to run
+`slope-example`.
 
 ### Plots
 
 Code for generating the plots in the paper are provided in `code/plot_*.py`
-files. In addition to the dependencies mentioned in [Python
-Example](#python-example), you also need `pandas`, `numpy`, and `scipy`
+files. In addition to the dependencies mentioned in
+[Python Example](#python-example), you also need `pandas`, `numpy`, `scipy`, and
+`pyarrow` (to read the benchmark results, which are stored as Parquet files)
 installed to run these:
 
 ```bash
-pip install pandas numpy scipy
+pip install pandas numpy scipy pyarrow
 ```
 
 You can then run the plotting scripts with:
@@ -243,12 +303,12 @@ python code/plot_thresholding.py
 ## Real Data Analysis Example
 
 In `code/real-data.R`, we provide an extended example using the R `SLOPE`
-package, which is described i Section 6 in the paper. This requires the
-additional dependencies `caret`, `pROC`, `glmnet`, `MLmetrics`, `dplyr`, and
-`readxl`:
+package, which is described in Section 6 in the paper. In addition to `SLOPE`
+and `here` from the [R Example](#r-example), this requires the dependencies
+`caret`, `pROC`, `glmnet`, and `MLmetrics`:
 
 ```r
-install.packages(c("caret", "pROC", "glmnet", "MLmetrics", "dplyr", "readxl"))
+install.packages(c("caret", "pROC", "glmnet", "MLmetrics"))
 ```
 
 Then, you can run the real data analysis script with:
@@ -257,7 +317,7 @@ Then, you can run the real data analysis script with:
 Rscript code/real-data.R
 ```
 
-## Nix Environment {#nix-environment}
+## Nix Environment
 
 A Nix flake is provided for setting up a reproducible development environment.
 To enter the Nix shell, run:
