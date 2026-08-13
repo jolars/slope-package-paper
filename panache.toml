@@ -1,0 +1,6 @@
+flavor = "gfm"
+
+[formatters]
+bibtex = "badness"
+r = "arity"
+python = "ruff"

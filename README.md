@@ -46,8 +46,8 @@ magnitudes.
 This repository is organized into several key components:
 
 - **Benchmarks** (`benchmark_slope/`, `benchmark_slope_path/`): Two Benchopt
-  benchmarks for comparing SLOPE solvers—one for single-penalty problems and one
-  for full path fitting
+  benchmarks for comparing SLOPE solvers: one for single-penalty problems and
+  one for full path fitting
 - **Results** (`results/`): Benchmark outputs with performance comparisons
   across solvers
 - **Analysis Code** (`code/`, `slopeutils/`): R and Python scripts for
@@ -248,14 +248,7 @@ additional dependencies `caret`, `pROC`, `glmnet`, `MLmetrics`, `dplyr`, and
 `readxl`:
 
 ```r
-install.packages(c(
-  "caret",
-  "pROC",
-  "glmnet",
-  "MLmetrics",
-  "dplyr",
-  "readxl"
-))
+install.packages(c("caret", "pROC", "glmnet", "MLmetrics", "dplyr", "readxl"))
 ```
 
 Then, you can run the real data analysis script with:
@@ -286,17 +279,21 @@ Here is a BibLaTeX entry for citing the paper:
 
 ```bibtex
 @online{larsson2025d,
-  title = {Efficient Solvers for {{SLOPE}} in {{R}}, {{Python}}, {{Julia}}, and {{C}}++},
-  author = {Larsson, Johan and Bogdan, Malgorzata and Grzesiak, Krystyna and Massias, Mathurin and Wallin, Jonas},
-  date = {2025-11-04},
-  eprint = {2511.02430},
-  eprinttype = {arXiv},
+  title       = {Efficient Solvers for {SLOPE} in {R}, {Python}, {Julia}, and
+                 {C}++},
+  date        = {2025-11-04},
+  url         = {http://arxiv.org/abs/2511.02430},
+  doi         = {10.48550/arXiv.2511.02430},
+  eprint      = {2511.02430},
+  author      = {Larsson, Johan and Bogdan, Malgorzata and Grzesiak, Krystyna and
+                 Massias, Mathurin and Wallin, Jonas},
+  urldate     = {2025-11-05},
   eprintclass = {stat},
-  doi = {10.48550/arXiv.2511.02430},
-  url = {http://arxiv.org/abs/2511.02430},
-  urldate = {2025-11-05},
-  pubstate = {prepublished},
-  keywords = {Computer Science - Mathematical Software,Computer Science - Software Engineering,slope,software,Statistics - Computation,Statistics - Machine Learning}
+  eprinttype  = {arXiv},
+  keywords    = {Computer Science - Mathematical Software,Computer Science -
+                 Software Engineering,slope,software,Statistics -
+                 Computation,Statistics - Machine Learning},
+  pubstate    = {prepublished}
 }
 ```
 
