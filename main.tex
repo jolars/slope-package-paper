@@ -203,7 +203,8 @@ practice, providing examples of fitting models, plotting, and performing
 cross-validation. Finally, in \autoref{sec:discussion}, we summarize the
 contributions of this paper and discuss future work.
 
-\section{Mathematical details}\label{sec:math-details}
+\section{Mathematical details}
+\label{sec:math-details}
 
 In this section, we provide a brief overview of the mathematical details of the
 SLOPE optimization problem, including the objective and the hybrid coordinate
@@ -453,7 +454,8 @@ limited at \(n\) clusters\footnote{As opposed to the lasso, which at most allows
 non-zero coefficients, although in practice this is rare since clusters do not
 form easily at low levels of regularization.
 
-\subsection{Screening rules}\label{sec:screening-rules}
+\subsection{Screening rules}
+\label{sec:screening-rules}
 
 Sparse models like lasso and SLOPE are well-known to benefit from
 \emph{screening rules}, which are used to reduce the dimension of \(\beta\) for
@@ -599,7 +601,8 @@ platforms. Our functions employ several heuristics based on problem size to
 determine whether to spawn multiple threads, except for the case of
 cross-validation, which is always parallelized.
 
-\section{Examples}\label{sec:examples}
+\section{Examples}
+\label{sec:examples}
 
 The packages are available through the respective package managers for each
 language and can be installed using the following commands:
@@ -910,7 +913,8 @@ why they are not included everywhere.
   \label{tab:simulated-data}
 \end{table}
 
-\subsection{Single solution}\label{sec:single-solution-benchmark}
+\subsection{Single solution}
+\label{sec:single-solution-benchmark}
 
 We have parameterized our single-solution benchmarks by \(\alpha\) as a fraction
 of \(\alpha_\text{max}\) (the value at which the first cluster enters the
@@ -963,7 +967,8 @@ problem, especially the ADMM method, which sometimes diverges.
   \label{fig:real-data-single}
 \end{figure}
 
-\subsection{Path}\label{sec:path-benchmark}
+\subsection{Path}
+\label{sec:path-benchmark}
 
 Here, we present benchmarks on a subset of the real data sets from
 \autoref{tab:real-data}. We parameterize the benchmark using the length of the
@@ -997,7 +1002,8 @@ gap of \(10^{-10}\)), our benchmarks generally involve larger problem sizes, and
 our implementation includes enhancements over the original version from
 \citet{larsson2023}.
 
-\section{Application to real-world data}\label{sec:realdat}
+\section{Application to real-world data}
+\label{sec:realdat}
 
 To illustrate the practical utility of SLOPE, we applied it to a metabolomics
 dataset from \citet{Godlewski2023}, comprising plasma measurements from glioma
@@ -1082,7 +1088,8 @@ prediction, and cluster visualization, makes it a useful tool for
 high-dimensional biomedical data analysis, where interpretability and feature
 selection are essential.
 
-\section{Discussion}\label{sec:discussion}
+\section{Discussion}
+\label{sec:discussion}
 
 SLOPE is an appealing model for high-dimensional regression problems that is
 able to recover sparsity and ordering patterns in the solution, which sets it
@@ -1509,7 +1516,8 @@ in \citet{larsson2022d}, the marginal improvement of using duality-based
 screening strategies is minor, so we have opted not to implement these in our
 packages.
 
-\section{Solver details}\label{sec:solver-details}
+\section{Solver details}
+\label{sec:solver-details}
 
 \begin{description}
   \item[sortedl1] The python package of our implementation of the hybrid
