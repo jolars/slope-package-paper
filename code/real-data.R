@@ -36,7 +36,6 @@ pdf(patterns_glioma, width = width, height = height, pointsize = ps)
 SLOPE::plotClusters(fit_pat, include_zeroes = FALSE)
 dev.off()
 
-
 ####### SLOPE and Lasso - classification
 set.seed(222)
 
@@ -96,7 +95,6 @@ auc_val_slope <- auc(roc_obj_slope)
 
 pred_class_slope <- ifelse(pred_prob_slope > 0.5, 1, 0)
 f1_slope <- MLmetrics::F1_Score(y_true = y_test, y_pred = pred_class_slope)
-
 
 # lasso
 
@@ -159,8 +157,8 @@ colSums(
 )
 
 # patterns
-pat_slope <- slope_model_path$patterns[[which(
-  slope_cv$summary$alpha == alpha_cv
-)]]
+pat_slope <- slope_model_path$patterns[[
+  which(slope_cv$summary$alpha == alpha_cv)
+]]
 rownames(pat_slope) <- colnames(x)
 pat_slope[rowSums(pat_slope) != 0, ]
