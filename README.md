@@ -295,6 +295,13 @@ installed to run these:
 pip install pandas numpy scipy pyarrow
 ```
 
+The plots typeset their text with LaTeX (`text.usetex` in Matplotlib), so you
+also need a LaTeX installation that provides `mathtools`, `lmodern`, `bm`, and
+`siunitx`, together with `cm-super`, `dvipng`, and Ghostscript. On Debian and
+Ubuntu, for instance, these are available in the `texlive-latex-recommended`,
+`texlive-latex-extra`, `texlive-science`, `texlive-fonts-recommended`,
+`lmodern`, `cm-super`, `dvipng`, and `ghostscript` packages.
+
 You can then run the plotting scripts with:
 
 ```bash
