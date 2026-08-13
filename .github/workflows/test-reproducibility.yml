@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: recursive
 
@@ -39,7 +39,7 @@ jobs:
 
       - name: Upload benchmark results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: benchmark-results-${{ matrix.benchmark }}-${{ matrix.os }}
           path: ${{ matrix.benchmark }}/outputs/
@@ -51,15 +51,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ghostscript
+          sudo apt-get install -y ghostscript texlive-extra-utils
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -78,6 +78,7 @@ jobs:
           packages: |
             any::SLOPE
             any::knitr
+            any::tinytex
             any::here
             any::lars
             any::caret
@@ -86,7 +87,7 @@ jobs:
             any::MLmetrics
 
       - name: Set up Julia
-        uses: julia-actions/setup-julia@v2
+        uses: julia-actions/setup-julia@v3
         with:
           version: "1.12"
 
@@ -116,7 +117,7 @@ jobs:
 
       - name: Upload figures
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: figures
           path: images/
@@ -130,7 +131,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install system dependencies
         run: |
@@ -159,7 +160,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Compile the paper
         uses: xu-cheng/latex-action@v3
@@ -169,7 +170,7 @@ jobs:
 
       - name: Upload paper
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: paper
           path: main.pdf

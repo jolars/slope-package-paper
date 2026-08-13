@@ -210,12 +210,16 @@ directory is created automatically if missing).
 
 ### R Example
 
-To run the R examples, you need to have `SLOPE`, `knitr`, `here`, and `lars`
-installed:
+To run the R examples, you need to have `SLOPE`, `knitr`, `tinytex`, `here`, and
+`lars` installed:
 
 ```r
-install.packages(c("SLOPE", "knitr", "here", "lars"))
+install.packages(c("SLOPE", "knitr", "tinytex", "here", "lars"))
 ```
+
+The script crops one of the figures with `knitr::plot_crop()`, which needs
+`pdfcrop` (part of TeX Live) and Ghostscript. If these are missing, the script
+still runs, but leaves the figure uncropped.
 
 Then, you can run the example script:
 
