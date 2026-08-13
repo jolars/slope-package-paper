@@ -8,15 +8,17 @@ on:
   workflow_dispatch: # Allow manual triggering
 
 jobs:
-  test-benchmarks:
+  benchmarks:
+    name: Benchmark (${{ matrix.benchmark }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-    defaults:
-      run:
-        shell: bash -el {0} # Use login shell for conda
+        benchmark: [benchmark_slope, benchmark_slope_path]
+    env:
+      PYTHONUTF8: 1
+      KMP_DUPLICATE_LIB_OK: TRUE
 
     steps:
       - name: Checkout repository
@@ -24,93 +26,151 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup Conda
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          auto-update-conda: true
-          python-version: "3.12"
-          miniforge-version: latest
-          activate-environment: benchopt
+      - name: Set up benchopt
+        uses: jolars/setup-benchopt@main
 
-      - name: Install benchopt (Unix)
-        if: runner.os != 'Windows'
+      - name: Install benchmark dependencies
         run: |
-          conda activate benchopt
-          pip install -U benchopt
+          benchopt install ./${{ matrix.benchmark }} --config ${{ matrix.benchmark }}/example_config.yml -y
 
-      - name: Install benchopt (Windows)
-        if: runner.os == 'Windows'
-        shell: powershell
+      - name: Run benchmark with example config
         run: |
-          $env:BENCHOPT_DEBUG = "1"
-          conda activate benchopt
-          pip install -U benchopt
-
-      - name: Install benchmark_slope dependencies (Unix)
-        if: runner.os != 'Windows'
-        run: |
-          conda activate benchopt
-          benchopt install --config benchmark_slope/example_config.yml -y ./benchmark_slope
-
-      - name: Run benchmark_slope with example config (Unix)
-        if: runner.os != 'Windows'
-        run: |
-          conda activate benchopt
-          benchopt run --config benchmark_slope/example_config.yml ./benchmark_slope
-
-      - name: Install benchmark_slope dependencies (Windows)
-        if: runner.os == 'Windows'
-        shell: powershell
-        run: |
-          conda activate benchopt
-          $env:PYTHONUTF8 = "1"
-          $env:KMP_DUPLICATE_LIB_OK = "TRUE"
-          benchopt install --config benchmark_slope/example_config.yml -y ./benchmark_slope
-
-      - name: Run benchmark_slope with example config (Windows)
-        if: runner.os == 'Windows'
-        shell: powershell
-        run: |
-          conda activate benchopt
-          $env:PYTHONUTF8 = "1"
-          $env:KMP_DUPLICATE_LIB_OK = "TRUE"
-          benchopt run ./benchmark_slope --config benchmark_slope/example_config.yml
-
-      - name: Install benchmark_slope_path dependencies (Unix)
-        if: runner.os != 'Windows'
-        run: |
-          conda activate benchopt
-          benchopt install ./benchmark_slope_path -y --config benchmark_slope_path/example_config.yml
-
-      - name: Install benchmark_slope_path dependencies (Windows)
-        if: runner.os == 'Windows'
-        shell: powershell
-        run: |
-          conda activate benchopt
-          $env:PYTHONUTF8 = "1"
-          $env:KMP_DUPLICATE_LIB_OK = "TRUE"
-          benchopt install ./benchmark_slope_path -y --config benchmark_slope_path/example_config.yml
-
-      - name: Run benchmark_slope_path with example config (Unix)
-        if: runner.os != 'Windows'
-        run: |
-          benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
-
-      - name: Run benchmark_slope_path with example config (Windows)
-        if: runner.os == 'Windows'
-        shell: powershell
-        run: |
-          conda activate benchopt
-          $env:PYTHONUTF8 = "1"
-          $env:KMP_DUPLICATE_LIB_OK = "TRUE"
-          benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
+          benchopt run ./${{ matrix.benchmark }} --config ${{ matrix.benchmark }}/example_config.yml
 
       - name: Upload benchmark results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: benchmark-results-${{ matrix.os }}
-          path: |
-            benchmark_slope/outputs/
-            benchmark_slope_path/outputs/
+          name: benchmark-results-${{ matrix.benchmark }}-${{ matrix.os }}
+          path: ${{ matrix.benchmark }}/outputs/
+          retention-days: 30
+
+  examples:
+    name: Paper code examples
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ghostscript
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: |
+          pip install sortedl1 matplotlib scikit-learn pandas numpy scipy pyarrow
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - name: Install R dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: |
+            any::SLOPE
+            any::knitr
+            any::here
+            any::lars
+            any::caret
+            any::pROC
+            any::glmnet
+            any::MLmetrics
+
+      - name: Set up Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12"
+
+      - name: Instantiate Julia environment
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
+
+      - name: Run R example
+        run: Rscript code/example.R
+
+      - name: Run Python example
+        run: python code/example.py
+
+      - name: Run Julia example
+        run: julia --project=. code/example.jl
+        env:
+          GKSwstype: "100" # Headless GR backend
+
+      - name: Run plotting scripts
+        run: |
+          python code/plot_benchmark_path.py
+          python code/plot_benchmark_real.py
+          python code/plot_benchmark_simul.py
+          python code/plot_thresholding.py
+
+      - name: Run real data analysis
+        run: Rscript code/real-data.R
+
+      - name: Upload figures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: figures
+          path: images/
+          retention-days: 30
+
+  cpp-example:
+    name: C++ example
+    runs-on: ubuntu-latest
+    env:
+      LIBSLOPE_VERSION: 6.5.0
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake libeigen3-dev
+
+      - name: Build and install libslope
+        run: |
+          git clone --depth 1 --branch v${LIBSLOPE_VERSION} \
+            https://github.com/jolars/libslope.git
+          cmake -S libslope -B libslope/build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+          cmake --build libslope/build
+          sudo cmake --install libslope/build
+
+      - name: Build the example
+        run: |
+          cmake -S code -B build
+          cmake --build build
+
+      - name: Run the example
+        run: ./build/slope-example
+
+  paper:
+    name: Compile paper
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compile the paper
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+          args: -pdf -interaction=nonstopmode
+
+      - name: Upload paper
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper
+          path: main.pdf
           retention-days: 30
