@@ -111,12 +111,13 @@ We will assume that \(F\) takes the following form:
   F( \beta_0, \beta ) = \frac{1}{n} \sum_{i = 1}^n f( \beta_0 + x_i^\intercal \beta , y_i),
 \]
 where \(f\) is a smooth, convex function and \(x_i\) is the \(i\)th row of the
-\(n \times p\) design matrix \(X\). Throughout the paper, we will use the
-convention of denoting a row of a matrix \(X\) as \(x_i\) and a column as
-\(x_j\). \(y_i\) is the \(i\)th row of the \(n \times m\) response matrix
-\(Y\),\footnote{In our case, \(m = 1\) unless the model is multinomial logistic
-regression.} and we let \((\hat{\beta}_0, \hat{\beta})\) denote a solution to
-the problem in \autoref{eq:slope}.
+\(n \times p\) design matrix \(X\). Throughout the paper, we use
+scalar-response notation and denote a row of \(X\) by \(x_i\) and a column by
+\(x_j\). For multinomial regression with \(m\) classes, \(y_i\) and \(\beta_0\)
+instead have \(m-1\) components, \(\beta\) is a \(p \times (m-1)\) matrix, and
+the sorted \(\ell_1\) norm acts on its vectorization. We let
+\((\hat{\beta}_0, \hat{\beta})\) denote a solution to the problem in
+\autoref{eq:slope}.
 
 SLOPE is a generalization of both the lasso\footnote{The lasso is attained by
 taking a constant
@@ -254,22 +255,22 @@ by the SLOPE packages in \autoref{tab:glm}.
   \centering
   \begin{tabular}{lccc}
     \toprule
-    Model       &                                               \(f(\eta, y)\)                                                &               \(\link(\mu)\)                &                    \(\ilink(\eta)\) \\
+    Model       &                                                         \(f(\eta, y)\)                                                          &                             \(\link(\mu)\)                             &                                      \(\ilink(\eta)\) \\
     \midrule
-    Gaussian    &                                         \(\frac{1}{2}(y - \eta)^2\)                                         &                   \(\mu\)                   &                        \(\eta\) \\
+    Gaussian    &                                                   \(\frac{1}{2}(y - \eta)^2\)                                                   &                                 \(\mu\)                                 &                                          \(\eta\) \\
     \addlinespace
-    Binomial    &                                        \(\log(1 + e^\eta) - \eta y\)                                        & \(\log \left( \frac{\mu}{1 - \mu} \right)\) &             \(\frac{e^\eta}{1 + e^\eta}\) \\
+    Binomial    &                                                  \(\log(1 + e^\eta) - \eta y\)                                                  &               \(\log \left( \frac{\mu}{1 - \mu} \right)\)               &                               \(\frac{e^\eta}{1 + e^\eta}\) \\
     \addlinespace
-    Poisson     &                                             \(e^\eta - \eta y\)                                             &                \(\log(\mu)\)                &                       \(e^\eta\) \\
+    Poisson     &                                                       \(e^\eta - \eta y\)                                                       &                              \(\log(\mu)\)                              &                                         \(e^\eta\) \\
     \addlinespace
-    Multinomial & \(\sum_{k = 1}^{m - 1}\left( \log \left( 1 + \sum_{j = 1}^{m - 1} e^{\eta_j} \right) - y_k \eta_k \right)\) & \(\log\left( \frac{\mu}{1 - \mu} \right)\)  & \(\frac{\exp(\eta)}{1 + \sum_{j=1}^{m-1} e^{\eta_j}}\) \\
+    Multinomial & \(\log \left( 1 + \sum_{j = 1}^{m - 1} e^{\eta_j} \right) - \sum_{k = 1}^{m - 1} y_k \eta_k\) & \(\left(\log \frac{\mu_k}{\mu_m}\right)_{k=1}^{m-1}\) & \(\left(\frac{e^{\eta_k}}{1 + \sum_{j=1}^{m-1} e^{\eta_j}}\right)_{k=1}^{m-1}\) \\
     \bottomrule
   \end{tabular}
   \caption{
     Loss functions, link functions, and inverse link functions for generalized
     linear models in the SLOPE package. Note that in the case of multinomial
-    logistic regression, the input is vector-valued, and we allow \(\log\) and
-    \(\exp\) to be overloaded to apply element-wise in these cases.
+    logistic regression, the input is vector-valued and
+    \(\mu_m = 1 - \sum_{k=1}^{m-1} \mu_k\) is the mean of the reference class.
   }
   \label{tab:glm}
 \end{table}
@@ -282,9 +283,9 @@ formulation of the loss function, with the last class serving as the reference
 category. This choice slightly complicates the notation and leads to a more
 complex formulation for the dual problem. For SLOPE, however, this is a more
 natural choice, since it generalizes to the binary case as well (in which the
-last class is also implicit).\footnote{SLOPE needs a \(\lambda\) sequence of
-length \(mp\), so the loss function for the multinomial case would not be
-equivalent to the binary case if we used the redundant formulation.}
+last class is also implicit).\footnote{The non-redundant formulation requires a
+\(\lambda\) sequence of length \((m-1)p\). It would therefore not reduce to the
+binary formulation if we instead used \(m\) coefficient vectors.}
 Furthermore, it also relieves the problem of the parameter ambiguity that
 affects the redundant formulation, where rows of the coefficient matrix can be
 shifted without changing the value of \(F(\beta_0, \beta)\). This also means
@@ -1410,103 +1411,182 @@ q     : 0.1
 \section{Duality gap and convergence criteria}
 \label{sec:convergence-criteria-details}
 
-In detail, we transform the primal problem \(P(\beta_0,\beta)\), defined in
-\autoref{eq:slope}, into a constrained problem, taking \(\alpha = 1\) without
-loss of generality:
+For clarity, we first use the scalar-response notation from
+\autoref{sec:math-details}; the multinomial extension follows below. We absorb
+\(\alpha\) into \(\lambda\), introduce the linear predictors \(\eta_i\), and
+write the primal problem in constrained form:
 \begin{equation}
-  % \label{eq:slope-constrained}
   \begin{aligned}
-    & \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} &  & \frac{1}{n} \sum_{i = 1}^n f(x_i^\intercal \beta + \beta_0, y_i) + J_\lambda(\beta) \\
-    % & \text{subject to}                                              &  & r_i = \link(\bm{x}_i^\intercal \bm{\beta}) - y_i, \quad i = 1, \ldots, n                                            \\
-    & \text{subject to}                                         &  & r_i = \ilink(\beta_0 + x_i^\intercal \beta) - y_i, \quad i = 1, \ldots, n \\
+    \minimize_{\beta_0 \in \mathbb{R},\,\beta \in \mathbb{R}^p,\,\eta \in \mathbb{R}^n}
+    \quad & \frac{1}{n} \sum_{i = 1}^n f(\eta_i, y_i) + J_\lambda(\beta) \\
+    \text{subject to}
+    \quad & \eta_i = \beta_0 + x_i^\intercal \beta,
+    \qquad i = 1, \ldots, n.
   \end{aligned}
 \end{equation}
-
-Since \(\beta_0 + x_i^\intercal \beta = g(r_i + y_i)\), we can write the
-Lagrangian as
+Using multipliers \(\delta_i/n\) gives the Lagrangian
 \[
-  L( \beta_0, \beta ,r, \delta ) = \frac{1}{n} \sum_{i = 1}^n f \big (g(r_i + y_i), y_i \big )
-                                   + J_\lambda ( \beta )
-                                   - \sum_{i = 1}^n \delta_i \left( g(r_i + y_i) - x_i^\intercal \beta - \beta_0 \right) .
+  L(\beta_0, \beta, \eta, \delta)
+  = \frac{1}{n} \sum_{i=1}^n
+    \left[f(\eta_i, y_i)
+          - \delta_i(\eta_i - x_i^\intercal\beta - \beta_0)\right]
+    + J_\lambda(\beta).
 \]
-This allows us to write the dual problem as
+Let \(f_i^*\) denote the Fenchel conjugate of
+\(f_i(\eta) = f(\eta,y_i)\). Minimizing over \(\eta\) gives
 \[
-  D(\delta) = \inf_r\left( \frac{1}{n} \sum_{i = 1}^n f\left( g(r_i+y_i), y_i \right) - \delta_i g(r_i+ y_i) \right) % & \phantom{={}} + \inf_\beta \left(J_\lambda(\beta) - \delta^\intercal X\beta\right)   \\% & \phantom{={}} + \inf_{\beta_0} \left( -\delta^\intercal \bm{1} \beta_0\right)        \\
-  - \sup_\beta \big(( - X^\intercal \delta)^\intercal \beta - J_\lambda(\beta) \big) - \sup_{\beta_0} \left( \delta^\intercal \bm{1} \beta_0 \right).
+  \inf_{\eta_i}\{f_i(\eta_i)-\delta_i\eta_i\}
+  = -f_i^*(\delta_i).
 \]
-Here, we begin by noting that the infimum is attained at the point where
-\(r = \delta\)~\citep{fercoq2015}, which means that the value is
+The terms involving \(\beta\) give
 \[
-  \frac{1}{n} \sum_{i = 1}^n f \left( g(\delta_i+y_i), y_i \right)
-  - \delta_i g( \delta_i + y_i)
+  \inf_\beta
+  \left\{J_\lambda(\beta)
+  + \left(\frac{X^\intercal\delta}{n}\right)^\intercal\beta\right\}
+  = -J_\lambda^*\left(-\frac{X^\intercal\delta}{n}\right).
 \]
-in general, although loss-specific simplifications can be made. For instance, in
-the case of quadratic loss the expression evaluates to
-\(\frac{1}{2} \lVert y \rVert_2^2 - \frac{1}{2} \lVert \delta + y \lVert^2_2\).
-
-Next, we observe that
-\(\sup_\beta \big(( - X^\intercal \delta)^\intercal \beta - J_\lambda(\beta) \big)\)
-is the Fenchel conjugate of the sorted \(\ell_1\) norm, which is the indicator
-function of the sorted \(\ell_1\) dual norm unit ball. Its value is
+Here, the Fenchel conjugate of the sorted \(\ell_1\) norm is the indicator of
+its dual-norm unit ball:
 \[
-  \sup_\beta \big (z^\intercal \beta - J_\lambda ( \beta ) \big ) = \begin{cases}
-                                                                      0      & \text{if } J^*_\lambda(z) \leq 1, \\
-                                                                      \infty & \text{otherwise},
-                                                                    \end{cases}
+  J_\lambda^*(z) = \begin{cases}
+                      0      & \text{if } \lVert z \rVert_{*,\lambda} \leq 1, \\
+                      \infty & \text{otherwise},
+                    \end{cases}
 \]
-where \(J^*_\lambda(z)\) is the sorted \(\ell_1\) dual norm, defined
-as~\citep{negrinho2014}
+where the sorted \(\ell_1\) dual norm is~\citep{negrinho2014}
 \begin{equation}
-  J^*_\lambda(z) = \max_{j = 1,2,\dots,p}\left\{ \frac{\sum_{k=1}^j|z_{(k)}|}{\sum_{k=1}^j\lambda_k} \right\}
+  \lVert z \rVert_{*,\lambda}
+  = \max_{j = 1,2,\dots,p}
+    \left\{
+      \frac{\sum_{k=1}^j|z_{(k)}|}{\sum_{k=1}^j\lambda_k}
+    \right\}.
 \end{equation}
-
-Next, observe that \(\sup_{\beta_0} (\delta^\intercal \bm{1} \beta_0) = \infty\)
-unless \(\delta^\intercal \bm{1} = 0\).
-
-Taken together, this means that we have the following dual function:
+Finally, minimizing over the unpenalized intercept is finite only when
+\(\bm{1}^\intercal\delta=0\). The dual problem is therefore
 \begin{equation}
   D(\delta) = \begin{cases}
-                \frac{1}{n} \sum_{i = 1}^n f\left( g(\delta_i+y_i), y_i \right) - \delta_i g(\delta_i+ y_i) & \text{if } J^*_\lambda(-X^\intercal \delta) \leq 1 \text{ and } \delta^\intercal \bm{1} = 0 \\
-                -\infty,                                                                                    & \text{otherwise}.
-              \end{cases}
+    -\dfrac{1}{n}\displaystyle\sum_{i=1}^n f_i^*(\delta_i)
+      & \text{if }
+        \left\lVert-\dfrac{X^\intercal\delta}{n}\right\rVert_{*,\lambda}
+        \leq 1,\;
+        \bm{1}^\intercal\delta=0, \\
+    -\infty
+      & \text{otherwise}.
+  \end{cases}
+  \label{eq:slope-dual}
 \end{equation}
+As usual, \(f_i^*(\delta_i)=\infty\) outside its domain, so domain
+feasibility is implicit in \autoref{eq:slope-dual}.
+If the model has no intercept, the condition
+\(\bm{1}^\intercal\delta=0\) is omitted.
 
-A natural dual point candidate for this problem is to pick \(\delta = r\), since
-at the optimum we have
+For the canonical generalized linear models considered here, let
+\(q_i=y_i+\delta_i\). The conjugate domain requires \(q_i\) to belong to the
+mean-parameter domain \(\mathcal{M}\). This domain is \(\mathbb{R}\) for the
+Gaussian model, \([0,1]\) for the binomial model, \([0,\infty)\) for the
+Poisson model, and
 \[
-  \bm{0} \in X^\intercal r + \partial J_\lambda (X^\intercal r)
+  \mathcal{M}
+  = \left\{q \in \mathbb{R}^{m-1}:
+      q_k \geq 0,\; \sum_{k=1}^{m-1}q_k \leq 1\right\}
 \]
-and, in addition require that the signs between agree.
-% TODO: Hand-wavy, clean up later.
+for the non-redundant multinomial model. In the multinomial case, we define the
+reference-class mean as
+\(q_{im}=1-\sum_{k=1}^{m-1}q_{ik}\). Using the convention
+\(0\log 0=0\), the loss-specific terms in \autoref{eq:slope-dual} are
+\[
+  -f_i^*(\delta_i) = \begin{cases}
+    -y_i\delta_i - \frac{1}{2}\delta_i^2
+      & \text{Gaussian}, \\
+    -q_i\log q_i - (1-q_i)\log(1-q_i)
+      & \text{binomial}, \\
+    q_i(1-\log q_i)
+      & \text{Poisson}, \\
+    -\displaystyle\sum_{k=1}^m q_{ik}\log q_{ik}
+      & \text{multinomial}.
+  \end{cases}
+\]
+For example, the Gaussian dual objective is
+\[
+  D(\delta)
+  = \frac{\lVert y\rVert_2^2-\lVert y+\delta\rVert_2^2}{2n}
+\]
+at a feasible point.
 
-% To obtain a feasible dual point for this problem, we can use the
-% following fact about the stationarity condition of the primal problem,
-% namely that
-% \[
-%   \sum_{j=1}^k | g_{(j)} | \leq \sum_{j=1}^k \lambda_j |\beta_{(j)}| \quad \forall\; k = 1,2,\dots,p.
-% \]
-% where  \(g_j = x_j^\intercal r\) is the \(j\)th component of the gradient of loss function
-% with respect to \(\beta_j\)
-% and \(r\) the generalized residual, for which \(r_i = \ilink(x_i^\intercal \beta + \beta_0) - y_i\).
+The generalized residual
+\(r_i=\ilink(\beta_0+x_i^\intercal\beta)-y_i\) is a natural dual candidate:
+at the optimum, the Karush--Kuhn--Tucker conditions include
+\[
+  \bm{0} \in \frac{X^\intercal r}{n} + \partial J_\lambda(\beta),
+  \qquad
+  \bm{1}^\intercal r=0.
+\]
+Away from the optimum, however, centering \(r\) is safe only for the Gaussian
+model. For the other models, centering can move \(y_i+r_i\) outside
+\(\mathcal{M}\). We instead construct a zero-sum point that remains in the
+conjugate domain. Let
+\[
+  c_i = r_i-\bar r,
+  \qquad
+  a_i = \bar y-y_i,
+\]
+and define
+\[
+  t_{\max}
+  = \max\left\{t\in[0,1]:
+      y_i+a_i+t(c_i-a_i)\in\mathcal{M}
+      \text{ for every }i\right\}.
+\]
+Then
+\[
+  \widetilde\delta_i
+  = a_i+t_{\max}(c_i-a_i)
+\]
+satisfies both
+\(\bm{1}^\intercal\widetilde\delta=0\) and
+\(y_i+\widetilde\delta_i\in\mathcal{M}\). The set defining
+\(t_{\max}\) is nonempty because \(t=0\) gives
+\(y_i+a_i=\bar y\in\mathcal{M}\). For a model without an intercept, we instead
+take \(\widetilde\delta=r\), which is already in the conjugate domain.
 
-To be a feasible point, however, we first center the point by its mean and scale
-it:
+It remains to enforce the sorted \(\ell_1\) dual constraint. Set
 \[
-  \delta_j = \frac{r_i - \bar{r}}{\max\left\{1, J_\lambda^*\left(X^\intercal(r - \bar{r})\right) \right\}}
+  \rho
+  = \max\left\{1,
+      \left\lVert-\frac{X^\intercal\widetilde\delta}{n}
+      \right\rVert_{*,\lambda}\right\},
+  \qquad
+  \delta=\frac{\widetilde\delta}{\rho}.
 \]
-which guarantees feasibility. We then obtain the following duality gap:
+This scaling preserves every other constraint. In particular,
 \[
-  P( \beta_0, \beta ) - D( \delta ).
+  y_i+\delta_i
+  = \left(1-\frac{1}{\rho}\right)y_i
+    + \frac{1}{\rho}(y_i+\widetilde\delta_i)
+  \in\mathcal{M}
 \]
-As a stopping criterion for the algorithm, we use the relative duality gap
-\[
-  P( \beta_0, \beta ) - D( \delta ) \leq \varepsilon P( \beta_0),
-\]
-where \(\varepsilon > 0\) is the user-defined tolerance level. The duality gap
-provides an upper bound on suboptimality for the problem, independent of solver
-and conditioning of the problem, which is not the case of convergence criteria
-based on changes in objective, gradients, or coefficients.
+by convexity of \(\mathcal{M}\). For binomial and Poisson models, our
+implementation obtains a tighter initial point by conditionally adjusting the
+intercept so that the residuals sum to zero. It uses the domain-preserving
+construction above as a numerical repair and as the primary construction for
+the multinomial model. For multinomial regression, the intercept condition
+holds componentwise across the nonreference classes, whereas domain
+feasibility is imposed jointly on each row through the simplex \(\mathcal{M}\).
+The regularizer constraint is also joint: the matrix
+\(X^\intercal\widetilde\delta/n\) is vectorized before evaluating the sorted
+\(\ell_1\) dual norm.
 
+At this feasible point, the duality gap
+\[
+  P(\beta_0,\beta)-D(\delta)
+\]
+is nonnegative and bounds the primal suboptimality. We stop when the relative
+duality gap satisfies
+\[
+  P(\beta_0,\beta)-D(\delta)
+  \leq \varepsilon\lvert P(\beta_0,\beta)\rvert,
+\]
+where \(\varepsilon>0\) is the user-defined tolerance level.
 The availability of the duality gap would also allow us to employ duality-gap
 based safe screening rules~\citep{fercoq2015} and working set strategies derived
 from these~\citep{massias2018}, which could furthermore be used to enhance our
