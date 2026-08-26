@@ -12,7 +12,7 @@
 \usepackage{subcaption}
 \usepackage{siunitx}
 
-\usepackage[linesnumbered,vlined,ruled]{algorithm2e}
+\usepackage[linesnumbered, vlined, ruled]{algorithm2e}
 
 \def\algorithmautorefname{Algorithm}%
 
@@ -30,21 +30,18 @@
 
 \author{
   Johan Larsson~\orcidlink{0000-0002-4029-5945}\\
-  University of Copenhagen
-  \And
-  Ma\l{}gorzata Bogdan~\orcidlink{0000-0002-0657-4342}\\
-  University of Wroc\l{}aw
-  \And
-  Krystyna Grzesiak~\orcidlink{0000-0003-2581-7722}\\
-  University of Wroc\l{}aw
-  \AND
-  Mathurin Massias~\orcidlink{0000-0002-8950-0356}\\
-  Inria, ENS de Lyon; CNRS, Lyon
-  \And
-  Jonas Wallin~\orcidlink{0000-0003-0381-6593}\\
+  University of Copenhagen \And Ma\l{}gorzata
+  Bogdan~\orcidlink{0000-0002-0657-4342}\\
+  University of Wroc\l{}aw \And Krystyna
+  Grzesiak~\orcidlink{0000-0003-2581-7722}\\
+  University of Wroc\l{}aw \AND Mathurin
+  Massias~\orcidlink{0000-0002-8950-0356}\\
+  Inria, ENS de Lyon; CNRS, Lyon \And Jonas
+  Wallin~\orcidlink{0000-0003-0381-6593}\\
   Lund University
 }
-\Plainauthor{Johan Larsson, Malgorzata Bogdan, Krystyna Grzesiak, Mathurin Massias, Jonas Wallin}
+\Plainauthor{Johan Larsson, Malgorzata Bogdan, Krystyna Grzesiak, Mathurin
+  Massias, Jonas Wallin}
 
 \title{
   Efficient Solvers for SLOPE in \proglang{R}, \proglang{Python},
@@ -55,44 +52,38 @@
 
 \Abstract{
   \noindent We present a suite of packages in \proglang{R}, \proglang{Python},
-  \proglang{Julia}, and \proglang{C++} that efficiently solve
-  the Sorted L-One Penalized Estimation (SLOPE) problem.
-  The packages feature a highly efficient hybrid coordinate descent
-  algorithm that fits generalized linear models (GLMs) and supports
-  a variety of loss functions, including Gaussian, binomial,
-  Poisson, and multinomial logistic regression. Our implementation
-  is designed to be fast, memory-efficient, and flexible.
-  The packages support a variety of data structures (dense, sparse, and
-  out-of-memory matrices) and are designed to efficiently fit the
-  full SLOPE path as well as handle cross-validation of SLOPE models,
-  including the relaxed SLOPE.
-  We present examples of how to use the packages and benchmarks that
-  demonstrate the performance of the packages on both
-  real and simulated data and show that our packages outperform
-  existing implementations of SLOPE in terms of speed.
+  \proglang{Julia}, and \proglang{C++} that efficiently solve the Sorted L-One
+  Penalized Estimation (SLOPE) problem. The packages feature a highly efficient
+  hybrid coordinate descent algorithm that fits generalized linear models (GLMs)
+  and supports a variety of loss functions, including Gaussian, binomial,
+  Poisson, and multinomial logistic regression. Our implementation is designed
+  to be fast, memory-efficient, and flexible. The packages support a variety of
+  data structures (dense, sparse, and out-of-memory matrices) and are designed
+  to efficiently fit the full SLOPE path as well as handle cross-validation of
+  SLOPE models, including the relaxed SLOPE. We present examples of how to use
+  the packages and benchmarks that demonstrate the performance of the packages
+  on both real and simulated data and show that our packages outperform existing
+  implementations of SLOPE in terms of speed.
 }
 
-\Keywords{SLOPE, OWL, regularization, generalized linear models, \proglang{R}, \proglang{Python}, \proglang{Julia}, \proglang{C++}}
-\Plainkeywords{SLOPE, OWL, regularization, generalized linear models, R, Python, Julia, C++}
+\Keywords{SLOPE, OWL, regularization, generalized linear models, \proglang{R},
+  \proglang{Python}, \proglang{Julia}, \proglang{C++}}
+\Plainkeywords{SLOPE, OWL, regularization, generalized linear models, R, Python,
+  Julia, C++}
 
 \Address{
-  Johan Larsson\\
-  Department of Mathematical Sciences\\
-  Faculty of Science\\
-  University of Copenhagen\\
-  Universitetsparken 5\\
-  2100 København Ø, Denmark\\
-  E-mail: \email{johan@jolars.co}\\
-  URL: \url{https://jolars.co/}
+  Johan Larsson\\ Department of Mathematical Sciences\\ Faculty of Science\\
+  University of Copenhagen\\ Universitetsparken 5\\ 2100 København Ø, Denmark\\
+  E-mail: \email{johan@jolars.co}\\ URL: \url{https://jolars.co/}
 }
 
 \begin{document}
 
 \section{Introduction}
 
-Sorted L-One Penalized Estimation (SLOPE)~\citep{bogdan2013,zeng2014,bogdan2015}
-is a type of regularized regression that consists of solving the following
-convex optimization problem:
+Sorted L-One Penalized Estimation (SLOPE)~\citep{bogdan2013, zeng2014,
+bogdan2015} is a type of regularized regression that consists of solving the
+following convex optimization problem:
 \begin{equation}
   \label{eq:slope}
   \minimize_{\beta_0 \in \mathbb{R},\beta \in \mathbb{R}^p} \Big( P(\beta_0,\beta) = F(\beta_0, \beta) + \alpha J_\lambda(\beta) \Big)
@@ -104,34 +95,33 @@ non-increasing sequence of penalty weights. \(J\) is the \emph{sorted $\ell_1$
 norm}, defined as
 \begin{equation}
   % \label{eq:sl1}
-  J_\lambda(\beta) = \sum_{j = 1}^p \lambda_j |\beta_{(j)}|, \quad \text{where}\quad |\beta_{(1)}| \geq |\beta_{(2)}| \geq \ldots \geq |\beta_{(p)}|.
+  J_\lambda(\beta) = \sum_{j=1}^p \lambda_j |\beta_{(j)}|, \quad \text{where}\quad |\beta_{(1)}| \geq |\beta_{(2)}| \geq \ldots \geq |\beta_{(p)}|.
 \end{equation}
 We will assume that \(F\) takes the following form:
 \[
-  F( \beta_0, \beta ) = \frac{1}{n} \sum_{i = 1}^n f( \beta_0 + x_i^\intercal \beta , y_i),
+  F( \beta_0, \beta ) = \frac{1}{n} \sum_{i=1}^n f( \beta_0 + x_i^\intercal \beta , y_i),
 \]
 where \(f\) is a smooth, convex function and \(x_i\) is the \(i\)th row of the
-\(n \times p\) design matrix \(X\). Throughout the paper, we use
-scalar-response notation and denote a row of \(X\) by \(x_i\) and a column by
-\(x_j\). For multinomial regression with \(m\) classes, \(y_i\) and \(\beta_0\)
-instead have \(m-1\) components, \(\beta\) is a \(p \times (m-1)\) matrix, and
-the sorted \(\ell_1\) norm acts on its vectorization. We let
+\(n \times p\) design matrix \(X\). Throughout the paper, we use scalar-response
+notation and denote a row of \(X\) by \(x_i\) and a column by \(x_j\). For
+multinomial regression with \(m\) classes, \(y_i\) and \(\beta_0\) instead have
+\(m - 1\) components, \(\beta\) is a \(p \times (m - 1)\) matrix, and the sorted
+\(\ell_1\) norm acts on its vectorization. We let
 \((\hat{\beta}_0, \hat{\beta})\) denote a solution to the problem in
 \autoref{eq:slope}.
 
 SLOPE is a generalization of both the lasso\footnote{The lasso is attained by
-taking a constant
-\(\lambda\).}~\citep{santosa1986,donoho1994,donoho1995,tibshirani1996} and
-OSCAR\footnote{OSCAR is attained by setting \(\lambda\) to be a linear sequence,
-where \(\lambda_j = \theta_1 + \theta_2(p - j)\) with
+taking a constant \(\lambda\).}~\citep{santosa1986, donoho1994, donoho1995,
+tibshirani1996} and OSCAR\footnote{OSCAR is attained by setting \(\lambda\) to
+be a linear sequence, where \(\lambda_j = \theta_1 + \theta_2(p - j)\) with
 \(\theta_1, \theta_2 \geq 0\)~\citep{figueiredo2014}.} (octagonal shrinkage and
 clustering algorithm for regression)~\citep{bondell2008}. One of the most
 important properties of SLOPE is that it can cluster coefficients by setting
-them to the same magnitude~\citep{figueiredo2016,hejny2025,bogdan2026}. This is
-a natural consequence of the sorted \(\ell_1\) norm, stemming from the fact that
-the contribution to the norm of a given coefficient increases disproportionately
-if it changes order. This also allows SLOPE to better recover the ordering
-pattern in the solution.
+them to the same magnitude~\citep{figueiredo2016, hejny2025, bogdan2026}. This
+is a natural consequence of the sorted \(\ell_1\) norm, stemming from the fact
+that the contribution to the norm of a given coefficient increases
+disproportionately if it changes order. This also allows SLOPE to better recover
+the ordering pattern in the solution.
 
 Like the lasso, SLOPE is a convex but non-smooth optimization problem. And since
 the pool-adjacent-violators algorithm~(PAVA)~\citep{barlow1972} can be used to
@@ -145,9 +135,9 @@ direction method of multipliers (ADMM) method~\citep{boyd2010}.
 
 For similar problems such as the lasso and elastic net\citep{zou2005}, however,
 these aforementioned methods have generally found themselves outperformed by
-coordinate descent methods~\citep{friedman2007,friedman2010}, which optimize one
-coefficient at a time. Several efficient implementations of coordinate descent
-algorithms exists for the lasso, elastic net, and other \(\ell_1\)-based
+coordinate descent methods~\citep{friedman2007, friedman2010}, which optimize
+one coefficient at a time. Several efficient implementations of coordinate
+descent algorithms exists for the lasso, elastic net, and other \(\ell_1\)-based
 regularization methods. For \proglang{R}, there is for instance
 \pkg{glmnet}~\citep{friedman2010}, which fits generalized linear models,
 including Cox-proportional hazards models, with elastic net regularization.
@@ -222,11 +212,9 @@ exponential family, and is assumed to depend conditionally on the linear
 predictor \(\eta_i = x_i^\intercal \beta + \beta_0\) via
 \(\E(y_i \mid \eta_i) = \ilink(\eta_i)\), where \(\ilink\) is the inverse link
 function. This gives rise to the following form of the loss function:
-%
 \[
-  F( \beta_0, \beta ) = \frac{1}{n} \sum_{i = 1}^n f( \eta_i, y_i),
+  F( \beta_0, \beta ) = \frac{1}{n} \sum_{i=1}^n f( \eta_i, y_i),
 \]
-%
 where \(f\) is the contribution of the \(i\)th observation to the negative
 log-likelihood of the model. To estimate the parameters of a generalized linear
 model, \((\beta_0, \beta)\), we minimize the loss function \(F\) with respect to
@@ -234,18 +222,16 @@ model, \((\beta_0, \beta)\), we minimize the loss function \(F\) with respect to
 
 A special property of \(f\) is that its partial derivative with respect to
 \(\eta\) is
-%
 \[
   \frac{\partial}{\partial \eta_i} f( \eta_i, y_i) = \ilink ( \eta_i) - y_i
                                                    = r_i,
 \]
-%
 where we define \(r_i\) to be the \emph{generalized residual}. As a consequence,
 the gradient of the loss function with respect to \(\beta\) can be expressed as
-%
 \[
-  \frac{\partial}{\partial \beta_j} F( \beta_0, \beta ) = \frac{1}{n} \sum_{i = 1}^n x_{ij} \frac{\partial}{\partial \eta_i} f( \eta_i, y_i)
-                                                        = \frac{1}{n} \sum_{i = 1}^n x_{ij} r_i.
+  \frac{\partial}{\partial \beta_j} F( \beta_0, \beta )
+  = \frac{1}{n} \sum_{i=1}^n x_{ij} \frac{\partial}{\partial \eta_i} f( \eta_i, y_i)
+  = \frac{1}{n} \sum_{i=1}^n x_{ij} r_i.
 \]
 
 We summarize the loss, link, and inverse link functions for the GLMs supported
@@ -255,15 +241,15 @@ by the SLOPE packages in \autoref{tab:glm}.
   \centering
   \begin{tabular}{lccc}
     \toprule
-    Model       &                                                         \(f(\eta, y)\)                                                          &                             \(\link(\mu)\)                             &                                      \(\ilink(\eta)\) \\
+    Model       &                                    \(f(\eta, y)\)                                     &                     \(\link(\mu)\)                      &                                 \(\ilink(\eta)\)                                  \\
     \midrule
-    Gaussian    &                                                   \(\frac{1}{2}(y - \eta)^2\)                                                   &                                 \(\mu\)                                 &                                          \(\eta\) \\
+    Gaussian    &                              \(\frac{1}{2}(y - \eta)^2\)                              &                         \(\mu\)                         &                                     \(\eta\)                                      \\
     \addlinespace
-    Binomial    &                                                  \(\log(1 + e^\eta) - \eta y\)                                                  &               \(\log \left( \frac{\mu}{1 - \mu} \right)\)               &                               \(\frac{e^\eta}{1 + e^\eta}\) \\
+    Binomial    &                             \(\log(1 + e^\eta) - \eta y\)                             &       \(\log \left( \frac{\mu}{1 - \mu} \right)\)       &                           \(\frac{e^\eta}{1 + e^\eta}\)                           \\
     \addlinespace
-    Poisson     &                                                       \(e^\eta - \eta y\)                                                       &                              \(\log(\mu)\)                              &                                         \(e^\eta\) \\
+    Poisson     &                                  \(e^\eta - \eta y\)                                  &                      \(\log(\mu)\)                      &                                    \(e^\eta\)                                     \\
     \addlinespace
-    Multinomial & \(\log \left( 1 + \sum_{j = 1}^{m - 1} e^{\eta_j} \right) - \sum_{k = 1}^{m - 1} y_k \eta_k\) & \(\left(\log \frac{\mu_k}{\mu_m}\right)_{k=1}^{m-1}\) & \(\left(\frac{e^{\eta_k}}{1 + \sum_{j=1}^{m-1} e^{\eta_j}}\right)_{k=1}^{m-1}\) \\
+    Multinomial & \(\log \left( 1 + \sum_{j=1}^{m-1} e^{\eta_j} \right) - \sum_{k=1}^{m-1} y_k \eta_k\) & \(\left( \log \frac{\mu_k}{\mu_m} \right)_{k=1}^{m-1}\) & \(\left( \frac{e^{\eta_k}}{1 + \sum_{j=1}^{m-1} e^{\eta_j}} \right)_{k=1}^{m-1}\) \\
     \bottomrule
   \end{tabular}
   \caption{
@@ -284,8 +270,8 @@ category. This choice slightly complicates the notation and leads to a more
 complex formulation for the dual problem. For SLOPE, however, this is a more
 natural choice, since it generalizes to the binary case as well (in which the
 last class is also implicit).\footnote{The non-redundant formulation requires a
-\(\lambda\) sequence of length \((m-1)p\). It would therefore not reduce to the
-binary formulation if we instead used \(m\) coefficient vectors.}
+\(\lambda\) sequence of length \((m - 1)p\). It would therefore not reduce to
+the binary formulation if we instead used \(m\) coefficient vectors.}
 Furthermore, it also relieves the problem of the parameter ambiguity that
 affects the redundant formulation, where rows of the coefficient matrix can be
 shifted without changing the value of \(F(\beta_0, \beta)\). This also means
@@ -357,8 +343,10 @@ omitted some details of the algorithm here.
 
     \For{\(i \gets 1,\dots,n\)}{
       \(\eta_i \gets x_i^T \beta + \beta_0\)\;
-      \(w_i \gets \frac{\partial^2}{\partial \eta_i^2} f(\eta_i, y_i)\)\tcc*{Weights for IRLS}
-      \(z_i \gets \eta_i - \frac{r_i(\eta_i, y_i)}{w_i}\)\tcc*{Working response for IRLS}
+      \(w_i \gets \frac{\partial^2}{\partial \eta_i^2} f(\eta_i, y_i)\)\tcc*{Weights
+        for IRLS}
+      \(z_i \gets \eta_i - \frac{r_i(\eta_i, y_i)}{w_i}\)\tcc*{Working response
+        for IRLS}
     }
     update \(c\), \(\mathcal{C}\)\;
     \For{\texttt{it} \(\gets 1,\dots,\)\texttt{cd\_maxit}}{
@@ -368,17 +356,15 @@ omitted some details of the algorithm here.
       \While{\(k \leq \lvert \mathcal{C} \rvert\)}{
         \(\tilde x \gets \sum_{j \in \cC_k} x_j \sign \beta_j\)\;
         \(\tilde{r} \gets X \beta + \beta_0 - z\)\tcc*{Residuals}
-        \(\gamma \gets \frac{1}{n} \sum_{i = 1}^n w_i \tilde{x}_i \tilde{r}_i\)\tcc*{Gradient}
-        \(\xi \gets \frac{1}{n} \sum_{i = 1}^n w_i \tilde{x}_i^2\)\tcc*{Hessian}
+        \(\gamma \gets \frac{1}{n} \sum_{i=1}^n w_i \tilde{x}_i \tilde{r}_i\)\tcc*{Gradient}
+        \(\xi \gets \frac{1}{n} \sum_{i=1}^n w_i \tilde{x}_i^2\)\tcc*{Hessian}
         \(\tilde {c} \gets T(c_k \xi - \gamma; \xi, c^{\setminus k}, \lambda)\)\;
-        \(\beta_{\cC_k} \gets \tilde{c} \sign(\beta_{\cC_k})\)\;
-        Update \(c\), \(\mathcal{C}\)\;
-        \(k \gets k + 1\)\;
+        \(\beta_{\cC_k} \gets \tilde{c} \sign(\beta_{\cC_k})\)\; Update \(c\),
+        \(\mathcal{C}\)\; \(k \gets k + 1\)\;
       }
 
       \If{\(P(\beta) \geq P(\beta^\text{old})\)}{
-        \(\beta \gets \beta^\text{old}\)\;
-        break\;
+        \(\beta \gets \beta^\text{old}\)\; break\;
       }
     }
   }
@@ -502,9 +488,9 @@ repositories~(\autoref{tab:slope-packages}).
   \centering
   \begin{tabular}{llll}
     \toprule
-    Language          & Package        & Repository                         & Documentation \\
+    Language          & Package        & Repository                         & Documentation                     \\
     \midrule
-    \proglang{R}      & \pkg{SLOPE}    & \myurl{github.com/jolars/SLOPE}    & \myurl{jolars.github.io/SLOPE} \\
+    \proglang{R}      & \pkg{SLOPE}    & \myurl{github.com/jolars/SLOPE}    & \myurl{jolars.github.io/SLOPE}    \\
     \proglang{Python} & \pkg{sortedl1} & \myurl{github.com/jolars/sortedl1} & \myurl{jolars.github.io/sortedl1} \\
     \proglang{Julia}  & \pkg{SLOPE.jl} & \myurl{github.com/jolars/SLOPE.jl} & \myurl{jolars.github.io/SLOPE.jl} \\
     \proglang{C++}    & \pkg{slope}    & \myurl{github.com/jolars/libslope} & \myurl{jolars.github.io/libslope} \\
@@ -830,7 +816,7 @@ implementation, \pkg{sortedl1}\footnote{The \proglang{R} package \pkg{SLOPE} is
 also included, but we have omitted it from the benchmark here since it is
 essentially equivalent to the \proglang{Python} package \pkg{sortedl1}.}. The
 single solution benchmark includes four variations on proximal gradient descent
-(PGD), using Anderson acceleration~\citep{anderson1965,zhang2020},
+(PGD), using Anderson acceleration~\citep{anderson1965, zhang2020},
 Barzilai--Borwein step sizes, safe screening rules, and the fast iterative
 shrinking and thresholding algorithm (FISTA)~\citep{beck2009}. The latter of
 these is also included through the \pkg{skglm} package~\citep{bertrand2022}. We
@@ -860,21 +846,18 @@ why they are not included everywhere.
 \begin{table}[tp]
   \centering
   \begin{tabular}{
-    l
-    S[table-format=5.0]
-    S[table-format=7.0]
-    S[table-format=1.5,round-mode=figures,round-precision=2]
-    p{5cm}
+    l S[table-format=5.0] S[table-format=7.0]
+    S[table-format=1.5,round-mode=figures,round-precision=2] p{5cm}
   }
     \toprule
-    Dataset                    & {\(n\)} & {\(p\)} & {\(X\) density} & {References} \\
+    Dataset                    & {\(n\)} & {\(p\)} & {\(X\) density} & {References}                        \\
     \midrule
     \dataset{BRCA1}            & 536     & 17322   & 1               & \citet{nationalcancerinstitute2022} \\
-    \dataset{Koussounadis2014} & 101     & 34694   & 1               & \citet{koussounadis2014} \\
-    \dataset{Real-Sim}         & 72309   & 20958   & 1               & \citet{mccallum2010} \\
-    \dataset{RCV1}             & 20242   & 44504   & 0.00166         & \citet{lewis2004} \\
-    \dataset{Rhee2006}         & 842     & 360     & 0.02469         & \citet{rhee2006} \\
-    \dataset{Scheetz2006}      & 120     & 18975   & 1               & \citet{scheetz2006} \\
+    \dataset{Koussounadis2014} & 101     & 34694   & 1               & \citet{koussounadis2014}            \\
+    \dataset{Real-Sim}         & 72309   & 20958   & 1               & \citet{mccallum2010}                \\
+    \dataset{RCV1}             & 20242   & 44504   & 0.00166         & \citet{lewis2004}                   \\
+    \dataset{Rhee2006}         & 842     & 360     & 0.02469         & \citet{rhee2006}                    \\
+    \dataset{Scheetz2006}      & 120     & 18975   & 1               & \citet{scheetz2006}                 \\
     \bottomrule
   \end{tabular}
   \caption{
@@ -890,19 +873,15 @@ why they are not included everywhere.
 \begin{table}[tp]
   \centering
   \begin{tabular}{
-    l
-    S[table-format=6.0]
-    S[table-format=6.0]
-    S[table-format=2.0]
-    S[table-format=1.3]
-    S[table-format=0.1]
+    l S[table-format=6.0] S[table-format=6.0] S[table-format=2.0]
+    S[table-format=1.3] S[table-format=0.1]
   }
     \toprule
     {Scenario}       & {\(n\)} & {\(p\)} & {\(k\)} & {\(X\) density} & {\(\rho\)} \\
     \midrule
-    High Dim         & 200     & 20000   & 20      & 1               & 0.6 \\
-    High Dim, Sparse & 200     & 200000  & 20      & 0.001           & 0.6 \\
-    Low Dim          & 200000  & 200     & 40      & 1               & 0.2 \\
+    High Dim         & 200     & 20000   & 20      & 1               & 0.6        \\
+    High Dim, Sparse & 200     & 200000  & 20      & 0.001           & 0.6        \\
+    Low Dim          & 200000  & 200     & 40      & 1               & 0.2        \\
     \bottomrule
   \end{tabular}
   \caption{
@@ -1078,9 +1057,8 @@ biomarker~\citep{du2020both}. SLOPE additionally highlighted \textit{tryptophan}
 and several carnitine derivatives (e.g., acetylcarnitine and
 propionylcarnitine), which have recently been proposed as glioma
 biomarkers~\citep{wang2024genomic}. Other significant amino acids such as
-\textit{phenylalanine} and
-\textit{lysine}~\citep{koslinski2023comparative, srivastava2025amino} were
-selected by both SLOPE and lasso.
+\textit{phenylalanine} and \textit{lysine}~\citep{koslinski2023comparative,
+srivastava2025amino} were selected by both SLOPE and lasso.
 
 Overall, this example demonstrates how the package can be applied in practice.
 Beyond predictive performance, its functionality, such as cross-validation,
@@ -1154,6 +1132,7 @@ Science Centre Poland through the grant no. 2021/43/O/ST6/02805.
 \begin{appendix}
 
 \section{Examples in Julia, Python, and C++}%
+
 \label{sec:examples-julia-python}
 
 In this section, we provide \proglang{Python}, \proglang{Julia}, and
@@ -1417,179 +1396,139 @@ For clarity, we first use the scalar-response notation from
 write the primal problem in constrained form:
 \begin{equation}
   \begin{aligned}
-    \minimize_{\beta_0 \in \mathbb{R},\,\beta \in \mathbb{R}^p,\,\eta \in \mathbb{R}^n}
-    \quad & \frac{1}{n} \sum_{i = 1}^n f(\eta_i, y_i) + J_\lambda(\beta) \\
-    \text{subject to}
-    \quad & \eta_i = \beta_0 + x_i^\intercal \beta,
-    \qquad i = 1, \ldots, n.
+    \minimize_{\beta_0 \in \mathbb{R},\,\beta \in \mathbb{R}^p,\,\eta \in \mathbb{R}^n} \quad & \frac{1}{n} \sum_{i=1}^n f(\eta_i, y_i) + J_\lambda(\beta)       \\
+    \text{subject to} \quad                                                                   & \eta_i = \beta_0 + x_i^\intercal \beta, \qquad i = 1, \ldots, n.
   \end{aligned}
 \end{equation}
 Using multipliers \(\delta_i/n\) gives the Lagrangian
 \[
-  L(\beta_0, \beta, \eta, \delta)
-  = \frac{1}{n} \sum_{i=1}^n
-    \left[f(\eta_i, y_i)
-          - \delta_i(\eta_i - x_i^\intercal\beta - \beta_0)\right]
-    + J_\lambda(\beta).
+  L(\beta_0, \beta, \eta, \delta) = \frac{1}{n} \sum_{i=1}^n \left[ f(\eta_i, y_i) - \delta_i(\eta_i - x_i^\intercal\beta - \beta_0) \right]
+                                    + J_\lambda(\beta).
 \]
-Let \(f_i^*\) denote the Fenchel conjugate of
-\(f_i(\eta) = f(\eta,y_i)\). Minimizing over \(\eta\) gives
+Let \(f_i^*\) denote the Fenchel conjugate of \(f_i(\eta) = f(\eta,y_i)\).
+Minimizing over \(\eta\) gives
 \[
-  \inf_{\eta_i}\{f_i(\eta_i)-\delta_i\eta_i\}
-  = -f_i^*(\delta_i).
+  \inf_{\eta_i}\{f_i(\eta_i) - \delta_i\eta_i\} = -f_i^*(\delta_i).
 \]
 The terms involving \(\beta\) give
 \[
-  \inf_\beta
-  \left\{J_\lambda(\beta)
-  + \left(\frac{X^\intercal\delta}{n}\right)^\intercal\beta\right\}
-  = -J_\lambda^*\left(-\frac{X^\intercal\delta}{n}\right).
+  \inf_\beta \left\{ J_\lambda(\beta) + \left( \frac{X^\intercal\delta}{n} \right)^\intercal\beta \right\} = -J_\lambda^*\left( -\frac{X^\intercal\delta}{n} \right).
 \]
 Here, the Fenchel conjugate of the sorted \(\ell_1\) norm is the indicator of
 its dual-norm unit ball:
 \[
   J_\lambda^*(z) = \begin{cases}
-                      0      & \text{if } \lVert z \rVert_{*,\lambda} \leq 1, \\
-                      \infty & \text{otherwise},
-                    \end{cases}
+                     0      & \text{if } \lVert z \rVert_{*,\lambda} \leq 1, \\
+                     \infty & \text{otherwise},
+                   \end{cases}
 \]
 where the sorted \(\ell_1\) dual norm is~\citep{negrinho2014}
 \begin{equation}
-  \lVert z \rVert_{*,\lambda}
-  = \max_{j = 1,2,\dots,p}
-    \left\{
-      \frac{\sum_{k=1}^j|z_{(k)}|}{\sum_{k=1}^j\lambda_k}
-    \right\}.
+  \lVert z \rVert_{*,\lambda} = \max_{j=1,2,\dots,p} \left\{ \frac{\sum_{k=1}^j|z_{(k)}|}{\sum_{k=1}^j\lambda_k} \right\}.
 \end{equation}
 Finally, minimizing over the unpenalized intercept is finite only when
-\(\bm{1}^\intercal\delta=0\). The dual problem is therefore
+\(\bm{1}^\intercal\delta = 0\). The dual problem is therefore
 \begin{equation}
-  D(\delta) = \begin{cases}
-    -\dfrac{1}{n}\displaystyle\sum_{i=1}^n f_i^*(\delta_i)
-      & \text{if }
-        \left\lVert-\dfrac{X^\intercal\delta}{n}\right\rVert_{*,\lambda}
-        \leq 1,\;
-        \bm{1}^\intercal\delta=0, \\
-    -\infty
-      & \text{otherwise}.
-  \end{cases}
-  \label{eq:slope-dual}
+  D(\delta)
+  = \begin{cases}
+      -\dfrac{1}{n}\displaystyle\sum_{i=1}^n f_i^*(\delta_i) & \text{if } \left\lVert -\dfrac{X^\intercal\delta}{n} \right\rVert_{*,\lambda} \leq 1,\; \bm{1}^\intercal\delta = 0, \\
+      -\infty                                                & \text{otherwise}.
+    \end{cases} \label{eq:slope-dual}
 \end{equation}
-As usual, \(f_i^*(\delta_i)=\infty\) outside its domain, so domain
-feasibility is implicit in \autoref{eq:slope-dual}.
-If the model has no intercept, the condition
-\(\bm{1}^\intercal\delta=0\) is omitted.
+As usual, \(f_i^*(\delta_i) = \infty\) outside its domain, so domain feasibility
+is implicit in \autoref{eq:slope-dual}. If the model has no intercept, the
+condition \(\bm{1}^\intercal\delta = 0\) is omitted.
 
 For the canonical generalized linear models considered here, let
-\(q_i=y_i+\delta_i\). The conjugate domain requires \(q_i\) to belong to the
+\(q_i = y_i + \delta_i\). The conjugate domain requires \(q_i\) to belong to the
 mean-parameter domain \(\mathcal{M}\). This domain is \(\mathbb{R}\) for the
-Gaussian model, \([0,1]\) for the binomial model, \([0,\infty)\) for the
-Poisson model, and
+Gaussian model, \([0,1]\) for the binomial model, \([0,\infty)\) for the Poisson
+model, and
 \[
-  \mathcal{M}
-  = \left\{q \in \mathbb{R}^{m-1}:
-      q_k \geq 0,\; \sum_{k=1}^{m-1}q_k \leq 1\right\}
+  \mathcal{M} = \left\{ q \in \mathbb{R}^{m-1}: q_k \geq 0,\; \sum_{k=1}^{m-1}q_k \leq 1 \right\}
 \]
 for the non-redundant multinomial model. In the multinomial case, we define the
-reference-class mean as
-\(q_{im}=1-\sum_{k=1}^{m-1}q_{ik}\). Using the convention
-\(0\log 0=0\), the loss-specific terms in \autoref{eq:slope-dual} are
+reference-class mean as \(q_{im} = 1 - \sum_{k=1}^{m-1}q_{ik}\). Using the
+convention \(0\log 0 = 0\), the loss-specific terms in \autoref{eq:slope-dual}
+are
 \[
-  -f_i^*(\delta_i) = \begin{cases}
-    -y_i\delta_i - \frac{1}{2}\delta_i^2
-      & \text{Gaussian}, \\
-    -q_i\log q_i - (1-q_i)\log(1-q_i)
-      & \text{binomial}, \\
-    q_i(1-\log q_i)
-      & \text{Poisson}, \\
-    -\displaystyle\sum_{k=1}^m q_{ik}\log q_{ik}
-      & \text{multinomial}.
-  \end{cases}
+  -f_i^*(\delta_i)
+  = \begin{cases}
+      -y_i\delta_i - \frac{1}{2}\delta_i^2         & \text{Gaussian},    \\
+      -q_i\log q_i - (1 - q_i)\log(1 - q_i)        & \text{binomial},    \\
+      q_i(1 - \log q_i)                            & \text{Poisson},     \\
+      -\displaystyle\sum_{k=1}^m q_{ik}\log q_{ik} & \text{multinomial}.
+    \end{cases}
 \]
 For example, the Gaussian dual objective is
 \[
-  D(\delta)
-  = \frac{\lVert y\rVert_2^2-\lVert y+\delta\rVert_2^2}{2n}
+  D(\delta) = \frac{\lVert y\rVert_2^2 - \lVert y + \delta\rVert_2^2}{2n}
 \]
 at a feasible point.
 
-The generalized residual
-\(r_i=\ilink(\beta_0+x_i^\intercal\beta)-y_i\) is a natural dual candidate:
-at the optimum, the Karush--Kuhn--Tucker conditions include
+The generalized residual \(r_i = \ilink(\beta_0 + x_i^\intercal\beta) - y_i\) is
+a natural dual candidate: at the optimum, the Karush--Kuhn--Tucker conditions
+include
 \[
-  \bm{0} \in \frac{X^\intercal r}{n} + \partial J_\lambda(\beta),
-  \qquad
-  \bm{1}^\intercal r=0.
+  \bm{0} \in \frac{X^\intercal r}{n}
+             + \partial J_\lambda(\beta), \qquad \bm{1}^\intercal r
+         = 0.
 \]
 Away from the optimum, however, centering \(r\) is safe only for the Gaussian
-model. For the other models, centering can move \(y_i+r_i\) outside
+model. For the other models, centering can move \(y_i + r_i\) outside
 \(\mathcal{M}\). We instead construct a zero-sum point that remains in the
 conjugate domain. Let
 \[
-  c_i = r_i-\bar r,
-  \qquad
-  a_i = \bar y-y_i,
+  c_i = r_i - \bar r, \qquad a_i = \bar y - y_i,
 \]
 and define
 \[
-  t_{\max}
-  = \max\left\{t\in[0,1]:
-      y_i+a_i+t(c_i-a_i)\in\mathcal{M}
-      \text{ for every }i\right\}.
+  t_{\max} = \max\left\{ t \in[0,1] : y_i + a_i + t(c_i - a_i) \in \mathcal{M} \text{ for every }i \right\}.
 \]
 Then
 \[
-  \widetilde\delta_i
-  = a_i+t_{\max}(c_i-a_i)
+  \widetilde\delta_i = a_i + t_{\max}(c_i - a_i)
 \]
-satisfies both
-\(\bm{1}^\intercal\widetilde\delta=0\) and
-\(y_i+\widetilde\delta_i\in\mathcal{M}\). The set defining
-\(t_{\max}\) is nonempty because \(t=0\) gives
-\(y_i+a_i=\bar y\in\mathcal{M}\). For a model without an intercept, we instead
-take \(\widetilde\delta=r\), which is already in the conjugate domain.
+satisfies both \(\bm{1}^\intercal\widetilde\delta = 0\) and
+\(y_i + \widetilde\delta_i \in \mathcal{M}\). The set defining \(t_{\max}\) is
+nonempty because \(t = 0\) gives \(y_i + a_i = \bar y \in \mathcal{M}\). For a
+model without an intercept, we instead take \(\widetilde\delta = r\), which is
+already in the conjugate domain.
 
 It remains to enforce the sorted \(\ell_1\) dual constraint. Set
 \[
-  \rho
-  = \max\left\{1,
-      \left\lVert-\frac{X^\intercal\widetilde\delta}{n}
-      \right\rVert_{*,\lambda}\right\},
-  \qquad
-  \delta=\frac{\widetilde\delta}{\rho}.
+  \rho = \max\left\{ 1, \left\lVert -\frac{X^\intercal\widetilde\delta}{n} \right\rVert_{*,\lambda} \right\}, \qquad \delta
+       = \frac{\widetilde\delta}{\rho}.
 \]
 This scaling preserves every other constraint. In particular,
 \[
-  y_i+\delta_i
-  = \left(1-\frac{1}{\rho}\right)y_i
-    + \frac{1}{\rho}(y_i+\widetilde\delta_i)
-  \in\mathcal{M}
+  y_i + \delta_i = \left( 1 - \frac{1}{\rho} \right)y_i
+                   + \frac{1}{\rho}(y_i + \widetilde\delta_i)
+                 \in \mathcal{M}
 \]
 by convexity of \(\mathcal{M}\). For binomial and Poisson models, our
 implementation obtains a tighter initial point by conditionally adjusting the
 intercept so that the residuals sum to zero. It uses the domain-preserving
-construction above as a numerical repair and as the primary construction for
-the multinomial model. For multinomial regression, the intercept condition
-holds componentwise across the nonreference classes, whereas domain
-feasibility is imposed jointly on each row through the simplex \(\mathcal{M}\).
-The regularizer constraint is also joint: the matrix
-\(X^\intercal\widetilde\delta/n\) is vectorized before evaluating the sorted
-\(\ell_1\) dual norm.
+construction above as a numerical repair and as the primary construction for the
+multinomial model. For multinomial regression, the intercept condition holds
+componentwise across the nonreference classes, whereas domain feasibility is
+imposed jointly on each row through the simplex \(\mathcal{M}\). The regularizer
+constraint is also joint: the matrix \(X^\intercal\widetilde\delta/n\) is
+vectorized before evaluating the sorted \(\ell_1\) dual norm.
 
 At this feasible point, the duality gap
 \[
-  P(\beta_0,\beta)-D(\delta)
+  P(\beta_0,\beta) - D(\delta)
 \]
 is nonnegative and bounds the primal suboptimality. We stop when the relative
 duality gap satisfies
 \[
-  P(\beta_0,\beta)-D(\delta)
-  \leq \varepsilon\lvert P(\beta_0,\beta)\rvert,
+  P(\beta_0,\beta) - D(\delta) \leq \varepsilon\lvert P(\beta_0,\beta)\rvert,
 \]
-where \(\varepsilon>0\) is the user-defined tolerance level.
-The availability of the duality gap would also allow us to employ duality-gap
-based safe screening rules~\citep{fercoq2015} and working set strategies derived
-from these~\citep{massias2018}, which could furthermore be used to enhance our
+where \(\varepsilon > 0\) is the user-defined tolerance level. The availability
+of the duality gap would also allow us to employ duality-gap based safe
+screening rules~\citep{fercoq2015} and working set strategies derived from
+these~\citep{massias2018}, which could furthermore be used to enhance our
 strategy with look-ahead screening rules~\citep{larsson2021a}. However, as noted
 in \citet{larsson2022d}, the marginal improvement of using duality-based
 screening strategies is minor, so we have opted not to implement these in our
@@ -1606,7 +1545,7 @@ packages.
 
   \item[Anderson PGD] The proximal gradient descent (PGD) algorithm with
         Anderson acceleration, which is a method for accelerating the
-        convergence of fixed-point iterations~\citep{anderson1965,zhang2020}.
+        convergence of fixed-point iterations~\citep{anderson1965, zhang2020}.
 
   \item[BB PGD] PGD with Barizilai--Borwein~\citep{barzilai1988} step sizes.
 
@@ -1618,9 +1557,9 @@ packages.
         rules~\citep{elvira2023}.
 
   \item[ADMM] The alternating direction method of
-        multipliers~\citep{glowinski1975,boyd2010}, which is a popular algorithm
-        for solving convex optimization problems with constraints. In our
-        experiments, we have used \(\rho = 100\) as a step size based on the
+        multipliers~\citep{glowinski1975, boyd2010}, which is a popular
+        algorithm for solving convex optimization problems with constraints. In
+        our experiments, we have used \(\rho = 100\) as a step size based on the
         results from \citet{larsson2023}. We considered using the heuristic
         \(\rho\) selection method from \citet{boyd2010}, but have avoided doing
         so since it, as shown by \citet{larsson2023}, may lead to erratic
