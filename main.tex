@@ -538,12 +538,12 @@ search over the clusters in order to find correct solution. This leads to a
 worst-case complexity that depends on the number of clusters, which might seem
 to be prohibitive when both \(n\) and \(p\) are large. Fortunately, however, the
 situation is much less dire in practice, since the order of the clusters
-typically stabilizes early during optimization. This also means that, contrary
-to conventional wisdom, it is in fact more efficient to conduct a linear, as
-opposed to binary, search over the clusters. Note also that the partial
-\(\lambda\) sums do not need to be computed directly. Instead, we simply compute
-the cumulative sum of the \(\lambda\) array once and use this to retrieve the
-partial sums as needed.
+typically stabilizes early during optimization. In benchmarks, we have found
+that it makes no difference whether we use a linear search or a binary search
+for real data sets, and we have therefore opted for the simpler linear search.
+Note also that the partial \(\lambda\) sums do not need to be computed directly.
+Instead, we simply compute the cumulative sum of the \(\lambda\) array once and
+use this to retrieve the partial sums as needed.
 
 \subsection{Data handling and optimization}
 
