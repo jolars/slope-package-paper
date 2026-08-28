@@ -15,7 +15,7 @@ This repository contains materials under two different licenses:
    - Licensed under GNU General Public License v3.0
    - See LICENSE-CODE for full text
 
-Configuration files (*.yml, *.yaml, flake.nix) follow the license
+Configuration files (*.yml, *.yaml, devenv.nix) follow the license
 of the code they configure (GPL-3.0).
 
 For specific licensing questions, please contact the repository maintainer.

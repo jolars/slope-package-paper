@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://devenv.sh/devenv.schema.json
+inputs:
+  nixpkgs:
+    url: github:NixOS/nixpkgs/13b0f9e6ac78abbbb736c635d87845c4f4bee51b
+  libslope:
+    url: github:jolars/libslope/v6.5.0
+    inputs:
+      nixpkgs:
+        follows: nixpkgs

@@ -1,7 +1,8 @@
 # Efficient Solvers for SLOPE in R, Python, Julia, and C++
 
 [![arXiv](https://img.shields.io/badge/arXiv-2511.02430-b31b1b.svg)](https://arxiv.org/abs/2511.02430)
-[![Test Reproducibility](https://github.com/jolars/slope-package-paper/actions/workflows/test-reproducibility.yml/badge.svg)](https://github.com/jolars/slope-package-paper/actions/workflows/test-reproducibility.yml)
+[![Test
+Reproducibility](https://github.com/jolars/slope-package-paper/actions/workflows/test-reproducibility.yml/badge.svg)](https://github.com/jolars/slope-package-paper/actions/workflows/test-reproducibility.yml)
 
 This repository contains the research paper **"Efficient Solvers for SLOPE in R,
 Python, Julia, and C++"** and associated reproducibility materials, including
@@ -98,9 +99,10 @@ This repository is organized into several key components:
 │   └── macros.tex
 ├── bench_config_single.yml     # Benchopt configuration for single-penalty
 ├── bench_config_path.yml       # Benchopt configuration for path-fitting
-├── flake.nix                   # Nix flake for reproducible environment
+├── devenv.nix                  # Reproducible development environment
+├── devenv.lock                 # Locked Nix inputs
 ├── Project.toml                # Julia environment for the Julia example
-├── Manifest.toml
+├── Manifest.toml               # Locked Julia dependencies
 ├── Taskfile.yml                # Task automation
 ├── main.tex                    # Paper LaTeX source
 ├── main.bib                    # Bibliography
@@ -175,11 +177,11 @@ benchopt run ./benchmark_slope_path  --config bench_config_path.yml
 ```
 
 Note that it's possible that there are installation issues with some of the
-solvers due to the complexity of their dependencies and continuous upgrades. For
-full reproducibility, we therefore recommend that you instead use the provided
-Nix flake environment, which provides a stable snapshot of all dependencies used
-in the benchmarks at the time of running them. See
-[Nix Environment](#nix-environment) below for more details.
+solvers due to the complexity of their dependencies and continuous upgrades. The
+benchmark repositories leave dependency resolution to Benchopt so that they
+remain useful outside this paper. See [Reproducible
+Environment](#reproducible-environment) below for the package versions pinned by
+this repository.
 
 You can also bypass the installation step (`benchopt install`) and manually
 install the required dependencies if you prefer.
@@ -202,8 +204,8 @@ latexmk -pdf -interaction=nonstopmode main.tex
 
 The scripts in `code/` are lightweight examples for generating figures and
 demonstrating package usage. They are not intended to be strict, byte-for-byte
-reproducibility pipelines. For a fully reproducible environment, use the Nix
-setup in the next section.
+reproducibility pipelines. For the package versions used by this repository, use
+the Devenv setup in the next section.
 
 Run these from the repository root. Output figures are written to `images/` (the
 directory is created automatically if missing).
@@ -279,15 +281,15 @@ cmake --build build
 ./build/slope-example
 ```
 
-The Nix environment described in [Nix Environment](#nix-environment) provides
-libslope and builds the example for you, in which case you only have to run
-`slope-example`.
+The Devenv environment described in [Reproducible
+Environment](#reproducible-environment) provides libslope and builds the example
+for you, in which case you only have to run `slope-example`.
 
 ### Plots
 
 Code for generating the plots in the paper are provided in `code/plot_*.py`
-files. In addition to the dependencies mentioned in
-[Python Example](#python-example), you also need `pandas`, `numpy`, `scipy`, and
+files. In addition to the dependencies mentioned in [Python
+Example](#python-example), you also need `pandas`, `numpy`, `scipy`, and
 `pyarrow` (to read the benchmark results, which are stored as Parquet files)
 installed to run these:
 
@@ -328,21 +330,42 @@ Then, you can run the real data analysis script with:
 Rscript code/real-data.R
 ```
 
-## Nix Environment
+## Reproducible Environment
 
-A Nix flake is provided for setting up a reproducible development environment.
-To enter the Nix shell, run:
+The root [Devenv](https://devenv.sh/) configuration provides the package
+versions used for the paper examples and analysis. Its committed `devenv.lock`
+pins the Nix inputs, `devenv.nix` pins the R, Python, and C++ implementations,
+and `Manifest.toml` locks the Julia environment.
+
+  | Implementation    | Version |
+  | ----------------- | ------: |
+  | R `SLOPE`         |   2.1.0 |
+  | Python `sortedl1` |  1.11.0 |
+  | Julia `SLOPE.jl`  |   1.3.0 |
+  | C++ `libslope`    |   6.5.0 |
+
+Install Devenv and enter the shell with:
 
 ```bash
-nix develop
+devenv shell
 ```
 
-Each of the benchmark directories also contain `flake.nix` files that correspond
-to the exact dependencies used when running the benchmarks.
+Run the environment smoke tests with:
 
-If you have [direnv](https://direnv.net/) installed, we provide `.envrc` files
-for automatic environment loading, and you only have to enter the directories to
-activate the corresponding Nix shell.
+```bash
+devenv test
+```
+
+The implementation versions used by the paper examples and release bundle are
+pinned here rather than in the reusable Benchopt benchmark repositories.
+Benchopt still creates Conda environments for solver and dataset requirements;
+those solves are independent of `devenv.lock` and are not exact historical
+lockfiles.
+
+Each benchmark submodule contains its own Devenv configuration solely to make
+Benchopt's Conda workflow usable on NixOS. Run `devenv shell` and then
+`benchopt-setup` from the relevant benchmark directory; those shells do not pin
+solver packages.
 
 ## Citation
 
