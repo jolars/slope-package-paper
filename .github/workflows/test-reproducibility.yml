@@ -8,6 +8,28 @@ on:
   workflow_dispatch: # Allow manual triggering
 
 jobs:
+  devenv:
+    name: Reproducible environment
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Configure Devenv cache
+        uses: cachix/cachix-action@v16
+        with:
+          name: devenv
+
+      - name: Install Devenv
+        run: nix profile add nixpkgs#devenv
+
+      - name: Test reproducible environment
+        run: devenv test --no-tui
+
   benchmarks:
     name: Benchmark (${{ matrix.benchmark }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -149,7 +171,7 @@ jobs:
 
       - name: Build and install libslope
         run: |
-          git clone --depth 1 --branch v${LIBSLOPE_VERSION} \
+          git clone --depth 1 --branch "v${LIBSLOPE_VERSION}" \
             https://github.com/jolars/libslope.git
           cmake -S libslope -B libslope/build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
           cmake --build libslope/build
