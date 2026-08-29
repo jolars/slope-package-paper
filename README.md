@@ -134,57 +134,87 @@ single-penalty problems and one for fitting the full SLOPE path. The benchmarks
 use [Benchopt](https://benchopt.github.io/), a benchmarking framework for
 optimization algorithms.
 
-### Installing Benchopt
+### Canonical Devenv Environment
 
-The recommended way to use Benchopt is within a
-[conda](https://anaconda.org/anaconda/conda) environment. Make sure you first
-have a functioning version of conda. Then, create and activate a new conda
-environment and install benchopt in it:
+The root Devenv is the authoritative environment for results produced by this
+repository. It pins Benchopt, all selected solver packages, Python, R, native
+libraries, and build tools. Initialize the submodules, test the environment, and
+enter it with:
+
+```bash
+git submodule update --init --recursive
+devenv test
+devenv shell
+```
+
+Run the two full benchmarks from the repository root:
+
+```bash
+benchmark-single
+benchmark-path
+```
+
+These commands use `bench_config_single.yml` and `bench_config_path.yml`, disable
+Benchopt's result cache, and do not invoke `benchopt install`. Downloaded data is
+kept under `.benchmark-data/`; set `SLOPE_BENCHMARK_DATA_DIR` to use another
+location. Record the environment and data hashes alongside each benchmark run
+with:
+
+```bash
+benchmark-environment > benchmark-environment.txt
+benchmark-data-checksums > benchmark-data.sha256
+```
+
+The full benchmarks can take several hours. `devenv test` runs much smaller
+configurations through both benchmark suites.
+
+### OCI Container
+
+Devenv can build an OCI image from the same pinned benchmark closure used by
+the native shell:
+
+```bash
+devenv container build shell
+devenv container run shell
+```
+
+The image is named `slope-package-benchmarks` and contains the pinned benchmark
+environment, both benchmark source trees, and the benchmark configurations. It
+omits paper-authoring tools that the benchmark does not use. Run
+`benchmark-single` or `benchmark-path` after entering it. Data and result
+directories should be mounted or copied out when the image is used for an
+archived benchmark run.
+
+Publishing a GitHub release builds and tests this image, then publishes it to
+the GitHub Container Registry under both the release tag and a source commit
+tag. For example:
+
+```bash
+docker pull ghcr.io/jolars/slope-package-benchmarks:v1.0.0
+docker run --rm -it ghcr.io/jolars/slope-package-benchmarks:v1.0.0
+```
+
+Each release includes a `container-image.txt` asset containing the registry
+digest and immutable image reference. The first published package is private by
+default; a maintainer must change its visibility to public once in the GitHub
+package settings.
+
+### Generic Conda Installation
+
+The benchmark repositories retain their normal Benchopt requirements for users
+outside this paper. A conventional installation remains available:
 
 ```bash
 conda create -n benchopt -c conda-forge python=3.12
 conda activate benchopt
-pip install -U benchopt
-```
+pip install benchopt
 
-### Running the Benchmarks
-
-After having installed Benchopt, you need to install all the required
-dependencies of the benchmarks. For a quick test to verify the setup, you can
-install the dependencies for the example configuration by running the following
-lines:
-
-```bash
 benchopt install ./benchmark_slope --config benchmark_slope/example_config.yml
-benchopt install ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
-```
-
-To run the benchmarks with the example configuration, you then run:
-
-```bash
 benchopt run ./benchmark_slope --config benchmark_slope/example_config.yml
-benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
 ```
 
-To reproduce the results from the paper, use the full benchmark configurations:
-
-```bash
-benchopt install ./benchmark_slope  --config bench_config_single.yml
-benchopt install ./benchmark_slope_path  --config bench_config_path.yml
-
-benchopt run ./benchmark_slope  --config bench_config_single.yml
-benchopt run ./benchmark_slope_path  --config bench_config_path.yml
-```
-
-Note that it's possible that there are installation issues with some of the
-solvers due to the complexity of their dependencies and continuous upgrades. The
-benchmark repositories leave dependency resolution to Benchopt so that they
-remain useful outside this paper. See [Reproducible
-Environment](#reproducible-environment) below for the package versions pinned by
-this repository.
-
-You can also bypass the installation step (`benchopt install`) and manually
-install the required dependencies if you prefer.
+This resolves current Conda and PyPI packages and is therefore a portability
+path, not the environment used for authoritative results in this repository.
 
 Note that the full benchmarks may take several hours to complete. You can
 alternatively configure solvers and data sets either interactively on the
@@ -261,12 +291,12 @@ julia --project=. code/example.jl
 ### C++ Example
 
 The C++ example in [`code/example.cpp`](./code/example.cpp) requires
-[libslope](https://github.com/jolars/libslope) (version 6.5.0 was used for the
+[libslope](https://github.com/jolars/libslope) (version 6.5.4 is used for the
 paper), Eigen 3.4 or later, and CMake 3.15 or later. If libslope is not already
 installed on your system, you can build and install it from source with:
 
 ```bash
-git clone --depth 1 --branch v6.5.0 https://github.com/jolars/libslope.git
+git clone --depth 1 --branch v6.5.4 https://github.com/jolars/libslope.git
 cmake -S libslope -B libslope/build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
 cmake --build libslope/build
 cmake --install libslope/build
@@ -333,9 +363,11 @@ Rscript code/real-data.R
 ## Reproducible Environment
 
 The root [Devenv](https://devenv.sh/) configuration provides the package
-versions used for the paper examples and analysis. Its committed `devenv.lock`
-pins the Nix inputs, `devenv.nix` pins the R, Python, and C++ implementations,
-and `Manifest.toml` locks the Julia environment.
+versions used for the benchmarks, paper examples, and analysis. Its committed
+`devenv.lock` pins the Nix inputs, `devenv.nix` defines the environment and
+benchmark commands, `nix/benchmark-python-packages.nix` fixes external Python
+sources by version or Git revision and content hash, and `Manifest.toml` locks
+the Julia environment.
 
   | Implementation    | Version |
   | ----------------- | ------: |
@@ -350,22 +382,17 @@ Install Devenv and enter the shell with:
 devenv shell
 ```
 
-Run the environment smoke tests with:
+Run the environment and benchmark smoke tests with:
 
 ```bash
 devenv test
 ```
 
-The implementation versions used by the paper examples and release bundle are
-pinned here rather than in the reusable Benchopt benchmark repositories.
-Benchopt still creates Conda environments for solver and dataset requirements;
-those solves are independent of `devenv.lock` and are not exact historical
-lockfiles.
-
-Each benchmark submodule contains its own Devenv configuration solely to make
-Benchopt's Conda workflow usable on NixOS. Run `devenv shell` and then
-`benchopt-setup` from the relevant benchmark directory; those shells do not pin
-solver packages.
+The reusable benchmark repositories describe their dependencies without fixing
+a complete environment. The paper repository owns the reproducible workflow:
+its submodule revisions fix the benchmark code, while the root Devenv fixes the
+software closure used to execute it. The generated OCI image carries that same
+closure to other Linux hosts.
 
 ## Citation
 

@@ -627,5 +627,8 @@ _build/
 devenv.local.nix
 devenv.local.yaml
 
+# Benchmark data downloaded by the canonical Devenv commands.
+.benchmark-data/
+
 # pre-commit
 .pre-commit-config.yaml
