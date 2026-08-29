@@ -2,7 +2,7 @@
 
 julia_version = "1.12.4"
 manifest_format = "2.0"
-project_hash = "4a302c27aad11447ef40bc86d61d2dd29dbbc4fc"
+project_hash = "5050e13c904ddafb0c130de80447f475c2240f42"
 
 [[deps.Accessors]]
 deps = ["CompositionsBase", "ConstructionBase", "Dates", "InverseFunctions", "MacroTools"]
@@ -921,9 +921,9 @@ version = "0.7.0"
 
 [[deps.SLOPE]]
 deps = ["CxxWrap", "Distributions", "LinearAlgebra", "Random", "RecipesBase", "SparseArrays", "StatsBase", "slope_jll"]
-git-tree-sha1 = "962c47cc619a142a8dca90d4a740f760319b1d1c"
+git-tree-sha1 = "4474d33a3410d49a1ecbd46b1af96cc72648e8ce"
 uuid = "56cf27a2-3bf1-11f0-14fe-11f76b7dfe56"
-version = "1.3.0"
+version = "1.3.1"
 
 [[deps.Scratch]]
 deps = ["Dates"]

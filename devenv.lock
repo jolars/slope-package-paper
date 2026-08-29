@@ -47,16 +47,16 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1769636879,
-        "narHash": "sha256-6VTldyaJjoXThrq+N6B5y7Uss7bxBtGaxU8aLcHhmW8=",
+        "lastModified": 1787918111,
+        "narHash": "sha256-RDicJj7V8K08E1rOaAwBwAtZzAkmuB/wGVEgmZtPkJQ=",
         "owner": "jolars",
         "repo": "libslope",
-        "rev": "a56a80af28743360f28c6936e4abad473ce885fa",
+        "rev": "79d779d275763bfae62fbef873f96355e5f5ce3b",
         "type": "github"
       },
       "original": {
         "owner": "jolars",
-        "ref": "v6.5.0",
+        "ref": "v6.5.4",
         "repo": "libslope",
         "type": "github"
       }

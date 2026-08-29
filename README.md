@@ -339,10 +339,10 @@ and `Manifest.toml` locks the Julia environment.
 
   | Implementation    | Version |
   | ----------------- | ------: |
-  | R `SLOPE`         |   2.1.0 |
-  | Python `sortedl1` |  1.11.0 |
-  | Julia `SLOPE.jl`  |   1.3.0 |
-  | C++ `libslope`    |   6.5.0 |
+  | R `SLOPE`         |   2.1.1 |
+  | Python `sortedl1` |  1.11.2 |
+  | Julia `SLOPE.jl`  |   1.3.1 |
+  | C++ `libslope`    |   6.5.4 |
 
 Install Devenv and enter the shell with:
 

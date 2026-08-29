@@ -7,10 +7,10 @@
 let
   system = pkgs.stdenv.hostPlatform.system;
   libslope = inputs.libslope.packages.${system}.default;
-  libslopeVersion = "6.5.0";
-  sortedl1Version = "1.11.0";
-  slopeRVersion = "2.1.0";
-  slopeJuliaVersion = "1.3.0";
+  libslopeVersion = "6.5.4";
+  sortedl1Version = "1.11.2";
+  slopeRVersion = "2.1.1";
+  slopeJuliaVersion = "1.3.1";
 
   sortedl1 = pkgs.python3.pkgs.buildPythonPackage {
     pname = "sortedl1";
@@ -21,7 +21,7 @@ let
       owner = "jolars";
       repo = "sortedl1";
       rev = "v${sortedl1Version}";
-      hash = "sha256-k6eKeX3s59vI9TUu/xQAWnZyrsBKFm66506ETdzqFLE=";
+      hash = "sha256-oIPQ1eGeMZPt92EjJ/mPwel2fwUQIYeekDXFnBT6tnw=";
     };
 
     dontUseCmakeConfigure = true;
@@ -68,7 +68,7 @@ let
       owner = "jolars";
       repo = "SLOPE";
       rev = "v${slopeRVersion}";
-      hash = "sha256-B+R+3Q6xE8C/3ReMc61nYPhfq2Zqp7OdSbvrsGZdOnU=";
+      hash = "sha256-9NebMi+OpRyS+whHVKvLm+sAtICWuM/wKRDEWM6HkHI=";
     };
     propagatedBuildInputs = with pkgs.rPackages; [
       Matrix
