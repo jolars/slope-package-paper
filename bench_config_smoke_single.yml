@@ -10,7 +10,7 @@ solver:
   - sortedl1[cd_type=permuted]
   - skglm
   - SlopePath
-  - Newt-ALM[inner_solver=standard]
+  - Newt-ALM[inner_solver=auto]
   - PGD_safe_screening[accelerated=True]
 
 n-repetitions: 1

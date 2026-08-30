@@ -19,10 +19,10 @@ solver:
   - PGD[prox=prox_fast_stack,acceleration=bb]
   - PGD[prox=prox_fast_stack,acceleration=anderson]
   - ADMM[adaptive_rho=False,rho=100]
-  - sortedl1
+  - sortedl1[cd_type=permuted]
   - skglm
   - SlopePath
-  - Newt-ALM[inner_solver=standard]
+  - Newt-ALM[inner_solver=auto]
   - PGD_safe_screening[accelerated=True]
 
 n-repetitions: 1

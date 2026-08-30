@@ -9,7 +9,7 @@ let
   system = pkgs.stdenv.hostPlatform.system;
   libslope = inputs.libslope.packages.${system}.default;
   libslopeVersion = "6.5.4";
-  sortedl1Version = "1.11.2";
+  sortedl1Version = "1.11.3";
   slopeRVersion = "2.1.1";
   slopeJuliaVersion = "1.3.1";
   benchmarkPackages = import ./nix/benchmark-python-packages.nix { inherit pkgs; };
@@ -67,7 +67,7 @@ let
       owner = "jolars";
       repo = "sortedl1";
       rev = "v${sortedl1Version}";
-      hash = "sha256-oIPQ1eGeMZPt92EjJ/mPwel2fwUQIYeekDXFnBT6tnw=";
+      hash = "sha256-86DCJ8LjwTXLmuCz2oo+Bi982FNb1IHns3m1XwQysw8=";
     };
 
     dontUseCmakeConfigure = true;
