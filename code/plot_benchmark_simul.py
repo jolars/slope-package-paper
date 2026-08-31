@@ -22,21 +22,21 @@ set_plot_defaults()
 def extract_dataset_name(data_name):
     n_features = re.search(r"n_features=(\d+)", data_name).group(1)
     n_samples = re.search(r"n_samples=(\d+)", data_name).group(1)
+    density = re.search(r"X_density=([\d.]+)", data_name).group(1)
 
     n_features = int(n_features)
     n_samples = int(n_samples)
+    density = float(density)
 
-    if n_samples == 200 and n_features == 20000:
-        return "High Dim"
-    elif n_samples == 200 and n_features == 200000:
-        return "High Dim, Sparse"
-    elif n_samples == 200000 and n_features == 200:
+    if n_features > n_samples:
+        return "High Dim, Sparse" if density < 1 else "High Dim"
+    elif n_samples > n_features:
         return "Low Dim"
 
-    return "Unknown Scenario"
+    return "Square"
 
 
-results_dir = "results/single_0612"
+results_dir = "results/single_0831"
 df = merge_parquet_files(results_dir)
 df = extract_reg_param(df)
 
@@ -53,7 +53,7 @@ df_subset = df[
     ]
 ]
 
-simulated_df = df_subset[df_subset["data_name"].str.contains("Simulated")]
+simulated_df = df_subset[df_subset["data_name"].str.contains("Simulated")].copy()
 
 simulated_df.loc[:, "dataset"] = simulated_df["data_name"].apply(extract_dataset_name)
 

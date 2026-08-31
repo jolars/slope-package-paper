@@ -91,7 +91,7 @@ This repository is organized into several key components:
 │   └── ...
 ├── results/                    # Benchmark results
 │   ├── path_0623/              # Path-fitting benchmark results
-│   └── single_0612/            # Single-penalty benchmark results
+│   └── single_0831/            # Single-penalty benchmark results
 ├── slopeutils/                 # Utility functions
 │   ├── merge_parquet.py
 │   └── plot_utils.py

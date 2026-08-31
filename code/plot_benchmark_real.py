@@ -19,7 +19,7 @@ from slopeutils import (
 set_plot_defaults()
 
 
-results_dir = "results/single_0612"
+results_dir = "results/single_0831"
 df = merge_parquet_files(results_dir)
 df = extract_reg_param(df)
 
@@ -36,7 +36,7 @@ df_subset = df[
     ]
 ]
 
-real_df = df_subset[df_subset["data_name"].str.contains("breheny|libsvm")]
+real_df = df_subset[df_subset["data_name"].str.contains("breheny|libsvm")].copy()
 
 
 # Extract dataset specifics from data_name to create shorter labels

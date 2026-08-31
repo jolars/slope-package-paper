@@ -42,6 +42,10 @@ def merge_parquet_files(directory_path: str) -> pd.DataFrame | None:
 
     # Combine all DataFrames
     combined_df = pd.concat(dfs, ignore_index=True)
+
+    if "data_name" not in combined_df and "dataset_name" in combined_df:
+        combined_df = combined_df.rename(columns={"dataset_name": "data_name"})
+
     print(f"Created combined DataFrame with {len(combined_df)} rows")
 
     return combined_df
