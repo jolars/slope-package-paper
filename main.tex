@@ -840,8 +840,8 @@ the solvers cannot handle intercepts, we have omitted the intercepts from the
 models. Also note that not all solvers support sparse design matrices, which is
 why they are not included everywhere.
 
-We evaluate convergence using a solver-independent relative duality gap and
-stop sampling each convergence curve once this measure reaches \(10^{-7}\). For
+We evaluate convergence using a solver-independent relative duality gap and stop
+sampling each convergence curve once this measure reaches \(10^{-7}\). For
 solution paths, we apply the same target to the maximum relative duality gap
 along the path. Values below this threshold are not distinguished in the
 figures. The solvers retain their native internal stopping rules, so the common
@@ -916,10 +916,10 @@ all nine combinations of simulation setting and regularization level. The
 difference is especially pronounced for high levels of regularization, where our
 method is often many times faster than the next best method. Newt-ALM also
 reaches the threshold rapidly in the (\(\alpha_\text{max} / 50\), High Dim)
-setting, although \pkg{sortedl1} reaches it first. Our current implementation shows
-improved performance compared to \citet{larsson2023}, which also featured the
-hybrid method. We believe this is likely due to the addition of screening rules
-as well as algorithmic improvements. Newt-ALM also performs better than in
+setting, although \pkg{sortedl1} reaches it first. Our current implementation
+shows improved performance compared to \citet{larsson2023}, which also featured
+the hybrid method. We believe this is likely due to the addition of screening
+rules as well as algorithmic improvements. Newt-ALM also performs better than in
 \citet{larsson2023}, following improvements to the implementation used here.
 
 \begin{figure}[tp]
@@ -968,8 +968,8 @@ as for the single solution benchmarks since we fit a full path. Nevertheless,
 \pkg{sortedl1} is the only solver to reduce the maximum relative duality gap to
 \(10^{-7}\), reaching it in eight of the nine combinations of dataset and path
 length, and doing so by a large time margin. No solver reaches the threshold for
-\dataset{BRCA1} with 200 path points within the time limit; \pkg{sortedl1}
-comes closest, with a maximum relative duality gap of \(2.5 \times 10^{-7}\).
+\dataset{BRCA1} with 200 path points within the time limit; \pkg{sortedl1} comes
+closest, with a maximum relative duality gap of \(2.5 \times 10^{-7}\).
 
 \begin{figure}[tp]
   \centering
@@ -987,14 +987,13 @@ Taken together, our benchmarks show that our method reaches a relative duality
 gap of \(10^{-7}\) first in 25 of the 27 single-solution settings and in eight
 of the nine path settings. ADMM is faster in the other two single-solution
 settings, while no solver reaches the threshold in the remaining path setting.
-In contrast to
-\citet{dupuis2024}, who showed mixed results when
-comparing their approximate homotopy method to the hybrid algorithm from
-\citet{larsson2023}, we find a clearer advantage for the current hybrid
-implementation. Possible explanations include the more stringent stopping
-criterion used by \citet{dupuis2024} (a duality gap of \(10^{-10}\)), the
-generally larger problems in our benchmarks, and enhancements over the original
-hybrid implementation from \citet{larsson2023}.
+In contrast to \citet{dupuis2024}, who showed mixed results when comparing their
+approximate homotopy method to the hybrid algorithm from \citet{larsson2023}, we
+find a clearer advantage for the current hybrid implementation. Possible
+explanations include the more stringent stopping criterion used by
+\citet{dupuis2024} (a duality gap of \(10^{-10}\)), the generally larger
+problems in our benchmarks, and enhancements over the original hybrid
+implementation from \citet{larsson2023}.
 
 \section{Application to real-world data}
 
