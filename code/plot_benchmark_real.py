@@ -21,6 +21,7 @@ set_plot_defaults()
 
 results_dir = "results/single_0831"
 df = merge_parquet_files(results_dir)
+df = df[df["time"] <= 30].copy()
 df = extract_reg_param(df)
 
 df_subset = df[
@@ -82,7 +83,7 @@ custom_limits = {
     (0.02, "BRCA1"): (-1, 16, ymin_def, ymax_def),
     (0.5, "RCV1"): (-0.1, 2.1, ymin_def, ymax_def),
     (0.1, "RCV1"): (-0.5, 11, ymin_def, ymax_def),
-    (0.02, "RCV1"): (-2, 31, ymin_def, ymax_def),
+    (0.02, "RCV1"): (-2, 30, ymin_def, ymax_def),
     (0.5, "Real-Sim"): (-0.02, 0.3, ymin_def, ymax_def),
     (0.1, "Real-Sim"): (-0.1, 2.6, ymin_def, ymax_def),
     (0.02, "Real-Sim"): (-1, 11, ymin_def, ymax_def),

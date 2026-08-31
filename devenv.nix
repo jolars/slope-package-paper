@@ -142,14 +142,7 @@ let
 in
 {
   env = {
-    BLIS_NUM_THREADS = "1";
-    MKL_NUM_THREADS = "1";
-    NUMEXPR_NUM_THREADS = "1";
-    OMP_DYNAMIC = "FALSE";
-    OMP_NUM_THREADS = "1";
-    OPENBLAS_NUM_THREADS = "1";
     PYTHONHASHSEED = "0";
-    VECLIB_MAXIMUM_THREADS = "1";
   };
 
   packages =
@@ -197,7 +190,8 @@ in
         exit 1
       }
       ${prepareBenchmarkData}
-      exec benchopt run ./benchmark_slope --config bench_config_single.yml --no-cache "$@"
+      exec benchopt run ./benchmark_slope --config bench_config_single.yml \
+        --no-cache --timeout 30 "$@"
     '';
   };
 
@@ -209,7 +203,8 @@ in
         exit 1
       }
       ${prepareBenchmarkData}
-      exec benchopt run ./benchmark_slope_path --config bench_config_path.yml --no-cache "$@"
+      exec benchopt run ./benchmark_slope_path --config bench_config_path.yml \
+        --no-cache --timeout 30 "$@"
     '';
   };
 

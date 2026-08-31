@@ -22,6 +22,7 @@ def extract_path_length(df):
 
 results_dir = "results/path_0831"
 df = merge_parquet_files(results_dir)
+df = df[df["time"] <= 30].copy()
 df = extract_path_length(df)
 
 
@@ -42,7 +43,8 @@ df_subset = df[
 # Extract dataset specifics from data_name to create shorter labels
 def extract_dataset_name(data_name):
     match = re.search(r"dataset=([^,\]]+)", data_name)
-    return match.group(1) if match else "unknown"
+    dataset = match.group(1) if match else "unknown"
+    return "BRCA1" if dataset == "brca1" else dataset
 
 
 # Apply the function to create a shorter dataset identifier
@@ -66,9 +68,9 @@ custom_limits = {
     (50, "Rhee2006"): (-0.5, 6, ymin_def, ymax_def),
     (100, "Rhee2006"): (-1, 11, ymin_def, ymax_def),
     (200, "Rhee2006"): (-1, 11, ymin_def, ymax_def),
-    (50, "brca1"): (-1, 16, ymin_def, ymax_def),
-    (100, "brca1"): (-1, 16, ymin_def, ymax_def),
-    (200, "brca1"): (-1.5, 19, ymin_def, ymax_def),
+    (50, "BRCA1"): (-1, 16, ymin_def, ymax_def),
+    (100, "BRCA1"): (-1, 16, ymin_def, ymax_def),
+    (200, "BRCA1"): (-1.5, 19, ymin_def, ymax_def),
 }
 
 # Create markers for solvers

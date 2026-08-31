@@ -62,8 +62,8 @@
   to efficiently fit the full SLOPE path as well as handle cross-validation of
   SLOPE models, including the relaxed SLOPE. We present examples of how to use
   the packages and benchmarks that demonstrate the performance of the packages
-  on both real and simulated data and show that our packages outperform existing
-  implementations of SLOPE in terms of speed.
+  on both real and simulated data and show that our packages generally
+  outperform existing implementations of SLOPE in terms of speed.
 }
 
 \Keywords{SLOPE, OWL, regularization, generalized linear models, \proglang{R},
@@ -759,7 +759,7 @@ merge, and split.
 Our packages support hyper-parameter tuning via iterated \(k\)-fold
 cross-validation (CV), with parameterization over \(\alpha\), \(\lambda\) type
 (BH, Gaussian type, etc.), \(\gamma\) (SLOPE relaxation parameter). Here, we
-demonstrate the CV functionality by cross-validating across to values of the
+demonstrate the CV functionality by cross-validating across two values of the
 \(q\) parameter and printing the results, which displays the optimal values for
 all the cross-validated parameters.
 
@@ -824,15 +824,12 @@ also include the alternating direction method of multipliers
 (ADMM)~\citep{boyd2010}, a semi-smooth Newton-based method~\citep{luo2019}, and
 an approximate homotopy method, \pkg{SolutionPath}~\citep{dupuis2024}. See
 \autoref{sec:solver-details} for more details on the solvers and their
-implementations. The path benchmark includes a subset of these solvers, namely
-\pkg{FISTA}, \pkg{SolutionPath}, and \pkg{ADMM}. All of the benchmarks were run
-on a Lenovo Thinkpad T14 Gen 5 (Intel) laptop with a Intel Core Ultra 7 155U CPU
-(12 cores, max 4.8 GHz), 32 GB of RAM, and NixOS 25.05 (Linux).
-
-For this paper, we have also created a separate benchmark for fitting the full
-regularization path, which is available at
-\myurl{github.com/jolars/benchmark\_slope\_path} and which features a subset of
-the solvers from the previous benchmark.
+implementations. The path benchmark compares \pkg{sortedl1} with a subset of
+these solvers, namely \pkg{FISTA}, \pkg{SolutionPath}, and \pkg{ADMM}. All of
+the benchmarks were run on a system with an AMD Ryzen 9 7900 CPU (12 cores and
+24 threads, with a maximum boost clock of 5.5 GHz), 64 GB of RAM, and NixOS
+26.11 (Linux). We did not set thread-count environment variables, leaving each
+numerical library to use its default threading behavior.
 
 We have run the benchmarks for both simulated~(\autoref{tab:simulated-data}) as
 well as real data~(\autoref{tab:real-data}). For all real data, we standardize
@@ -842,6 +839,16 @@ the Benjamini--Hochberg sequence for \(\lambda\) with \(q = 0.2\). Since some of
 the solvers cannot handle intercepts, we have omitted the intercepts from the
 models. Also note that not all solvers support sparse design matrices, which is
 why they are not included everywhere.
+
+We evaluate convergence using a solver-independent relative duality gap and
+stop sampling each convergence curve once this measure reaches \(10^{-7}\). For
+solution paths, we apply the same target to the maximum relative duality gap
+along the path. Values below this threshold are not distinguished in the
+figures. The solvers retain their native internal stopping rules, so the common
+duality-gap measure, rather than an internal tolerance parameter, provides the
+basis for comparison. We use Benchopt's 30-second timeout, which is checked
+between successive evaluations of a solver, and restrict the figures to
+evaluations taking no more than 30 seconds.
 
 \begin{table}[tp]
   \centering
@@ -854,7 +861,7 @@ why they are not included everywhere.
     \midrule
     \dataset{BRCA1}             & 536     & 17322   & 1               & \citet{nationalcancerinstitute2022} \\
     \dataset{Koussounadis2014}  & 101     & 34694   & 1               & \citet{koussounadis2014}            \\
-    \dataset{Real-Sim}          & 72309   & 20958   & 1               & \citet{mccallum2010}                \\
+    \dataset{Real-Sim}          & 72309   & 20958   & 0.00245         & \citet{mccallum2010}                \\
     \dataset{RCV1}              & 20242   & 44504   & 0.00166         & \citet{lewis2004}                   \\
     \dataset{Rhee2006}          & 842     & 360     & 0.02469         & \citet{rhee2006}                    \\
     \dataset{YearPredictionMSD} & 463715  & 90      & 1               & \citet{bertin-mahieux2011}          \\
@@ -877,18 +884,18 @@ why they are not included everywhere.
       S[table-format=1.3] S[table-format=0.1]
     }
     \toprule
-    {Scenario}       & {\(n\)} & {\(p\)} & {\(k\)} & {\(X\) density} & {\(\rho\)} \\
+    {Scenario}       & {\(n\)} & {\(p\)} & {\(s\)} & {\(X\) density} & {\(\rho\)} \\
     \midrule
-    High Dim         & 200     & 20000   & 20      & 1               & 0.6        \\
-    High Dim, Sparse & 200     & 200000  & 20      & 0.001           & 0.6        \\
-    Low Dim          & 200000  & 200     & 40      & 1               & 0.2        \\
+    High Dim         & 100     & 20000   & 20      & 1               & 0.6        \\
+    High Dim, Sparse & 2000    & 200000  & 20      & 0.001           & 0.6        \\
+    Low Dim          & 20000   & 100     & 40      & 1               & 0.6        \\
     \bottomrule
   \end{tabular}
   \caption{
     Scenarios for the simulated data in our benchmarks. \(\rho\) is the
-    auto-correlation between adjacent predictors, \(k\) is the number of
-    clusters, and \(n\) and \(p\) are the number of samples and predictors,
-    respectively.
+    auto-correlation between adjacent predictors, \(s\) is the number of nonzero
+    true coefficients, and \(n\) and \(p\) are the number of samples and
+    predictors, respectively.
   }
   \label{tab:simulated-data}
 \end{table}
@@ -903,17 +910,17 @@ model), and run the benchmarks for \(\alpha = \alpha_\text{max} / 2\),
 convergence using the duality gap.
 
 The results for the simulated data are presented in
-\autoref{fig:simulated-data-single}. We can observe that our algorithm is
-fastest in every case except the (\(\alpha_\text{max} / 50\), High Dim)
-combination, where the Newt-ALM method seems to perform better (although does
-not quite converge). The difference is especially pronounced for high levels of
-regularization, where our method is often many times faster than the next best
-method. Our current implementation shows improved performance compared to
-\citet{larsson2023}, which also featured the hybrid method. We believe this is
-likely due to the addition of screening rules as well as algorithmic
-improvements. The Newt-ALM method also performs better than in
-\citet{larsson2023}, which is the result of algorithmic improvements made in the
-implemention we use here.
+\autoref{fig:simulated-data-single}. At the displayed relative-duality-gap
+threshold of \(10^{-7}\), our algorithm is the first to reach the threshold in
+all nine combinations of simulation setting and regularization level. The
+difference is especially pronounced for high levels of regularization, where our
+method is often many times faster than the next best method. Newt-ALM also
+reaches the threshold rapidly in the (\(\alpha_\text{max} / 50\), High Dim)
+setting, although \pkg{sortedl1} reaches it first. Our current implementation shows
+improved performance compared to \citet{larsson2023}, which also featured the
+hybrid method. We believe this is likely due to the addition of screening rules
+as well as algorithmic improvements. Newt-ALM also performs better than in
+\citet{larsson2023}, following improvements to the implementation used here.
 
 \begin{figure}[tp]
   \centering
@@ -928,18 +935,18 @@ implemention we use here.
 \end{figure}
 
 For real data~\autoref{fig:real-data-single}, we see a mostly similar pattern.
-Our algorithm (sortedl1) performs best for most combinations---again dominating
-in the high-regularization regime, whereas Newt-ALM and occasionally some
-version of the accelerated PGD methods or ADMM perform well. Notice, however,
-that the other algorithms performance appears to be much more sensitive to the
-problem, especially the ADMM method, which sometimes diverges.
+At a relative duality gap of \(10^{-7}\), \pkg{sortedl1} is the first solver to
+reach the threshold in 16 of the 18 combinations. ADMM is first for
+\dataset{YearPredictionMSD} at \(\alpha_\text{max}/10\) and
+\(\alpha_\text{max}/50\). The performance of the other algorithms is generally
+more sensitive to the dataset and regularization level.
 
 \begin{figure}[tp]
   \centering
   \includegraphics[width=\natwidth]{images/benchmark_single_real.pdf}
   \caption{
     %
-    Performance of the solvers for the single solution benchmark for five
+    Performance of the solvers for the single solution benchmark for six
     different real data sets~(\autoref{tab:real-data}) and three levels of
     regularization. Please see the text for information about the data and setup
     of the experiment.
@@ -957,8 +964,12 @@ relative duality gap along the path.
 
 The results are presented in \autoref{fig:real-data-path}. Note that the
 interpretation of progress towards convergence does not hold quite the same way
-as for the single solution benchmarks since we fit a full path. Nevertheless, we
-note that our implementation is the fastest by a large margin.
+as for the single solution benchmarks since we fit a full path. Nevertheless,
+\pkg{sortedl1} is the only solver to reduce the maximum relative duality gap to
+\(10^{-7}\), reaching it in eight of the nine combinations of dataset and path
+length, and doing so by a large time margin. No solver reaches the threshold for
+\dataset{BRCA1} with 200 path points within the time limit; \pkg{sortedl1}
+comes closest, with a maximum relative duality gap of \(2.5 \times 10^{-7}\).
 
 \begin{figure}[tp]
   \centering
@@ -966,21 +977,24 @@ note that our implementation is the fastest by a large margin.
   \caption{
     %
     Benchmark for fitting the full regularization path on real data sets with
-    varying path lengths. The plot show the maximum relative duality gap across
+    varying path lengths. The plot shows the maximum relative duality gap across
     all solutions along the regularization path.
   }
   \label{fig:real-data-path}
 \end{figure}
 
-Taken together, our benchmarks show that our method outperforms all competing
-methods. In contrast to \citet{dupuis2024}, who showed mixed results when
+Taken together, our benchmarks show that our method reaches a relative duality
+gap of \(10^{-7}\) first in 25 of the 27 single-solution settings and in eight
+of the nine path settings. ADMM is faster in the other two single-solution
+settings, while no solver reaches the threshold in the remaining path setting.
+In contrast to
+\citet{dupuis2024}, who showed mixed results when
 comparing their approximate homotopy method to the hybrid algorithm from
-\citet{larsson2023}, we consistently find our algorithm to be superior across
-all tested scenarios. This improved performance can be attributed to several
-factors: \citet{dupuis2024} used a more stringent stopping criterion (duality
-gap of \(10^{-10}\)), our benchmarks generally involve larger problem sizes, and
-our implementation includes enhancements over the original version from
-\citet{larsson2023}.
+\citet{larsson2023}, we find a clearer advantage for the current hybrid
+implementation. Possible explanations include the more stringent stopping
+criterion used by \citet{dupuis2024} (a duality gap of \(10^{-10}\)), the
+generally larger problems in our benchmarks, and enhancements over the original
+hybrid implementation from \citet{larsson2023}.
 
 \section{Application to real-world data}
 
@@ -1076,28 +1090,27 @@ however, SLOPE represents a more challenging optimization problem due to the
 penalty term's inseparability.
 
 Despite the complexity of the problem, we have here presented a collection of
-packages (in \proglang{R}, \proglang{Python}, and \proglang{Julia}) that offer
-efficient and feature-rich implementations of SLOPE\@. We hope that this
-endeavour will make SLOPE accessible to a wider audience. Ours are the first
-packages that implement SLOPE in these languages. At the time of writing, the
-only other implementation of SLOPE is \pkg{skglm}, which is available in
-\proglang{Python}. For \proglang{R} and \proglang{Julia}, ours are the only
-available implementations.
+packages (in \proglang{R}, \proglang{Python}, \proglang{Julia}, and
+\proglang{C++}) that offer efficient and feature-rich implementations of
+SLOPE\@. We hope that this endeavor will make SLOPE accessible to a wider
+audience. Other implementations include \pkg{skglm} and the specialized
+approximate path method \pkg{SolutionPath}; our suite instead provides a common
+implementation and feature set across four programming languages.
 
-We have shown that the performance of our software is unparalleled compared to
-other algorithms and implementations, both for fitting the full regularization
-path as well as for a single solution, and have shown these in a series of
-benchmarks on both real and simulated data.
+Our benchmarks show that the software generally performs strongly compared with
+the other algorithms and implementations considered here, both for fitting the
+full regularization path and for a single solution on real and simulated data.
 
-Our results confirm the effectiveness of the hybrid algorithm approach, with
-performance improvements over \citet{larsson2023} due to the addition of
-screening rules and other algorithmic enhancements. The comprehensive benchmarks
-demonstrate consistent superiority over competing methods, including the
-approximate homotopy method of \citet{dupuis2024}, across diverse problem
-settings and data types.
+Our results support the effectiveness of the hybrid algorithm approach, with
+performance improvements over \citet{larsson2023} following the addition of
+screening rules and other algorithmic enhancements. The method reaches the
+reported accuracy threshold first in most of the settings considered here,
+including eight of the nine path-fitting settings, while another solver is
+faster in two single-solution settings. No solver reaches the threshold in the
+remaining path-fitting setting.
 
 Although our packages are full-fledged implementations of SLOPE, there are still
-some features that are missing and feature coverage is generally not on with
+some features that are missing and feature coverage is generally not on par with
 that of, for instance, \pkg{glmnet} for elastic net. For instance, we do not yet
 support observation weights or the full suite of loss functions from the family
 of generalized linear models. On the other hand, we \emph{do} support

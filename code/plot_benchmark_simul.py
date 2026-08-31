@@ -38,6 +38,7 @@ def extract_dataset_name(data_name):
 
 results_dir = "results/single_0831"
 df = merge_parquet_files(results_dir)
+df = df[df["time"] <= 30].copy()
 df = extract_reg_param(df)
 
 df_subset = df[
@@ -73,7 +74,7 @@ custom_limits = {
     (0.02, "High Dim"): (-1, 21, ymin_def, ymax_def),
     (0.5, "High Dim, Sparse"): (-0.1, 4, ymin_def, ymax_def),
     (0.1, "High Dim, Sparse"): (-0.5, 11, ymin_def, ymax_def),
-    (0.02, "High Dim, Sparse"): (-2, 81, ymin_def, ymax_def),
+    (0.02, "High Dim, Sparse"): (-2, 30, ymin_def, ymax_def),
     (0.5, "Low Dim"): (-0.05, 0.5, ymin_def, ymax_def),
     (0.1, "Low Dim"): (-0.05, 1.2, ymin_def, ymax_def),
     (0.02, "Low Dim"): (-0.05, 2.1, ymin_def, ymax_def),

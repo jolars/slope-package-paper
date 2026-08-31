@@ -1,7 +1,7 @@
 objective:
-  - SLOPE[fit_intercept=False,q=0.2,reg=0.5]
-  - SLOPE[fit_intercept=False,q=0.2,reg=0.1]
-  - SLOPE[fit_intercept=False,q=0.2,reg=0.02]
+  - SLOPE[fit_intercept=False,q=0.2,reg=0.5,target_rel_duality_gap=1e-7]
+  - SLOPE[fit_intercept=False,q=0.2,reg=0.1,target_rel_duality_gap=1e-7]
+  - SLOPE[fit_intercept=False,q=0.2,reg=0.02,target_rel_duality_gap=1e-7]
 
 dataset:
   - Simulated[X_density=1.0,n_features=20000,n_samples=100,rho=0.6,n_signals=20]
