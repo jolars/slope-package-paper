@@ -58,7 +58,7 @@ This repository is organized into several key components:
   paper
 
 <details>
-<summary>📁 <b>Full directory tree</b></summary>
+<summary>Directory tree</summary>
 
 ```
 .
@@ -154,11 +154,11 @@ benchmark-single
 benchmark-path
 ```
 
-These commands use `bench_config_single.yml` and `bench_config_path.yml`, disable
-Benchopt's result cache, and do not invoke `benchopt install`. Downloaded data is
-kept under `.benchmark-data/`; set `SLOPE_BENCHMARK_DATA_DIR` to use another
-location. Record the environment and data hashes alongside each benchmark run
-with:
+These commands use `bench_config_single.yml` and `bench_config_path.yml`,
+disable Benchopt's result cache, and do not invoke `benchopt install`.
+Downloaded data is kept under `.benchmark-data/`; set `SLOPE_BENCHMARK_DATA_DIR`
+to use another location. Record the environment and data hashes alongside each
+benchmark run with:
 
 ```bash
 benchmark-environment > benchmark-environment.txt
@@ -170,8 +170,8 @@ configurations through both benchmark suites.
 
 ### OCI Container
 
-Devenv can build an OCI image from the same pinned benchmark closure used by
-the native shell:
+Devenv can build an OCI image from the same pinned benchmark closure used by the
+native shell:
 
 ```bash
 devenv container build shell
@@ -388,9 +388,9 @@ Run the environment and benchmark smoke tests with:
 devenv test
 ```
 
-The reusable benchmark repositories describe their dependencies without fixing
-a complete environment. The paper repository owns the reproducible workflow:
-its submodule revisions fix the benchmark code, while the root Devenv fixes the
+The reusable benchmark repositories describe their dependencies without fixing a
+complete environment. The paper repository owns the reproducible workflow: its
+submodule revisions fix the benchmark code, while the root Devenv fixes the
 software closure used to execute it. The generated OCI image carries that same
 closure to other Linux hosts.
 
