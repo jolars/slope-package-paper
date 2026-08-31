@@ -74,9 +74,9 @@ custom_limits = {
     (0.5, "High Dim, Sparse"): (-0.1, 4, ymin_def, ymax_def),
     (0.1, "High Dim, Sparse"): (-0.5, 11, ymin_def, ymax_def),
     (0.02, "High Dim, Sparse"): (-2, 81, ymin_def, ymax_def),
-    (0.5, "Low Dim"): (-0.05, 1.6, ymin_def, ymax_def),
-    (0.1, "Low Dim"): (-0.05, 3.1, ymin_def, ymax_def),
-    (0.02, "Low Dim"): (-0.05, 5.1, ymin_def, ymax_def),
+    (0.5, "Low Dim"): (-0.05, 0.5, ymin_def, ymax_def),
+    (0.1, "Low Dim"): (-0.05, 1.2, ymin_def, ymax_def),
+    (0.02, "Low Dim"): (-0.05, 2.1, ymin_def, ymax_def),
 }
 
 markers = ["o", "s", "^", "D", "*", "x", "+", "v", "<", ">", "p", "h", "H", "d"]

@@ -74,9 +74,9 @@ custom_limits = {
     (0.5, "Koussounadis2014"): (-0.1, 2.6, ymin_def, ymax_def),
     (0.1, "Koussounadis2014"): (-0.1, 6, ymin_def, ymax_def),
     (0.02, "Koussounadis2014"): (-0.5, 23, ymin_def, ymax_def),
-    (0.5, "Scheetz2006"): (-0.01, 0.6, ymin_def, ymax_def),
-    (0.1, "Scheetz2006"): (-0.1, 3.2, ymin_def, ymax_def),
-    (0.02, "Scheetz2006"): (-0.1, 3.2, ymin_def, ymax_def),
+    (0.5, "Rhee2006"): (-0.0001, 0.003, ymin_def, ymax_def),
+    (0.1, "Rhee2006"): (-0.0001, 0.003, ymin_def, ymax_def),
+    (0.02, "Rhee2006"): (-0.0001, 0.003, ymin_def, ymax_def),
     (0.5, "BRCA1"): (-0.1, 2.9, ymin_def, ymax_def),
     (0.1, "BRCA1"): (-0.2, 9.1, ymin_def, ymax_def),
     (0.02, "BRCA1"): (-1, 16, ymin_def, ymax_def),
@@ -86,6 +86,9 @@ custom_limits = {
     (0.5, "Real-Sim"): (-0.02, 0.3, ymin_def, ymax_def),
     (0.1, "Real-Sim"): (-0.1, 2.6, ymin_def, ymax_def),
     (0.02, "Real-Sim"): (-1, 11, ymin_def, ymax_def),
+    (0.5, "YearPredictionMSD"): (-0.5, 5, ymin_def, ymax_def),
+    (0.1, "YearPredictionMSD"): (-0.5, 6, ymin_def, ymax_def),
+    (0.02, "YearPredictionMSD"): (-1, 8, ymin_def, ymax_def),
 }
 
 # Create markers for solvers

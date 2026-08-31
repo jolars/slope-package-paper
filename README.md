@@ -90,7 +90,7 @@ This repository is organized into several key components:
 │   ├── benchmark_single_simulated.pdf
 │   └── ...
 ├── results/                    # Benchmark results
-│   ├── path_0623/              # Path-fitting benchmark results
+│   ├── path_0831/              # Path-fitting benchmark results
 │   └── single_0831/            # Single-penalty benchmark results
 ├── slopeutils/                 # Utility functions
 │   ├── merge_parquet.py

@@ -20,7 +20,7 @@ def extract_path_length(df):
     return df
 
 
-results_dir = "results/path_0623"
+results_dir = "results/path_0831"
 df = merge_parquet_files(results_dir)
 df = extract_path_length(df)
 
@@ -36,7 +36,7 @@ df_subset = df[
         "objective_value",
         "objective_max_rel_duality_gap",
     ]
-]
+].copy()
 
 
 # Extract dataset specifics from data_name to create shorter labels
