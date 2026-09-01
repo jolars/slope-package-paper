@@ -730,12 +730,13 @@ end result is given by
 \]
 
 Our packages support regularization through the \code{gamma} argument. Here, we
-fit two models: one that is fully relaxed~(\(\gamma = 0\)) and one that is
-semi-relaxed~(\(\gamma = 0.5\)).
+fit fully relaxed~(\(\gamma = 0\)) and semi-relaxed~(\(\gamma = 0.5\)) models,
+along with standard SLOPE~(\(\gamma = 1\)) for comparison.
 
 \begin{Code}
 R> fit_relaxed <- SLOPE(x, y, q = 0.1, gamma = 0)
 R> fit_semirelaxed <- SLOPE(x, y, q = 0.1, gamma = 0.5)
+R> fit_standard <- SLOPE(x, y, q = 0.1, gamma = 1)
 \end{Code}
 
 We plot the resulting paths in \autoref{fig:relaxed-slope}. Observe the
@@ -747,7 +748,7 @@ merge, and split.
   \includegraphics[width=\natwidth]{images/slope-relaxed.pdf}
   \caption{
     %
-    SLOPE with various level of relaxation \(\gamma\), with \(\gamma = 0\)
+    SLOPE with various levels of relaxation \(\gamma\), with \(\gamma = 0\)
     (fully relaxed), \(\gamma = 0.5\) (semi-relaxed), and \(\gamma = 1\)
     (standard SLOPE).
   }
@@ -774,8 +775,8 @@ Call:
 cvSLOPE(x = x, y = y, q = c(0.1, 0.2))
 
 Optimum values:
-      q gamma     alpha measure     mean       se      lo       hi
-129 0.2     0 0.3379402     mse 3013.065 234.6321 2482.29 3543.839
+    q gamma     alpha measure     mean      se       lo       hi
+1 0.2     0 0.3379402     mse 3012.926 234.652 2482.106 3543.745
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1166,6 +1167,7 @@ julia> using CSV
 julia> using ProjectRoot
 julia> using DataFrames
 julia> using Statistics
+julia> using Random
 julia> using Plots
   \end{Code}
 
@@ -1224,6 +1226,7 @@ directly. Users need to load the \pkg{Plots.jl} package (as we do here) to have
 access to these plotting methods.}.
 
 \begin{Code}
+julia> Random.seed!(48)
 julia> fit_cv = slopecv(x, y)
 julia> pcv = plot(fit_cv)
   \end{Code}
@@ -1235,9 +1238,9 @@ The result is shown in \autoref{fig:cv-julia}.
   \includegraphics[width=\natwidth]{images/slope-cv-julia.pdf}
   \caption{
     %
-    Mean-squared error (MSE) from cross-validation of \(q\) and \(\alpha\) for
-    SLOPE fit to the diabetes data set. The ribbons represent 95\% confidence
-    intervals.
+    Mean-squared error (MSE) from cross-validation over \(\alpha\), with
+    \(q = 0.1\), for SLOPE fit to the diabetes data set. The ribbon represents
+    a 95\% confidence interval.
   }
   \label{fig:cv-julia}
 \end{figure}
