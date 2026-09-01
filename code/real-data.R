@@ -3,7 +3,6 @@ library(caret)
 library(pROC)
 library(here)
 library(glmnet)
-library(MLmetrics)
 
 fig_name <- function(name) {
   name <- here::here("images", paste0(name, ".pdf"))
@@ -91,9 +90,6 @@ pred_prob_slope <- predict(slope_model, x_test, type = "response")
 roc_obj_slope <- roc(y_test, pred_prob_slope)
 auc_val_slope <- auc(roc_obj_slope)
 
-pred_class_slope <- ifelse(pred_prob_slope > 0.5, 1, 0)
-f1_slope <- MLmetrics::F1_Score(y_true = y_test, y_pred = pred_class_slope)
-
 # lasso
 
 pred_prob_lasso <- as.vector(predict(
@@ -104,9 +100,6 @@ pred_prob_lasso <- as.vector(predict(
 
 roc_obj_lasso <- roc(y_test, pred_prob_lasso)
 auc_val_lasso <- auc(roc_obj_lasso)
-
-pred_class_lasso <- ifelse(pred_prob_lasso > 0.5, 1, 0)
-f1_lasso <- MLmetrics::F1_Score(y_true = y_test, y_pred = pred_class_lasso)
 
 # plot
 

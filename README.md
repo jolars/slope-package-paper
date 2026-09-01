@@ -355,10 +355,10 @@ python code/plot_thresholding.py
 In `code/real-data.R`, we provide an extended example using the R `SLOPE`
 package, which is described in Section 6 in the paper. In addition to `SLOPE`
 and `here` from the [R Example](#r-example), this requires the dependencies
-`caret`, `pROC`, `glmnet`, and `MLmetrics`:
+`caret`, `pROC`, and `glmnet`:
 
 ```r
-install.packages(c("caret", "pROC", "glmnet", "MLmetrics"))
+install.packages(c("caret", "pROC", "glmnet"))
 ```
 
 Then, you can run the real data analysis script with:
