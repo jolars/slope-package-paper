@@ -3,6 +3,7 @@ using CSV
 using ProjectRoot
 using DataFrames
 using Statistics
+using Random
 using Plots
 using Measures
 
@@ -41,6 +42,7 @@ p_comb = plot(
 
 savefig(p_comb, imgdir * "diabetes-slope-lasso-julia.pdf")
 
+Random.seed!(48)
 fit_cv = slopecv(x, y)
 
 pcv = plot(fit_cv, size = (300, 200))
