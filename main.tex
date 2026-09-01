@@ -1038,11 +1038,13 @@ R> x_test  <- x[-train_index, ]
 R> y_test  <- y[-train_index]
 \end{Code}
 
-In this example, SLOPE achieved an AUC of 0.978 on the test set, while the lasso
-obtained 0.94. More importantly, SLOPE selected a richer set of features (25
-metabolites grouped into 10 clusters), compared to the 10 variables selected by
-the lasso. One of the unique features of the R implementation is the ability to
-visualize the clustering of coefficients with the \texttt{plotClusters()}
+In this example, SLOPE achieved an AUC of 0.913 on the test set, while the lasso
+obtained 0.929. Although the lasso performed slightly better in terms of AUC,
+the fitted SLOPE model exhibits the structure induced by the sorted $\ell_1$
+penalty: it selected 11 metabolites and organized them into five coefficient
+clusters. The lasso selected seven metabolites without grouping them. One of
+the unique features of the R implementation is the ability to visualize the
+clustering of coefficients with the \texttt{plotClusters()}
 function\footnote{This functionality is specific to the R package.}. The plot
 highlights groups of variables with coefficients of the same magnitude (up to
 sign):
@@ -1062,15 +1064,17 @@ R> plotClusters(fit_pat, include_zeroes = FALSE)
   \label{fig:real-data-clusters}
 \end{figure}
 
-This produces a cluster map of selected metabolites, revealing biologically
-meaningful groupings~(\autoref{fig:real-data-clusters}). For example, both SLOPE
-and the lasso consistently identified \textit{kynurenine}, a known glioma
-biomarker~\citep{du2020both}. SLOPE additionally highlighted \textit{tryptophan}
-and several carnitine derivatives (e.g., acetylcarnitine and
-propionylcarnitine), which have recently been proposed as glioma
-biomarkers~\citep{wang2024genomic}. Other significant amino acids such as
-\textit{phenylalanine} and \textit{lysine}~\citep{koslinski2023comparative,
-srivastava2025amino} were selected by both SLOPE and lasso.
+This produces a cluster map of selected metabolites, revealing the grouping
+behavior of SLOPE~(\autoref{fig:real-data-clusters}). At the value of~$\alpha$
+selected by cross-validation, one cluster comprises \textit{lysine},
+\textit{phenylalanine}, and PC aa C34:1, while another comprises
+\textit{alanine} and \textit{kynurenine}. The latter is a known glioma
+biomarker~\citep{du2020both}, and both \textit{phenylalanine} and
+\textit{lysine} have been associated with glioma-related metabolic
+changes~\citep{koslinski2023comparative,srivastava2025amino}. The largest
+cluster contains \textit{asparagine}, \textit{methionine}, PC ae C42:5, and SM
+C18:0. These groupings illustrate how SLOPE can select variables jointly and
+assign them coefficients with the same magnitude (up to sign).
 
 Overall, this example demonstrates how the package can be applied in practice.
 Beyond predictive performance, its functionality, such as cross-validation,
