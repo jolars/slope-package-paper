@@ -155,17 +155,16 @@ benchmark-path
 ```
 
 These commands use `bench_config_single.yml` and `bench_config_path.yml`, pass a
-30-second timeout to Benchopt, disable Benchopt's result cache, and do not invoke
-`benchopt install`. Benchopt checks the timeout between evaluations, so an
-in-flight solver call can finish after the deadline. Both configurations use a
-solver-independent relative-duality-gap target of `1e-7`, after which Benchopt
+30-second timeout to Benchopt, disable Benchopt's result cache, and do not
+invoke `benchopt install`. Benchopt checks the timeout between evaluations, so
+an in-flight solver call can finish after the deadline. Both configurations use
+a solver-independent relative-duality-gap target of `1e-7`, after which Benchopt
 stops sampling the corresponding convergence curve. The benchmark plotting
 scripts display only evaluations taking no more than 30 seconds. Thread-count
 environment variables are left unset, so numerical libraries use their default
-threading behavior.
-Downloaded data is kept under `.benchmark-data/`; set `SLOPE_BENCHMARK_DATA_DIR`
-to use another location. Record the environment and data hashes alongside each
-benchmark run with:
+threading behavior. Downloaded data is kept under `.benchmark-data/`; set
+`SLOPE_BENCHMARK_DATA_DIR` to use another location. Record the environment and
+data hashes alongside each benchmark run with:
 
 ```bash
 benchmark-environment > benchmark-environment.txt
