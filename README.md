@@ -29,8 +29,7 @@ coefficient clustering simultaneously.
 SLOPE solves the following optimization problem:
 
 $$
-  \operatorname{minimize}_{\beta_0, \beta} \quad F(\beta_0, \beta)
-  + \alpha J(\beta; \lambda)
+  \operatorname{minimize}_{\beta_0, \beta} \quad F(\beta_0, \beta) + \alpha J(\beta; \lambda)
 $$
 
 where:
