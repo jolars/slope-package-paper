@@ -29,17 +29,17 @@ coefficient clustering simultaneously.
 SLOPE solves the following optimization problem:
 
 $$
-  \min_{\beta_0, \beta} \quad F(\beta_0, \beta) + \alpha J(\beta; \lambda)
+\text{minimize}_{\beta_0, \beta} \quad F(\beta_0, \beta) + \alpha J(\beta; \lambda)
 $$
 
 where:
 
-- F is a smooth convex loss function (e.g., from GLMs)
-- $J(\beta, \lambda)$ is the sorted $\ell_1$ norm: J(β; λ) = Σⱼ λⱼ \|β(j)\|
-- λ is a non-increasing sequence of penalty weights
-- \|β(1)\| ≥ \|β(2)\| ≥ ... ≥ \|β(p)\| are the sorted absolute coefficients
+- $F$ is a smooth convex loss function (e.g., from GLMs)
+- $J(\beta; \lambda)$ is the sorted L1 norm: $J(\beta; \lambda) = \sum_j \lambda_j |\beta(j)|$
+- $\lambda$ is a non-increasing sequence of penalty weights
+- $|\beta(1)| \geq |\beta(2)| \geq \ldots \geq |\beta(p)|$ are the sorted absolute coefficients
 
-SLOPE generalizes both the lasso (constant λ) and OSCAR (linearly decreasing λ),
+SLOPE generalizes both the lasso (constant $\lambda$) and OSCAR (linearly decreasing λ),
 with the unique property of clustering coefficients by setting them to equal
 magnitudes.
 
@@ -61,30 +61,52 @@ This repository is organized into several key components:
 <summary>Directory tree</summary>
 
 ```
-. ├── benchmark_slope/ # Benchopt benchmark for single-penalty problems │ ├──
-datasets/ # Benchmark datasets │ ├── solvers/ # Solver implementations │ ├──
-objective.py # Benchmark objective definition │ └── README.rst ├──
-benchmark_slope_path/ # Benchopt benchmark for path fitting │ ├── datasets/ │
-├── solvers/ │ ├── objective.py │ └── README.md ├── code/ # Analysis and
-visualization scripts │ ├── plot_benchmark_path.py # Benchmark plotting scripts
-│ ├── plot_benchmark_real.py # for real data │ ├── plot_benchmark_simul.py # for
-simulated data │ ├── plot_thresholding.py # SLOPE thresholding illustration │
-├── example.R # Usage examples for paper │ ├── example.py │ ├── example.jl │ ├──
-example.cpp │ ├── CMakeLists.txt # Build definition for the C++ example │ └──
-real-data.R # Real data analysis for paper ├── data/ # Data used by the examples
-│ └── diabetes.csv ├── images/ # Generated figures from paper │ ├──
-benchmark_path_real.pdf │ ├── benchmark_single_simulated.pdf │ └── ... ├──
-results/ # Benchmark results │ ├── path_0831/ # Path-fitting benchmark results │
-└── single_0831/ # Single-penalty benchmark results ├── slopeutils/ # Utility
-functions │ ├── merge_parquet.py │ └── plot_utils.py ├── tex/ # LaTeX macros │
-└── macros.tex ├── bench_config_single.yml # Benchopt configuration for
-single-penalty ├── bench_config_path.yml # Benchopt configuration for
-path-fitting ├── devenv.nix # Reproducible development environment ├──
-devenv.lock # Locked Nix inputs ├── Project.toml # Julia environment for the
-Julia example ├── Manifest.toml # Locked Julia dependencies ├── Taskfile.yml #
-Task automation ├── main.tex # Paper LaTeX source ├── main.bib # Bibliography
+.
+├── benchmark_slope/            # Benchopt benchmark for single-penalty problems
+│   ├── datasets/               # Benchmark datasets
+│   ├── solvers/                # Solver implementations
+│   ├── objective.py            # Benchmark objective definition
+│   └── README.rst
+├── benchmark_slope_path/       # Benchopt benchmark for path fitting
+│   ├── datasets/
+│   ├── solvers/
+│   ├── objective.py
+│   └── README.md
+├── code/                       # Analysis and visualization scripts
+│   ├── plot_benchmark_path.py  # Benchmark plotting scripts
+│   ├── plot_benchmark_real.py  # for real data
+│   ├── plot_benchmark_simul.py # for simulated data
+│   ├── plot_thresholding.py    # SLOPE thresholding illustration
+│   ├── example.R               # Usage examples for paper
+│   ├── example.py
+│   ├── example.jl
+│   ├── example.cpp
+│   ├── CMakeLists.txt          # Build definition for the C++ example
+│   └── real-data.R             # Real data analysis for paper
+├── data/                       # Data used by the examples
+│   └── diabetes.csv
+├── images/                     # Generated figures from paper
+│   ├── benchmark_path_real.pdf
+│   ├── benchmark_single_simulated.pdf
+│   └── ...
+├── results/                    # Benchmark results
+│   ├── path_0831/              # Path-fitting benchmark results
+│   └── single_0831/            # Single-penalty benchmark results
+├── slopeutils/                 # Utility functions
+│   ├── merge_parquet.py
+│   └── plot_utils.py
+├── tex/                        # LaTeX macros
+│   └── macros.tex
+├── bench_config_single.yml     # Benchopt configuration for single-penalty
+├── bench_config_path.yml       # Benchopt configuration for path-fitting
+├── devenv.nix                  # Reproducible development environment
+├── devenv.lock                 # Locked Nix inputs
+├── Project.toml                # Julia environment for the Julia example
+├── Manifest.toml               # Locked Julia dependencies
+├── Taskfile.yml                # Task automation
+├── main.tex                    # Paper LaTeX source
+├── main.bib                    # Bibliography
 └── README.md
-
 ```
 
 </details>
