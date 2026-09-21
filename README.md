@@ -13,7 +13,7 @@ benchmarks and analysis code.
 The paper presents a suite of packages across multiple programming languages (R,
 Python, Julia, and C++) for efficiently solving the Sorted L-One Penalized
 Estimation (SLOPE) problem. SLOPE is a type of regularized regression that uses
-a sorted ℓ₁ norm penalty, which allows it to perform variable selection and
+a sorted L1 norm penalty, which allows it to perform variable selection and
 coefficient clustering simultaneously.
 
 ### Authors
@@ -28,14 +28,15 @@ coefficient clustering simultaneously.
 
 SLOPE solves the following optimization problem:
 
-```
-minimize F(β₀, β) + α J(β; λ)
-```
+$$
+  \operatorname{minimize}_{\beta_0, \beta} \quad F(\beta_0, \beta)
+  + \alpha J(\beta; \lambda)
+$$
 
 where:
 
 - F is a smooth convex loss function (e.g., from GLMs)
-- J(β, λ) is the sorted ℓ₁ norm: J(β; λ) = Σⱼ λⱼ \|β(j)\|
+- $J(\beta, \lambda)$ is the sorted $\ell_1$ norm: J(β; λ) = Σⱼ λⱼ \|β(j)\|
 - λ is a non-increasing sequence of penalty weights
 - \|β(1)\| ≥ \|β(2)\| ≥ ... ≥ \|β(p)\| are the sorted absolute coefficients
 
@@ -61,52 +62,30 @@ This repository is organized into several key components:
 <summary>Directory tree</summary>
 
 ```
-.
-├── benchmark_slope/            # Benchopt benchmark for single-penalty problems
-│   ├── datasets/               # Benchmark datasets
-│   ├── solvers/                # Solver implementations
-│   ├── objective.py            # Benchmark objective definition
-│   └── README.rst
-├── benchmark_slope_path/       # Benchopt benchmark for path fitting
-│   ├── datasets/
-│   ├── solvers/
-│   ├── objective.py
-│   └── README.md
-├── code/                       # Analysis and visualization scripts
-│   ├── plot_benchmark_path.py  # Benchmark plotting scripts
-│   ├── plot_benchmark_real.py  # for real data
-│   ├── plot_benchmark_simul.py # for simulated data
-│   ├── plot_thresholding.py    # SLOPE thresholding illustration
-│   ├── example.R               # Usage examples for paper
-│   ├── example.py
-│   ├── example.jl
-│   ├── example.cpp
-│   ├── CMakeLists.txt          # Build definition for the C++ example
-│   └── real-data.R             # Real data analysis for paper
-├── data/                       # Data used by the examples
-│   └── diabetes.csv
-├── images/                     # Generated figures from paper
-│   ├── benchmark_path_real.pdf
-│   ├── benchmark_single_simulated.pdf
-│   └── ...
-├── results/                    # Benchmark results
-│   ├── path_0831/              # Path-fitting benchmark results
-│   └── single_0831/            # Single-penalty benchmark results
-├── slopeutils/                 # Utility functions
-│   ├── merge_parquet.py
-│   └── plot_utils.py
-├── tex/                        # LaTeX macros
-│   └── macros.tex
-├── bench_config_single.yml     # Benchopt configuration for single-penalty
-├── bench_config_path.yml       # Benchopt configuration for path-fitting
-├── devenv.nix                  # Reproducible development environment
-├── devenv.lock                 # Locked Nix inputs
-├── Project.toml                # Julia environment for the Julia example
-├── Manifest.toml               # Locked Julia dependencies
-├── Taskfile.yml                # Task automation
-├── main.tex                    # Paper LaTeX source
-├── main.bib                    # Bibliography
+. ├── benchmark_slope/ # Benchopt benchmark for single-penalty problems │ ├──
+datasets/ # Benchmark datasets │ ├── solvers/ # Solver implementations │ ├──
+objective.py # Benchmark objective definition │ └── README.rst ├──
+benchmark_slope_path/ # Benchopt benchmark for path fitting │ ├── datasets/ │
+├── solvers/ │ ├── objective.py │ └── README.md ├── code/ # Analysis and
+visualization scripts │ ├── plot_benchmark_path.py # Benchmark plotting scripts
+│ ├── plot_benchmark_real.py # for real data │ ├── plot_benchmark_simul.py # for
+simulated data │ ├── plot_thresholding.py # SLOPE thresholding illustration │
+├── example.R # Usage examples for paper │ ├── example.py │ ├── example.jl │ ├──
+example.cpp │ ├── CMakeLists.txt # Build definition for the C++ example │ └──
+real-data.R # Real data analysis for paper ├── data/ # Data used by the examples
+│ └── diabetes.csv ├── images/ # Generated figures from paper │ ├──
+benchmark_path_real.pdf │ ├── benchmark_single_simulated.pdf │ └── ... ├──
+results/ # Benchmark results │ ├── path_0831/ # Path-fitting benchmark results │
+└── single_0831/ # Single-penalty benchmark results ├── slopeutils/ # Utility
+functions │ ├── merge_parquet.py │ └── plot_utils.py ├── tex/ # LaTeX macros │
+└── macros.tex ├── bench_config_single.yml # Benchopt configuration for
+single-penalty ├── bench_config_path.yml # Benchopt configuration for
+path-fitting ├── devenv.nix # Reproducible development environment ├──
+devenv.lock # Locked Nix inputs ├── Project.toml # Julia environment for the
+Julia example ├── Manifest.toml # Locked Julia dependencies ├── Taskfile.yml #
+Task automation ├── main.tex # Paper LaTeX source ├── main.bib # Bibliography
 └── README.md
+
 ```
 
 </details>
@@ -118,14 +97,39 @@ recursively:
 
 ```bash
 git clone --recurse-submodules https://github.com/jolars/slope-package-paper.git
+cd slope-package-paper
 ```
 
 If you have already cloned the repository without `--recurse-submodules`, you
-can fetch the submodules afterwards with:
+can fetch the submodules from the repository root with:
 
 ```bash
 git submodule update --init --recursive
 ```
+
+Run all commands below from the repository root.
+
+## Setup
+
+Use [Devenv](https://devenv.sh/) for the package versions used in this
+repository. First, [install Nix and
+Devenv](https://devenv.sh/getting-started/#installation), then check the
+environment and enter the shell:
+
+```bash
+devenv test
+devenv shell
+```
+
+`devenv test` checks the package versions and runs small benchmark
+configurations. The shell provides the R and Python packages and the compiled
+C++ example. Julia dependencies and LaTeX tools are covered in the relevant
+sections below. See [Reproducible Environment](#reproducible-environment) for
+version details.
+
+You can now run the [benchmarks](#running-benchmarks) or the [paper examples and
+plots](#code-in-paper). Manual installation instructions are included below if
+you prefer to work without Devenv.
 
 ## Running Benchmarks
 
@@ -134,25 +138,19 @@ single-penalty problems and one for fitting the full SLOPE path. The benchmarks
 use [Benchopt](https://benchopt.github.io/), a benchmarking framework for
 optimization algorithms.
 
-### Canonical Devenv Environment
+### Using Devenv
 
-The root Devenv is the authoritative environment for results produced by this
-repository. It pins Benchopt, all selected solver packages, Python, R, native
-libraries, and build tools. Initialize the submodules, test the environment, and
-enter it with:
-
-```bash
-git submodule update --init --recursive
-devenv test
-devenv shell
-```
-
-Run the two full benchmarks from the repository root:
+After [setup](#setup), run either or both benchmarks in the Devenv shell. The
+full benchmarks can take several hours:
 
 ```bash
 benchmark-single
 benchmark-path
 ```
+
+Results are written to `benchmark_slope/outputs/` and
+`benchmark_slope_path/outputs/`, respectively. See [Plots](#plots) for how to
+plot these results or regenerate figures from the results included here.
 
 These commands use `bench_config_single.yml` and `bench_config_path.yml`, pass a
 30-second timeout to Benchopt, disable Benchopt's result cache, and do not
@@ -162,17 +160,16 @@ a solver-independent relative-duality-gap target of `1e-7`, after which Benchopt
 stops sampling the corresponding convergence curve. The benchmark plotting
 scripts display only evaluations taking no more than 30 seconds. Thread-count
 environment variables are left unset, so numerical libraries use their default
-threading behavior. Downloaded data is kept under `.benchmark-data/`; set
-`SLOPE_BENCHMARK_DATA_DIR` to use another location. Record the environment and
-data hashes alongside each benchmark run with:
+threading behavior.
+
+Downloaded data is kept under `.benchmark-data/`; set `SLOPE_BENCHMARK_DATA_DIR`
+to use another location. Record the environment and data hashes after each
+benchmark run with:
 
 ```bash
 benchmark-environment > benchmark-environment.txt
 benchmark-data-checksums > benchmark-data.sha256
 ```
-
-The full benchmarks can take several hours. `devenv test` runs much smaller
-configurations through both benchmark suites.
 
 ### OCI Container
 
@@ -205,10 +202,10 @@ digest and immutable image reference. The first published package is private by
 default; a maintainer must change its visibility to public once in the GitHub
 package settings.
 
-### Generic Conda Installation
+### Using Conda Instead
 
-The benchmark repositories retain their normal Benchopt requirements for users
-outside this paper. A conventional installation remains available:
+To run a benchmark without Devenv, create a Conda environment and install the
+dependencies with Benchopt:
 
 ```bash
 conda create -n benchopt -c conda-forge python=3.12
@@ -222,10 +219,10 @@ benchopt run ./benchmark_slope --config benchmark_slope/example_config.yml
 This resolves current Conda and PyPI packages and is therefore a portability
 path, not the environment used for authoritative results in this repository.
 
-Note that the full benchmarks may take several hours to complete. You can
-alternatively configure solvers and data sets either interactively on the
-command line or by writing and referencing your own YAML configuration files.
-See the [Benchopt documentation](https://benchopt.github.io/) for more details.
+For the path benchmark, replace `benchmark_slope` with `benchmark_slope_path` in
+both commands. You can choose solvers and data sets on the command line or in
+your own YAML configuration files. See the [Benchopt
+documentation](https://benchopt.github.io/) for more details.
 
 ## Compiling the Paper
 
@@ -241,15 +238,15 @@ latexmk -pdf -interaction=nonstopmode main.tex
 The scripts in `code/` are lightweight examples for generating figures and
 demonstrating package usage. They are not intended to be strict, byte-for-byte
 reproducibility pipelines. For the package versions used by this repository, use
-the Devenv setup in the next section.
+the [Devenv setup](#setup).
 
-Run these from the repository root. Output figures are written to `images/` (the
-directory is created automatically if missing).
+In the Devenv shell, skip the R and Python package installation commands below.
+Output figures are written to `images/` (the directory is created automatically
+if missing).
 
 ### R Example
 
-To run the R examples, you need to have `SLOPE`, `knitr`, `tinytex`, `here`, and
-`lars` installed:
+Without Devenv, install the R dependencies in an R session:
 
 ```r
 install.packages(c("SLOPE", "knitr", "tinytex", "here", "lars"))
@@ -259,15 +256,15 @@ The script crops one of the figures with `knitr::plot_crop()`, which needs
 `pdfcrop` (part of TeX Live) and Ghostscript. If these are missing, the script
 still runs, but leaves the figure uncropped.
 
-Then, you can run the example script:
+Run the example from your terminal:
 
-```r
+```bash
 Rscript code/example.R
 ```
 
 ### Python Example
 
-For Python, you need `sortedl1`, `matplotlib`, and `scikit-learn` installed:
+Without Devenv, install the Python dependencies:
 
 ```bash
 pip install sortedl1 matplotlib scikit-learn
@@ -296,6 +293,14 @@ julia --project=. code/example.jl
 
 ### C++ Example
 
+In the Devenv shell, the example is already built. Run it with:
+
+```bash
+slope-example
+```
+
+Without Devenv, follow the build instructions below.
+
 The C++ example in [`code/example.cpp`](./code/example.cpp) requires
 [libslope](https://github.com/jolars/libslope) (version 6.5.4 is used for the
 paper), Eigen 3.4 or later, and CMake 3.15 or later. If libslope is not already
@@ -317,17 +322,16 @@ cmake --build build
 ./build/slope-example
 ```
 
-The Devenv environment described in [Reproducible
-Environment](#reproducible-environment) provides libslope and builds the example
-for you, in which case you only have to run `slope-example`.
-
 ### Plots
 
-Code for generating the plots in the paper are provided in `code/plot_*.py`
-files. In addition to the dependencies mentioned in [Python
-Example](#python-example), you also need `pandas`, `numpy`, `scipy`, and
-`pyarrow` (to read the benchmark results, which are stored as Parquet files)
-installed to run these:
+The benchmark plotting scripts in `code/plot_benchmark_*.py` use the results in
+`results/path_0831/` and `results/single_0831/`, so you can regenerate the
+figures without running the benchmarks. To plot a new run, change `results_dir`
+in the relevant script to a directory containing that run's Parquet files. The
+scripts combine all Parquet files in that directory.
+
+Without Devenv, install these packages in addition to the dependencies in
+[Python Example](#python-example):
 
 ```bash
 pip install pandas numpy scipy pyarrow
@@ -352,17 +356,17 @@ python code/plot_thresholding.py
 ## Real Data Analysis Example
 
 In `code/real-data.R`, we provide an extended example using the R `SLOPE`
-package, which is described in Section 6 in the paper. In addition to `SLOPE`
-and `here` from the [R Example](#r-example), this requires the dependencies
-`caret`, `pROC`, and `glmnet`:
+package, which is described in Section 6 in the paper. Without Devenv, install
+these packages in an R session, in addition to the dependencies in [R
+Example](#r-example):
 
 ```r
 install.packages(c("caret", "pROC", "glmnet"))
 ```
 
-Then, you can run the real data analysis script with:
+Run the analysis from your terminal:
 
-```r
+```bash
 Rscript code/real-data.R
 ```
 
@@ -381,18 +385,6 @@ the Julia environment.
   | Python `sortedl1` |  1.11.3 |
   | Julia `SLOPE.jl`  |   1.3.1 |
   | C++ `libslope`    |   6.5.4 |
-
-Install Devenv and enter the shell with:
-
-```bash
-devenv shell
-```
-
-Run the environment and benchmark smoke tests with:
-
-```bash
-devenv test
-```
 
 The reusable benchmark repositories describe their dependencies without fixing a
 complete environment. The paper repository owns the reproducible workflow: its
