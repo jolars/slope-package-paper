@@ -39,7 +39,7 @@ where:
 - $\lambda$ is a non-increasing sequence of penalty weights
 - $|\beta(1)| \geq |\beta(2)| \geq \ldots \geq |\beta(p)|$ are the sorted absolute coefficients
 
-SLOPE generalizes both the lasso (constant $\lambda$) and OSCAR (linearly decreasing λ),
+SLOPE generalizes both the lasso (constant $\lambda$) and OSCAR (linearly decreasing $\lambda$),
 with the unique property of clustering coefficients by setting them to equal
 magnitudes.
 
@@ -130,10 +130,85 @@ git submodule update --init --recursive
 
 Run all commands below from the repository root.
 
-## Setup
+## Running Benchmarks
 
-Use [Devenv](https://devenv.sh/) for the package versions used in this
-repository. First, [install Nix and
+We provide two separate benchmarks for comparing SLOPE solvers, one for
+single-penalty problems and one for fitting the full SLOPE path. The benchmarks
+use [Benchopt](https://benchopt.github.io/), a benchmarking framework for
+optimization algorithms.
+
+Start with the Conda instructions below. To use the pinned package versions
+from this repository, use the [published container](#oci-container) or
+[Devenv](#using-devenv).
+
+### Using Conda
+
+Create a Conda environment and install Benchopt:
+
+```bash
+conda create -n benchopt -c conda-forge python=3.12
+conda activate benchopt
+pip install benchopt
+```
+
+Then install the benchmark dependencies and run the example configuration:
+
+```bash
+benchopt install ./benchmark_slope --config benchmark_slope/example_config.yml
+benchopt run ./benchmark_slope --config benchmark_slope/example_config.yml
+```
+
+For the path benchmark, replace `benchmark_slope` with `benchmark_slope_path` in
+both commands. For the full benchmarks, use `bench_config_single.yml` or
+`bench_config_path.yml` as the configuration in both commands, and add
+`--no-cache --timeout 30` to `benchopt run`. Full runs can take several hours.
+
+Results are written to `benchmark_slope/outputs/` and
+`benchmark_slope_path/outputs/`, respectively. See [Plots](#plots) for how to
+plot these results or regenerate figures from the results included here.
+
+This installation uses current Conda and PyPI packages. You can choose solvers
+and data sets on the command line or in your own YAML configuration files.
+See the [Benchopt documentation](https://benchopt.github.io/) for more details.
+
+### OCI Container
+
+Use the published container to run the benchmarks with Docker. Replace
+`v1.0.0` with the release tag you want:
+
+```bash
+docker run --name slope-benchmarks -it ghcr.io/jolars/slope-package-benchmarks:v1.0.0
+```
+
+Inside the container, run `benchmark-single` or `benchmark-path`. The image
+includes the pinned benchmark environment, source code, and configurations.
+It does not include the tools for compiling the paper or generating figures.
+
+Data and results remain in the named container after you exit. Copy them out
+with `docker cp` before removing the container. Each release includes a
+`container-image.txt` asset with the immutable image reference.
+
+<details>
+<summary>Building and publishing the container</summary>
+
+To build the image locally from the same pinned environment:
+
+```bash
+devenv container build shell
+devenv container run shell
+```
+
+Publishing a GitHub release tests the environment, builds the image, and
+publishes it to the GitHub Container Registry with release and source commit
+tags. A maintainer must make the package public in GitHub's package settings
+after the first publication.
+
+</details>
+
+### Using Devenv
+
+Devenv provides the pinned environment described in
+[Reproducible Environment](#reproducible-environment). First, [install Nix and
 Devenv](https://devenv.sh/getting-started/#installation), then check the
 environment and enter the shell:
 
@@ -143,40 +218,16 @@ devenv shell
 ```
 
 `devenv test` checks the package versions and runs small benchmark
-configurations. The shell provides the R and Python packages and the compiled
-C++ example. Julia dependencies and LaTeX tools are covered in the relevant
-sections below. See [Reproducible Environment](#reproducible-environment) for
-version details.
-
-You can now run the [benchmarks](#running-benchmarks) or the [paper examples and
-plots](#code-in-paper). Manual installation instructions are included below if
-you prefer to work without Devenv.
-
-## Running Benchmarks
-
-We provide two separate benchmarks for comparing SLOPE solvers, one for
-single-penalty problems and one for fitting the full SLOPE path. The benchmarks
-use [Benchopt](https://benchopt.github.io/), a benchmarking framework for
-optimization algorithms.
-
-### Using Devenv
-
-After [setup](#setup), run either or both benchmarks in the Devenv shell. The
-full benchmarks can take several hours:
+configurations. To run the full benchmarks in the shell:
 
 ```bash
 benchmark-single
 benchmark-path
 ```
 
-Results are written to `benchmark_slope/outputs/` and
-`benchmark_slope_path/outputs/`, respectively. See [Plots](#plots) for how to
-plot these results or regenerate figures from the results included here.
-
 These commands use `bench_config_single.yml` and `bench_config_path.yml`, pass a
 30-second timeout to Benchopt, disable Benchopt's result cache, and do not
-invoke `benchopt install`. Benchopt checks the timeout between evaluations, so
-an in-flight solver call can finish after the deadline. Both configurations use
+invoke `benchopt install`. Both configurations use
 a solver-independent relative-duality-gap target of `1e-7`, after which Benchopt
 stops sampling the corresponding convergence curve. The benchmark plotting
 scripts display only evaluations taking no more than 30 seconds. Thread-count
@@ -192,59 +243,6 @@ benchmark-environment > benchmark-environment.txt
 benchmark-data-checksums > benchmark-data.sha256
 ```
 
-### OCI Container
-
-Devenv can build an OCI image from the same pinned benchmark closure used by the
-native shell:
-
-```bash
-devenv container build shell
-devenv container run shell
-```
-
-The image is named `slope-package-benchmarks` and contains the pinned benchmark
-environment, both benchmark source trees, and the benchmark configurations. It
-omits paper-authoring tools that the benchmark does not use. Run
-`benchmark-single` or `benchmark-path` after entering it. Data and result
-directories should be mounted or copied out when the image is used for an
-archived benchmark run.
-
-Publishing a GitHub release builds and tests this image, then publishes it to
-the GitHub Container Registry under both the release tag and a source commit
-tag. For example:
-
-```bash
-docker pull ghcr.io/jolars/slope-package-benchmarks:v1.0.0
-docker run --rm -it ghcr.io/jolars/slope-package-benchmarks:v1.0.0
-```
-
-Each release includes a `container-image.txt` asset containing the registry
-digest and immutable image reference. The first published package is private by
-default; a maintainer must change its visibility to public once in the GitHub
-package settings.
-
-### Using Conda Instead
-
-To run a benchmark without Devenv, create a Conda environment and install the
-dependencies with Benchopt:
-
-```bash
-conda create -n benchopt -c conda-forge python=3.12
-conda activate benchopt
-pip install benchopt
-
-benchopt install ./benchmark_slope --config benchmark_slope/example_config.yml
-benchopt run ./benchmark_slope --config benchmark_slope/example_config.yml
-```
-
-This resolves current Conda and PyPI packages and is therefore a portability
-path, not the environment used for authoritative results in this repository.
-
-For the path benchmark, replace `benchmark_slope` with `benchmark_slope_path` in
-both commands. You can choose solvers and data sets on the command line or in
-your own YAML configuration files. See the [Benchopt
-documentation](https://benchopt.github.io/) for more details.
-
 ## Compiling the Paper
 
 To compile the LaTeX source of the paper, ensure you have a LaTeX distribution
@@ -258,8 +256,9 @@ latexmk -pdf -interaction=nonstopmode main.tex
 
 The scripts in `code/` are lightweight examples for generating figures and
 demonstrating package usage. They are not intended to be strict, byte-for-byte
-reproducibility pipelines. For the package versions used by this repository, use
-the [Devenv setup](#setup).
+reproducibility pipelines. Follow the installation instructions for each
+language below. Package versions are listed in
+[Reproducible Environment](#reproducible-environment).
 
 In the Devenv shell, skip the R and Python package installation commands below.
 Output figures are written to `images/` (the directory is created automatically
@@ -267,7 +266,7 @@ if missing).
 
 ### R Example
 
-Without Devenv, install the R dependencies in an R session:
+Install the R dependencies in an R session:
 
 ```r
 install.packages(c("SLOPE", "knitr", "tinytex", "here", "lars"))
@@ -285,7 +284,7 @@ Rscript code/example.R
 
 ### Python Example
 
-Without Devenv, install the Python dependencies:
+Install the Python dependencies:
 
 ```bash
 pip install sortedl1 matplotlib scikit-learn
@@ -314,14 +313,6 @@ julia --project=. code/example.jl
 
 ### C++ Example
 
-In the Devenv shell, the example is already built. Run it with:
-
-```bash
-slope-example
-```
-
-Without Devenv, follow the build instructions below.
-
 The C++ example in [`code/example.cpp`](./code/example.cpp) requires
 [libslope](https://github.com/jolars/libslope) (version 6.5.4 is used for the
 paper), Eigen 3.4 or later, and CMake 3.15 or later. If libslope is not already
@@ -343,6 +334,8 @@ cmake --build build
 ./build/slope-example
 ```
 
+If you use Devenv, the example is already built; run `slope-example` directly.
+
 ### Plots
 
 The benchmark plotting scripts in `code/plot_benchmark_*.py` use the results in
@@ -351,7 +344,7 @@ figures without running the benchmarks. To plot a new run, change `results_dir`
 in the relevant script to a directory containing that run's Parquet files. The
 scripts combine all Parquet files in that directory.
 
-Without Devenv, install these packages in addition to the dependencies in
+Install these packages in addition to the dependencies in
 [Python Example](#python-example):
 
 ```bash
@@ -377,8 +370,8 @@ python code/plot_thresholding.py
 ## Real Data Analysis Example
 
 In `code/real-data.R`, we provide an extended example using the R `SLOPE`
-package, which is described in Section 6 in the paper. Without Devenv, install
-these packages in an R session, in addition to the dependencies in [R
+package, which is described in Section 6 in the paper. Install these packages
+in an R session, in addition to the dependencies in [R
 Example](#r-example):
 
 ```r
