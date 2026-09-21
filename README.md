@@ -188,8 +188,7 @@ Data and results remain in the named container after you exit. Copy them out
 with `docker cp` before removing the container. Each release includes a
 `container-image.txt` asset with the immutable image reference.
 
-<details>
-<summary>Building and publishing the container</summary>
+#### Building the container locally
 
 To build the image locally from the same pinned environment:
 
@@ -197,13 +196,6 @@ To build the image locally from the same pinned environment:
 devenv container build shell
 devenv container run shell
 ```
-
-Publishing a GitHub release tests the environment, builds the image, and
-publishes it to the GitHub Container Registry with release and source commit
-tags. A maintainer must make the package public in GitHub's package settings
-after the first publication.
-
-</details>
 
 ### Using Devenv
 
