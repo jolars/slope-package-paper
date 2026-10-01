@@ -29,19 +29,22 @@ coefficient clustering simultaneously.
 SLOPE solves the following optimization problem:
 
 $$
-\text{minimize}_{\beta_0, \beta} \quad F(\beta_0, \beta) + \alpha J(\beta; \lambda)
+  \text{minimize}_{\beta_0, \beta} \quad F(\beta_0, \beta)
+  + \alpha J(\beta; \lambda)
 $$
 
 where:
 
 - $F$ is a smooth convex loss function (e.g., from GLMs)
-- $J(\beta; \lambda)$ is the sorted L1 norm: $J(\beta; \lambda) = \sum_j \lambda_j |\beta(j)|$
+- $J(\beta; \lambda)$ is the sorted L1 norm:
+  $J(\beta; \lambda) = \sum_j \lambda_j |\beta(j)|$
 - $\lambda$ is a non-increasing sequence of penalty weights
-- $|\beta(1)| \geq |\beta(2)| \geq \ldots \geq |\beta(p)|$ are the sorted absolute coefficients
+- $|\beta(1)| \geq |\beta(2)| \geq \ldots \geq |\beta(p)|$ are the sorted
+  absolute coefficients
 
-SLOPE generalizes both the lasso (constant $\lambda$) and OSCAR (linearly decreasing $\lambda$),
-with the unique property of clustering coefficients by setting them to equal
-magnitudes.
+SLOPE generalizes both the lasso (constant $\lambda$) and OSCAR (linearly
+decreasing $\lambda$), with the unique property of clustering coefficients by
+setting them to equal magnitudes.
 
 ## Repository Structure
 
@@ -137,8 +140,9 @@ single-penalty problems and one for fitting the full SLOPE path. The benchmarks
 use [Benchopt](https://benchopt.github.io/), a benchmarking framework for
 optimization algorithms.
 
-Start with the Conda instructions below. To use the pinned package versions
-from this repository, use the [published container](#oci-container) or
+The simplest approach is to use the Conda approach described below. But if you
+want to use the pinned package versions from this repository, for better
+reproducibility, use the [published container](#oci-container) or
 [Devenv](#using-devenv).
 
 ### Using Conda
@@ -168,21 +172,21 @@ Results are written to `benchmark_slope/outputs/` and
 plot these results or regenerate figures from the results included here.
 
 This installation uses current Conda and PyPI packages. You can choose solvers
-and data sets on the command line or in your own YAML configuration files.
-See the [Benchopt documentation](https://benchopt.github.io/) for more details.
+and data sets on the command line or in your own YAML configuration files. See
+the [Benchopt documentation](https://benchopt.github.io/) for more details.
 
 ### OCI Container
 
-Use the published container to run the benchmarks with Docker. Replace
-`v1.0.0` with the release tag you want:
+Use the published container to run the benchmarks with Docker. Replace `v1.0.0`
+with the release tag you want:
 
 ```bash
 docker run --name slope-benchmarks -it ghcr.io/jolars/slope-package-benchmarks:v1.0.0
 ```
 
 Inside the container, run `benchmark-single` or `benchmark-path`. The image
-includes the pinned benchmark environment, source code, and configurations.
-It does not include the tools for compiling the paper or generating figures.
+includes the pinned benchmark environment, source code, and configurations. It
+does not include the tools for compiling the paper or generating figures.
 
 Data and results remain in the named container after you exit. Copy them out
 with `docker cp` before removing the container. Each release includes a
@@ -199,8 +203,8 @@ devenv container run shell
 
 ### Using Devenv
 
-Devenv provides the pinned environment described in
-[Reproducible Environment](#reproducible-environment). First, [install Nix and
+Devenv provides the pinned environment described in [Reproducible
+Environment](#reproducible-environment). First, [install Nix and
 Devenv](https://devenv.sh/getting-started/#installation), then check the
 environment and enter the shell:
 
@@ -219,12 +223,11 @@ benchmark-path
 
 These commands use `bench_config_single.yml` and `bench_config_path.yml`, pass a
 30-second timeout to Benchopt, disable Benchopt's result cache, and do not
-invoke `benchopt install`. Both configurations use
-a solver-independent relative-duality-gap target of `1e-7`, after which Benchopt
-stops sampling the corresponding convergence curve. The benchmark plotting
-scripts display only evaluations taking no more than 30 seconds. Thread-count
-environment variables are left unset, so numerical libraries use their default
-threading behavior.
+invoke `benchopt install`. Both configurations use a solver-independent
+relative-duality-gap target of `1e-7`, after which Benchopt stops sampling the
+corresponding convergence curve. The benchmark plotting scripts display only
+evaluations taking no more than 30 seconds. Thread-count environment variables
+are left unset, so numerical libraries use their default threading behavior.
 
 Downloaded data is kept under `.benchmark-data/`; set `SLOPE_BENCHMARK_DATA_DIR`
 to use another location. Record the environment and data hashes after each
@@ -249,8 +252,8 @@ latexmk -pdf -interaction=nonstopmode main.tex
 The scripts in `code/` are lightweight examples for generating figures and
 demonstrating package usage. They are not intended to be strict, byte-for-byte
 reproducibility pipelines. Follow the installation instructions for each
-language below. Package versions are listed in
-[Reproducible Environment](#reproducible-environment).
+language below. Package versions are listed in [Reproducible
+Environment](#reproducible-environment).
 
 In the Devenv shell, skip the R and Python package installation commands below.
 Output figures are written to `images/` (the directory is created automatically
@@ -336,8 +339,8 @@ figures without running the benchmarks. To plot a new run, change `results_dir`
 in the relevant script to a directory containing that run's Parquet files. The
 scripts combine all Parquet files in that directory.
 
-Install these packages in addition to the dependencies in
-[Python Example](#python-example):
+Install these packages in addition to the dependencies in [Python
+Example](#python-example):
 
 ```bash
 pip install pandas numpy scipy pyarrow
@@ -362,9 +365,8 @@ python code/plot_thresholding.py
 ## Real Data Analysis Example
 
 In `code/real-data.R`, we provide an extended example using the R `SLOPE`
-package, which is described in Section 6 in the paper. Install these packages
-in an R session, in addition to the dependencies in [R
-Example](#r-example):
+package, which is described in Section 6 in the paper. Install these packages in
+an R session, in addition to the dependencies in [R Example](#r-example):
 
 ```r
 install.packages(c("caret", "pROC", "glmnet"))
