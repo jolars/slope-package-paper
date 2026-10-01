@@ -850,8 +850,11 @@ evaluations taking no more than 30 seconds.
 \begin{table}[tp]
   \centering
   \begin{tabular}{
-      l S[table-format=6.0] S[table-format=7.0]
-      S[table-format=1.5,round-mode=figures,round-precision=2] p{5cm}
+      l
+      S[table-format=6.0]
+      S[table-format=7.0]
+      S[table-format=1.5,round-mode=figures,round-precision=2]
+      p{5cm}
     }
     \toprule
     Dataset                     & {\(n\)} & {\(p\)} & {\(X\) density} & {References}                        \\
@@ -877,8 +880,12 @@ evaluations taking no more than 30 seconds.
 \begin{table}[tp]
   \centering
   \begin{tabular}{
-      l S[table-format=6.0] S[table-format=6.0] S[table-format=2.0]
-      S[table-format=1.3] S[table-format=0.1]
+      l
+      S[table-format=6.0]
+      S[table-format=6.0]
+      S[table-format=2.0]
+      S[table-format=1.3]
+      S[table-format=0.1]
     }
     \toprule
     {Scenario}       & {\(n\)} & {\(p\)} & {\(s\)} & {\(X\) density} & {\(\rho\)} \\
@@ -1040,8 +1047,8 @@ In this example, SLOPE achieved an AUC of 0.913 on the test set, while the lasso
 obtained 0.929. Although the lasso performed slightly better in terms of AUC,
 the fitted SLOPE model exhibits the structure induced by the sorted $\ell_1$
 penalty: it selected 11 metabolites and organized them into five coefficient
-clusters. The lasso selected seven metabolites without grouping them. One of
-the unique features of the R implementation is the ability to visualize the
+clusters. The lasso selected seven metabolites without grouping them. One of the
+unique features of the R implementation is the ability to visualize the
 clustering of coefficients with the \texttt{plotClusters()}
 function\footnote{This functionality is specific to the R package.}. The plot
 highlights groups of variables with coefficients of the same magnitude (up to
@@ -1069,7 +1076,7 @@ selected by cross-validation, one cluster comprises \textit{lysine},
 \textit{alanine} and \textit{kynurenine}. The latter is a known glioma
 biomarker~\citep{du2020both}, and both \textit{phenylalanine} and
 \textit{lysine} have been associated with glioma-related metabolic
-changes~\citep{koslinski2023comparative,srivastava2025amino}. The largest
+changes~\citep{koslinski2023comparative, srivastava2025amino}. The largest
 cluster contains \textit{asparagine}, \textit{methionine}, PC ae C42:5, and SM
 C18:0. These groupings illustrate how SLOPE can select variables jointly and
 assign them coefficients with the same magnitude (up to sign).
@@ -1236,8 +1243,8 @@ The result is shown in \autoref{fig:cv-julia}.
   \caption{
     %
     Mean-squared error (MSE) from cross-validation over \(\alpha\), with
-    \(q = 0.1\), for SLOPE fit to the diabetes data set. The ribbon represents
-    a 95\% confidence interval.
+    \(q = 0.1\), for SLOPE fit to the diabetes data set. The ribbon represents a
+    95\% confidence interval.
   }
   \label{fig:cv-julia}
 \end{figure}
@@ -1487,7 +1494,7 @@ include
 \[
   \bm{0} \in \frac{X^\intercal r}{n}
              + \partial J_\lambda(\beta), \qquad \bm{1}^\intercal r
-         = 0.
+         =   0.
 \]
 Away from the optimum, however, centering \(r\) is safe only for the Gaussian
 model. For the other models, centering can move \(y_i + r_i\) outside
@@ -1517,8 +1524,8 @@ It remains to enforce the sorted \(\ell_1\) dual constraint. Set
 \]
 This scaling preserves every other constraint. In particular,
 \[
-  y_i + \delta_i = \left( 1 - \frac{1}{\rho} \right)y_i
-                   + \frac{1}{\rho}(y_i + \widetilde\delta_i)
+  y_i + \delta_i =   \left( 1 - \frac{1}{\rho} \right)y_i
+                     + \frac{1}{\rho}(y_i + \widetilde\delta_i)
                  \in \mathcal{M}
 \]
 by convexity of \(\mathcal{M}\). For binomial and Poisson models, our
