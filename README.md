@@ -29,8 +29,7 @@ coefficient clustering simultaneously.
 SLOPE solves the following optimization problem:
 
 $$
-  \text{minimize}_{\beta_0, \beta} \quad F(\beta_0, \beta)
-  + \alpha J(\beta; \lambda)
+\text{minimize}_{\beta_0, \beta} \quad F(\beta_0, \beta) + \alpha J(\beta; \lambda)
 $$
 
 where:
@@ -223,14 +222,10 @@ benchmark-path
 
 These commands use `bench_config_single.yml` and `bench_config_path.yml`, pass a
 30-second timeout to Benchopt, disable Benchopt's result cache, and do not
-invoke `benchopt install`. Both configurations use a solver-independent
-relative-duality-gap target of `1e-7`, after which Benchopt stops sampling the
-corresponding convergence curve. The benchmark plotting scripts display only
-evaluations taking no more than 30 seconds. Thread-count environment variables
-are left unset, so numerical libraries use their default threading behavior.
+invoke `benchopt install`. 
 
-Downloaded data is kept under `.benchmark-data/`; set `SLOPE_BENCHMARK_DATA_DIR`
-to use another location. Record the environment and data hashes after each
+Downloaded data is kept under `.benchmark-data/`. Set `SLOPE_BENCHMARK_DATA_DIR`
+to use another location. You can record the environment and data hashes after each
 benchmark run with:
 
 ```bash
@@ -251,13 +246,12 @@ latexmk -pdf -interaction=nonstopmode main.tex
 
 The scripts in `code/` are lightweight examples for generating figures and
 demonstrating package usage. They are not intended to be strict, byte-for-byte
-reproducibility pipelines. Follow the installation instructions for each
+reproducibility scripts. Follow the installation instructions for each
 language below. Package versions are listed in [Reproducible
 Environment](#reproducible-environment).
 
-In the Devenv shell, skip the R and Python package installation commands below.
-Output figures are written to `images/` (the directory is created automatically
-if missing).
+If you are using the Devenv shell, skip the R and Python package installation
+commands below. Output figures are written to `images/`.
 
 ### R Example
 
@@ -266,10 +260,6 @@ Install the R dependencies in an R session:
 ```r
 install.packages(c("SLOPE", "knitr", "tinytex", "here", "lars"))
 ```
-
-The script crops one of the figures with `knitr::plot_crop()`, which needs
-`pdfcrop` (part of TeX Live) and Ghostscript. If these are missing, the script
-still runs, but leaves the figure uncropped.
 
 Run the example from your terminal:
 
@@ -329,7 +319,8 @@ cmake --build build
 ./build/slope-example
 ```
 
-If you use Devenv, the example is already built; run `slope-example` directly.
+If you use Devenv, the example is already built and you can run `slope-example`
+directly.
 
 ### Plots
 
@@ -348,10 +339,7 @@ pip install pandas numpy scipy pyarrow
 
 The plots typeset their text with LaTeX (`text.usetex` in Matplotlib), so you
 also need a LaTeX installation that provides `mathtools`, `lmodern`, `bm`, and
-`siunitx`, together with `cm-super`, `dvipng`, and Ghostscript. On Debian and
-Ubuntu, for instance, these are available in the `texlive-latex-recommended`,
-`texlive-latex-extra`, `texlive-science`, `texlive-fonts-recommended`,
-`lmodern`, `cm-super`, `dvipng`, and `ghostscript` packages.
+`siunitx`, together with `cm-super`, `dvipng`, and Ghostscript.
 
 You can then run the plotting scripts with:
 
