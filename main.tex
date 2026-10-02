@@ -1,83 +1,83 @@
-\documentclass[article]{jss}
+\documentclass[preprint,12pt,authoryear]{elsarticle}
 
-\usepackage{orcidlink,thumbpdf,lmodern}
+\usepackage[T1]{fontenc}
+\usepackage{orcidlink,lmodern}
 \usepackage{amssymb,amsmath,amsthm,mathtools,bm}
 \usepackage{upquote}
+\usepackage{fancyvrb}
+\fvset{fontsize=\small}
 
 \usepackage{microtype}
 \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 
 \usepackage{booktabs}
+\usepackage{array}
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{siunitx}
 
 \usepackage[linesnumbered,vlined,ruled]{algorithm2e}
 
-\def\algorithmautorefname{Algorithm}%
-
 \usepackage{enumitem}
-
-% Workaround for Gin settings
-\makeatletter
-\let\natwidth\Gin@nat@width
-\makeatother
+\usepackage{xurl}
+\usepackage{hyperref}
+\hypersetup{hidelinks}
 
 \input{tex/macros}
 
-% setup url command for hyperref
 \newcommand{\myurl}[1]{\href{https://#1}{\nolinkurl{#1}}}
+\def\algorithmautorefname{Algorithm}
 
-\author{
-  Johan Larsson~\orcidlink{0000-0002-4029-5945}\\
-  University of Copenhagen \And Ma\l{}gorzata
-  Bogdan~\orcidlink{0000-0002-0657-4342}\\
-  University of Wroc\l{}aw \And Krystyna
-  Grzesiak~\orcidlink{0000-0003-2581-7722}\\
-  University of Wroc\l{}aw \AND Mathurin
-  Massias~\orcidlink{0000-0002-8950-0356}\\
-  Inria, ENS de Lyon; CNRS, Lyon \And Jonas
-  Wallin~\orcidlink{0000-0003-0381-6593}\\
-  Lund University
-}
-\Plainauthor{Johan Larsson, Malgorzata Bogdan, Krystyna Grzesiak, Mathurin
-  Massias, Jonas Wallin}
-
-\title{
-  Efficient Solvers for SLOPE in \proglang{R}, \proglang{Python},
-  \proglang{Julia}, and \proglang{C++}
-}
-\Plaintitle{Efficient Solvers for SLOPE in R, Python, Julia, and C++}
-\Shorttitle{Efficient Solvers for SLOPE}
-
-\Abstract{
-  \noindent We present a suite of packages in \proglang{R}, \proglang{Python},
-  \proglang{Julia}, and \proglang{C++} that efficiently solve the Sorted L-One
-  Penalized Estimation (SLOPE) problem. The packages feature a highly efficient
-  hybrid coordinate descent algorithm that fits generalized linear models (GLMs)
-  and supports a variety of loss functions, including Gaussian, binomial,
-  Poisson, and multinomial logistic regression. Our implementation is designed
-  to be fast, memory-efficient, and flexible. The packages support a variety of
-  data structures (dense, sparse, and out-of-memory matrices) and are designed
-  to efficiently fit the full SLOPE path as well as handle cross-validation of
-  SLOPE models, including the relaxed SLOPE. We present examples of how to use
-  the packages and benchmarks that demonstrate the performance of the packages
-  on both real and simulated data and show that our packages generally
-  outperform existing implementations of SLOPE in terms of speed.
-}
-
-\Keywords{SLOPE, OWL, regularization, generalized linear models, \proglang{R},
-  \proglang{Python}, \proglang{Julia}, \proglang{C++}}
-\Plainkeywords{SLOPE, OWL, regularization, generalized linear models, R, Python,
-  Julia, C++}
-
-\Address{
-  Johan Larsson\\ Department of Mathematical Sciences\\ Faculty of Science\\
-  University of Copenhagen\\ Universitetsparken 5\\ 2100 København Ø, Denmark\\
-  E-mail: \email{johan@jolars.co}\\ URL: \url{https://jolars.co/}
-}
+\journal{Computational Statistics \& Data Analysis}
 
 \begin{document}
+\begin{frontmatter}
+
+  \title{Efficient Solvers for SLOPE in R, Python, Julia, and C++}
+
+  \author[ku]{
+    Johan
+    Larsson\texorpdfstring{\corref{cor1}}{}~\orcidlink{0000-0002-4029-5945}
+  }
+  \ead{johan@jolars.co}
+  \author[uw]{Ma\l{}gorzata Bogdan~\orcidlink{0000-0002-0657-4342}}
+  \author[uw]{Krystyna Grzesiak~\orcidlink{0000-0003-2581-7722}}
+  \author[inria]{Mathurin Massias~\orcidlink{0000-0002-8950-0356}}
+  \author[lu]{Jonas Wallin~\orcidlink{0000-0003-0381-6593}}
+  \cortext[cor1]{Corresponding author.}
+
+  \affiliation[ku]{organization={Department of Mathematical Sciences, University
+      of Copenhagen},
+    addressline={Universitetsparken 5}, city={Copenhagen}, postcode={2100},
+    country={Denmark}}
+  \affiliation[uw]{organization={University of Wroc\l{}aw}, country={Poland}}
+  \affiliation[inria]{organization={Inria, ENS de Lyon, CNRS}, city={Lyon},
+    country={France}}
+  \affiliation[lu]{organization={Lund University}, country={Sweden}}
+
+  \begin{abstract}
+    We present a suite of packages in \textsf{R}, \textsf{Python},
+    \textsf{Julia}, and \textsf{C++} that efficiently solve the Sorted L-One
+    Penalized Estimation (SLOPE) problem. The packages feature a highly
+    efficient hybrid coordinate descent algorithm that fits generalized linear
+    models (GLMs) and supports a variety of loss functions, including Gaussian,
+    binomial, Poisson, and multinomial logistic regression. Our implementation
+    is designed to be fast, memory-efficient, and flexible. The packages support
+    a variety of data structures (dense, sparse, and out-of-memory matrices) and
+    are designed to efficiently fit the full SLOPE path as well as handle
+    cross-validation of SLOPE models, including the relaxed SLOPE. We present
+    examples of how to use the packages and benchmarks that demonstrate the
+    performance of the packages on both real and simulated data and show that
+    our packages generally outperform existing implementations of SLOPE in terms
+    of speed.
+  \end{abstract}
+
+  \begin{keyword}
+    SLOPE \sep OWL \sep regularization \sep generalized linear models \sep R
+    \sep Python \sep Julia \sep C++
+  \end{keyword}
+
+\end{frontmatter}
 
 \section{Introduction}
 
@@ -138,22 +138,23 @@ these aforementioned methods have generally found themselves outperformed by
 coordinate descent methods~\citep{friedman2007, friedman2010}, which optimize
 one coefficient at a time. Several efficient implementations of coordinate
 descent algorithms exists for the lasso, elastic net, and other \(\ell_1\)-based
-regularization methods. For \proglang{R}, there is for instance
-\pkg{glmnet}~\citep{friedman2010}, which fits generalized linear models,
+regularization methods. For \textsf{R}, there is for instance
+\textbf{glmnet}~\citep{friedman2010}, which fits generalized linear models,
 including Cox-proportional hazards models, with elastic net regularization.
-Other notable packages are \pkg{ncvreg}~\citep{breheny2011}, which in addition
-to the elastic net also supports non-convex penalties such as
+Other notable packages are \textbf{ncvreg}~\citep{breheny2011}, which in
+addition to the elastic net also supports non-convex penalties such as
 SCAD~\citep{fan2001} and MCP~\citep{zhang2010}. Another interesting package is
-\pkg{biglasso}~\citep{zeng2021}, which supports out-of-memory data to fit lasso
-models to large datasets. Finally, there is also \pkg{lars}~\citep{efron2004},
-which fits exact lasso solution paths using the least angle regression (LARS)
-algorithm. For \proglang{Python}, there is support for the elastic net in the
-widely used \pkg{scikit-learn}~\citep{pedregosa2011} module, which beyond the
-coordinate descent algorithm also features LARS and alternative solvers for the
-lasso and elastic net. For \proglang{Julia}, there is generally less support for
-regularized regression. There exists a wrapper for \pkg{glmnet} in
-\pkg{GLMNet.jl}~\citep{kornblith2024a} and a native \proglang{Julia} package in
-\pkg{Lasso.jl}~\citep{kornblith2024}.
+\textbf{biglasso}~\citep{zeng2021}, which supports out-of-memory data to fit
+lasso models to large datasets. Finally, there is also
+\textbf{lars}~\citep{efron2004}, which fits exact lasso solution paths using the
+least angle regression (LARS) algorithm. For \textsf{Python}, there is support
+for the elastic net in the widely used
+\textbf{scikit-learn}~\citep{pedregosa2011} module, which beyond the coordinate
+descent algorithm also features LARS and alternative solvers for the lasso and
+elastic net. For \textsf{Julia}, there is generally less support for regularized
+regression. There exists a wrapper for \textbf{glmnet} in
+\textbf{GLMNet.jl}~\citep{kornblith2024a} and a native \textsf{Julia} package in
+\textbf{Lasso.jl}~\citep{kornblith2024}.
 
 Unfortunately, coordinate descent requires that the objective is separable in
 \((\beta_0, \beta)\), which is not the case in SLOPE due to the permutations
@@ -166,16 +167,15 @@ corresponding to the current cluster structure, to achieve robust and fast
 convergence.
 
 In this paper we make this algorithm available to a wide audience by presenting
-a collection of packages in \proglang{R}~\citep{rcoreteam2025},
-\proglang{Python}~\citep{pythonsoftwarefoundation2025},
-\proglang{Julia}~\citep{bezanson2017}, and \proglang{C++}. For \proglang{Julia}
-and \proglang{Python}, these are, to the best of our knowledge, the first and
-only available implementations of SLOPE\@. For \proglang{R}, our package was the
-first implementation of SLOPE, although there is now also support for SLOPE
-through the \pkg{sgs}~\citep{feser2023} and \pkg{grpSLOPE}~\citep{brzyski2018}
-packages. Additionally, an implementation for \proglang{MATLAB} is also
-available from \citet{candes2013} and is also included in
-TFOCS~\citep{becker2011}.
+a collection of packages in \textsf{R}~\citep{rcoreteam2025},
+\textsf{Python}~\citep{pythonsoftwarefoundation2025},
+\textsf{Julia}~\citep{bezanson2017}, and \textsf{C++}. For \textsf{Julia} and
+\textsf{Python}, these are, to the best of our knowledge, the first and only
+available implementations of SLOPE\@. For \textsf{R}, our package was the first
+implementation of SLOPE, although there is now also support for SLOPE through
+the \textbf{sgs}~\citep{feser2023} and \textbf{grpSLOPE}~\citep{brzyski2018}
+packages. Additionally, an implementation for \textsf{MATLAB} is also available
+from \citet{candes2013} and is also included in TFOCS~\citep{becker2011}.
 
 \subsection{Outline of the paper}
 
@@ -210,8 +210,9 @@ Our packages are designed to solve SLOPE for generalized linear models (GLMs),
 in which the response \(y_i\) is modelled as a random variable from an
 exponential family, and is assumed to depend conditionally on the linear
 predictor \(\eta_i = x_i^\intercal \beta + \beta_0\) via
-\(\E(y_i \mid \eta_i) = \ilink(\eta_i)\), where \(\ilink\) is the inverse link
-function. This gives rise to the following form of the loss function:
+\(\mathbb{E}(y_i \mid \eta_i) = \ilink(\eta_i)\), where \(\ilink\) is the
+inverse link function. This gives rise to the following form of the loss
+function:
 \[
   F( \beta_0, \beta ) = \frac{1}{n} \sum_{i=1}^n f( \eta_i, y_i),
 \]
@@ -239,17 +240,26 @@ by the SLOPE packages in \autoref{tab:glm}.
 
 \begin{table}[t!]
   \centering
-  \begin{tabular}{lccc}
+  \small
+  \begin{tabular}{@{}ll l@{}}
     \toprule
-    Model       &                                    \(f(\eta, y)\)                                     &                     \(\link(\mu)\)                      &                                 \(\ilink(\eta)\)                                  \\
+    Model       & Quantity     & Expression                                                                            \\
     \midrule
-    Gaussian    &                              \(\frac{1}{2}(y - \eta)^2\)                              &                         \(\mu\)                         &                                     \(\eta\)                                      \\
+    Gaussian    & Loss         & \(\frac{1}{2}(y - \eta)^2\)                                                           \\
+                & Link         & \(\mu\)                                                                               \\
+                & Inverse link & \(\eta\)                                                                              \\
     \addlinespace
-    Binomial    &                             \(\log(1 + e^\eta) - \eta y\)                             &       \(\log \left( \frac{\mu}{1 - \mu} \right)\)       &                           \(\frac{e^\eta}{1 + e^\eta}\)                           \\
+    Binomial    & Loss         & \(\log(1 + e^\eta) - \eta y\)                                                         \\
+                & Link         & \(\log \left( \frac{\mu}{1 - \mu} \right)\)                                           \\
+                & Inverse link & \(\frac{e^\eta}{1 + e^\eta}\)                                                         \\
     \addlinespace
-    Poisson     &                                  \(e^\eta - \eta y\)                                  &                      \(\log(\mu)\)                      &                                    \(e^\eta\)                                     \\
+    Poisson     & Loss         & \(e^\eta - \eta y\)                                                                   \\
+                & Link         & \(\log(\mu)\)                                                                         \\
+                & Inverse link & \(e^\eta\)                                                                            \\
     \addlinespace
-    Multinomial & \(\log \left( 1 + \sum_{j=1}^{m-1} e^{\eta_j} \right) - \sum_{k=1}^{m-1} y_k \eta_k\) & \(\left( \log \frac{\mu_k}{\mu_m} \right)_{k=1}^{m-1}\) & \(\left( \frac{e^{\eta_k}}{1 + \sum_{j=1}^{m-1} e^{\eta_j}} \right)_{k=1}^{m-1}\) \\
+    Multinomial & Loss         & \(\log \left( 1 + \sum_{j=1}^{m-1} e^{\eta_j} \right) - \sum_{k=1}^{m-1} y_k \eta_k\) \\
+                & Link         & \(\left( \log \frac{\mu_k}{\mu_m} \right)_{k=1}^{m-1}\)                               \\
+                & Inverse link & \(\left( \frac{e^{\eta_k}}{1 + \sum_{j=1}^{m-1} e^{\eta_j}} \right)_{k=1}^{m-1}\)     \\
     \bottomrule
   \end{tabular}
   \caption{
@@ -283,7 +293,7 @@ arbitrarily shifted, since this could affect the entire clustering structure.
 
 \subsection{Hybrid algorithm}
 
-The primary algorithm of the \pkg{SLOPE} packages is the hybrid coordinate
+The primary algorithm of the \textbf{SLOPE} packages is the hybrid coordinate
 descent algorithm by \citet{larsson2023}. Since it is described in detail there,
 we will only summarize its key points here and highlight some of the
 improvements that we have made to the original algorithm. The basic idea is to
@@ -373,7 +383,7 @@ omitted some details of the algorithm here.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\natwidth]{images/slope-thresholding.pdf}
+  \includegraphics{images/slope-thresholding.pdf}
   \caption{
     An illustration of the SLOPE thresholding operator for
     \(\beta = [0.5, - 0.5, 0.3, 0.7]^\intercal\), and thus
@@ -473,27 +483,27 @@ thresholding operator, and parallelization strategies.
 % \label{sec:software}
 
 We have implemented a collection of packages for solving SLOPE, currently with
-support for \proglang{R}, \proglang{Python}, and \proglang{Julia}. The backbone
-of all of these packages is based on a \proglang{C++} library that implements
-all of the numerical algorithms for SLOPE, including preprocessing,
-cross-validation, and path fitting. The packages for the high-level languages
-all serve as thin wrappers to the \proglang{C++} library, with some additional
-functionality for handling data and plotting the results. This means that new
-features and bug fixes propagate quickly and easily to all these wrappers and
-enable users to promptly take advantage of the latest developments. The entire
-suite of packages is open source and available in version-controlled online
+support for \textsf{R}, \textsf{Python}, and \textsf{Julia}. The backbone of all
+of these packages is based on a \textsf{C++} library that implements all of the
+numerical algorithms for SLOPE, including preprocessing, cross-validation, and
+path fitting. The packages for the high-level languages all serve as thin
+wrappers to the \textsf{C++} library, with some additional functionality for
+handling data and plotting the results. This means that new features and bug
+fixes propagate quickly and easily to all these wrappers and enable users to
+promptly take advantage of the latest developments. The entire suite of packages
+is open source and available in version-controlled online
 repositories~(\autoref{tab:slope-packages}).
 
 \begin{table}[tp]
   \centering
   \begin{tabular}{llll}
     \toprule
-    Language          & Package        & Repository                         & Documentation                     \\
+    Language        & Package           & Repository                                        & Documentation                                  \\
     \midrule
-    \proglang{R}      & \pkg{SLOPE}    & \myurl{github.com/jolars/SLOPE}    & \myurl{jolars.github.io/SLOPE}    \\
-    \proglang{Python} & \pkg{sortedl1} & \myurl{github.com/jolars/sortedl1} & \myurl{jolars.github.io/sortedl1} \\
-    \proglang{Julia}  & \pkg{SLOPE.jl} & \myurl{github.com/jolars/SLOPE.jl} & \myurl{jolars.github.io/SLOPE.jl} \\
-    \proglang{C++}    & \pkg{slope}    & \myurl{github.com/jolars/libslope} & \myurl{jolars.github.io/libslope} \\
+    \textsf{R}      & \textbf{SLOPE}    & \href{https://github.com/jolars/SLOPE}{GitHub}    & \href{https://jolars.github.io/SLOPE}{Docs}    \\
+    \textsf{Python} & \textbf{sortedl1} & \href{https://github.com/jolars/sortedl1}{GitHub} & \href{https://jolars.github.io/sortedl1}{Docs} \\
+    \textsf{Julia}  & \textbf{SLOPE.jl} & \href{https://github.com/jolars/SLOPE.jl}{GitHub} & \href{https://jolars.github.io/SLOPE.jl}{Docs} \\
+    \textsf{C++}    & \textbf{slope}    & \href{https://github.com/jolars/libslope}{GitHub} & \href{https://jolars.github.io/libslope}{Docs} \\
     \bottomrule
   \end{tabular}
   \caption{
@@ -504,10 +514,10 @@ repositories~(\autoref{tab:slope-packages}).
 \end{table}
 
 This is made possible via several pieces of software that enable us to link the
-API from our \proglang{C++} library to the high-level languages. This includes
-\pkg{Rcpp}~\citep{eddelbuettel2011} and \pkg{RcppEigen}~\citep{bates2013} for
-\proglang{R}, \pkg{pybind11}~\citep{jakob2025}, and
-\pkg{CxxWrap}~\citep{janssens2020} for \proglang{Julia}.
+API from our \textsf{C++} library to the high-level languages. This includes
+\textbf{Rcpp}~\citep{eddelbuettel2011} and \textbf{RcppEigen}~\citep{bates2013}
+for \textsf{R}, \textbf{pybind11}~\citep{jakob2025}, and
+\textbf{CxxWrap}~\citep{janssens2020} for \textsf{Julia}.
 
 \subsection{Core algorithmic components}
 
@@ -517,15 +527,16 @@ updates as well as updating the clusters after each update. In our
 implementation, we represent the clusters as a collection of three vectors:
 
 \begin{description}
-  \item[\code{c}] The coefficients of the clusters
-  \item[\code{c\_idx}] Pointers to the coefficients in the cluster
-  \item[\code{c\_ptr}] Values of the cluster pointers
+  \item[\texttt{c}] The coefficients of the clusters
+  \item[\texttt{c\_idx}] Pointers to the coefficients in the cluster
+  \item[\texttt{c\_ptr}] Values of the cluster pointers
 \end{description}
 
 In this representation, the indices for the \(k\)th cluster are given by
-\code{
-c_idx[c_ptr[k] : c_ptr[k+1]]}
-and the coefficient is simply \code{c[k]}. This structure is the same basic
+\begin{Verbatim}
+c_idx[c_ptr[k] : c_ptr[k+1]]
+\end{Verbatim}
+and the coefficient is simply \texttt{c[k]}. This structure is the same basic
 setup as in \citet{larsson2023}. Unlike their implementation, however, we have
 made improvements to the handling of updating the clusters (merging, reordering,
 removal), which can now be performed with negligible overhead and with minimal
@@ -547,13 +558,13 @@ use this to retrieve the partial sums as needed.
 
 \subsection{Data handling and optimization}
 
-Our package is based on the \pkg{Eigen} \proglang{C++} library and provides
+Our package is based on the \textbf{Eigen} \textsf{C++} library and provides
 support for both dense and sparse design matrices. The latter can be constructed
-through the \pkg{Matrix}~(\proglang{R}), \pkg{scipy}~(\proglang{Python}), and
-\pkg{SparseArrays}~(\proglang{Julia}) packages in and are passed to the
-\proglang{C++} API without copying and with negligible overhead. Coefficients
-are returned in a sparse format, which allows for efficient storage and
-retrieval of the coefficients.
+through the \textbf{Matrix}~(\textsf{R}), \textbf{scipy}~(\textsf{Python}), and
+\textbf{SparseArrays}~(\textsf{Julia}) packages in and are passed to the
+\textsf{C++} API without copying and with negligible overhead. Coefficients are
+returned in a sparse format, which allows for efficient storage and retrieval of
+the coefficients.
 
 For dense matrices, the packages implement memory-efficient views of the input
 matrices to avoid copying the data. This means, for instance, that no copies
@@ -568,10 +579,11 @@ The SLOPE packages also support out-of-memory storage for the design matrix,
 which means that users can fit SLOPE models on data sets that are larger than
 the available memory. Storage in RAM is therefore limited to the order of
 \(O(n) + O(p)\), which means that the packages can be used on huge data sets.
-This is supported via the generic \code{Eigen::Map} class, which allows
-arbitrary data to be mapped into \pkg{Eigen} data structures. At the time of
-writing, this is only supported for \proglang{R}, which is possible via the
-\pkg{bigmemory} package~\citep{kane2013}, and currently only for dense designs.
+This is supported via the generic \texttt{Eigen::Map} class, which allows
+arbitrary data to be mapped into \textbf{Eigen} data structures. At the time of
+writing, this is only supported for \textsf{R}, which is possible via the
+\textbf{bigmemory} package~\citep{kane2013}, and currently only for dense
+designs.
 
 As shown by \citet{larsson2025}, predictor normalization (centering and scaling
 the design matrix) may have large consequences for the solutions. Our packages
@@ -583,9 +595,9 @@ Normalization is performed as predictors of the design matrix are accessed
 during optimization, which allows us to support centering even of sparse design
 matrices. This also allows us to completely avoid copying the design matrix.
 
-The software is parallelized using \pkg{OpenMP}, which is supported on all major
-platforms. Our functions employ several heuristics based on problem size to
-determine whether to spawn multiple threads, except for the case of
+The software is parallelized using \textbf{OpenMP}, which is supported on all
+major platforms. Our functions employ several heuristics based on problem size
+to determine whether to spawn multiple threads, except for the case of
 cross-validation, which is always parallelized.
 
 \section{Examples}
@@ -595,58 +607,58 @@ The packages are available through the respective package managers for each
 language and can be installed using the following commands:
 %
 \begin{description}[labelwidth=8ex]
-  \item[\proglang{R}] \code{R> install.packages("SLOPE")}
-  \item[\proglang{Python}] \code{$ pip install sortedl1}
-  \item[\proglang{Julia}] \code{julia> using Pkg; Pkg.add("SLOPE")}
+  \item[\textsf{R}] \texttt{R> install.packages("SLOPE")}
+  \item[\textsf{Python}] \texttt{\$ pip install sortedl1}
+  \item[\textsf{Julia}] \texttt{julia> using Pkg; Pkg.add("SLOPE")}
 \end{description}
 
-Installing the \proglang{C++} library is slightly more involved, and requires
-\pkg{CMake}~\citep{kitware2025} together with a working \proglang{C++}
-toolchain, including the \pkg{Eigen} library~\citep{guennebaud2010a} and
-\pkg{OpenMP}~\citep{dagum1998} (optionally, to enable parallelization).
+Installing the \textsf{C++} library is slightly more involved, and requires
+\textbf{CMake} \citep{kitware2025} together with a working \textsf{C++}
+toolchain, including the \textbf{Eigen} library~\citep{guennebaud2010a} and
+\textbf{OpenMP}~\citep{dagum1998} (optionally, to enable parallelization).
 
-Assuming we have loaded a data set consisting of a design matrix \code{x} and
-response vector \code{y}, we can fit the full regularization path for the SLOPE
-model using the following commands in the different languages:
+Assuming we have loaded a data set consisting of a design matrix \texttt{x} and
+response vector \texttt{y}, we can fit the full regularization path for the
+SLOPE model using the following commands in the different languages:
 
-\begin{minipage}[t]{0.24\textwidth}%
-  \textbf{\proglang{R}}
-  \begin{Code}
+\noindent\begin{minipage}[t]{0.24\textwidth}%
+  \textbf{\textsf{R}}
+  \begin{Verbatim}
 R> library(SLOPE)
 R> fit <- SLOPE(x, y)
-  \end{Code}
+  \end{Verbatim}
 \end{minipage}
 \hfill
 \begin{minipage}[t]{0.33\textwidth}%
-  \textbf{\proglang{Python}}
-  \begin{Code}
+  \textbf{\textsf{Python}}
+  \begin{Verbatim}
 >>> import sortedl1
 >>> model = sortedl1.Slope()
 >>> fit = model.path(x, y)
-  \end{Code}
+  \end{Verbatim}
 \end{minipage}
 \hfill
 \begin{minipage}[t]{0.32\textwidth}%
-  \textbf{\proglang{Julia}}
-  \begin{Code}
+  \textbf{\textsf{Julia}}
+  \begin{Verbatim}
 julia> using SLOPE
 julia> fit = slope(x, y)
-  \end{Code}
+  \end{Verbatim}
 \end{minipage}
 
 \medskip
 
 You can also use the C++ library directly, in which case the above would
 translate into the following:
-\begin{Code}
+\begin{Verbatim}
 #include <slope/slope.h>
 slope::Slope model;
 auto path_result = model.path(x, y);
-\end{Code}
+\end{Verbatim}
 
-In the sequel, we will focus our examples on the \proglang{R} package, but
-please see \autoref{sec:examples-julia-python} for equivalent examples in
-\proglang{Python}, \proglang{Julia}, and \proglang{C++}.
+In the sequel, we will focus our examples on the \textsf{R} package, but please
+see \autoref{sec:examples-julia-python} for equivalent examples in
+\textsf{Python}, \textsf{Julia}, and \textsf{C++}.
 
 \subsection{First steps}
 \label{sec:first-steps}
@@ -656,24 +668,24 @@ set~\citep{efron2004}, including plotting it.\footnote{Note that the actual code
 for the plotting examples here is slightly more complex to allow for better
 control over the aesthetics.}
 
-\begin{Code}
+\begin{Verbatim}
 R> library(SLOPE)
 R> data("diabetes", package = "lars")
 R> x <- scale(diabetes$x)
 R> y <- diabetes$y
 R> fit_slope <- SLOPE(x, y, q = 0.4)
 R> plot(fit_slope)
-\end{Code}
+\end{Verbatim}
 
-The \code{q} parameter is a parameter of the sequence of \(\lambda\) values,
-which by default~(\code{lambda = "bh"}) uses the Benjamini--Hochberg (BH)
+The \texttt{q} parameter is a parameter of the sequence of \(\lambda\) values,
+which by default~(\texttt{lambda = "bh"}) uses the Benjamini--Hochberg (BH)
 sequence~\citep{bogdan2015}. If the design matrix is orthogonal, then the
-\code{q} parameter sets a desired false discovery rate (FDR) in terms of the
+\texttt{q} parameter sets a desired false discovery rate (FDR) in terms of the
 identification of true signals (nonzero coefficients).
 
-Other types of sequences are also supported, including \code{lambda = "lasso"}
-for the lasso, \code{lambda = "oscar"} for the OSCAR
-sequence~\citep{bondell2008}, and \code{lambda = "gaussian"} for the
+Other types of sequences are also supported, including \texttt{lambda = "lasso"}
+for the lasso, \texttt{lambda = "oscar"} for the OSCAR
+sequence~\citep{bondell2008}, and \texttt{lambda = "gaussian"} for the
 Gaussian-type sequence~\citep{bogdan2015}, which is a modification of the BH
 sequence that has been empirically shown to provide similar FDR control in
 non-orthogonal, low-dimensional settings.
@@ -681,10 +693,10 @@ non-orthogonal, low-dimensional settings.
 To show how the choice of the \(\lambda\) sequence affects the results, we will
 refit the diabetes data using the lasso sequence.
 
-\begin{Code}
+\begin{Verbatim}
 R> fit_lasso <- SLOPE(x, y, lambda = "lasso")
 R> plot(fit_lasso)
-\end{Code}
+\end{Verbatim}
 
 The resulting paths are plotted in \autoref{fig:diabetes}. Observe that the
 paths are similar but that SLOPE has clustered some coefficients along parts of
@@ -698,7 +710,7 @@ clusters.
 
 \begin{figure}[tp]
   \centering
-  {\includegraphics[width=\natwidth]{images/diabetes-slope-lasso.pdf}}
+  {\includegraphics{images/diabetes-slope-lasso.pdf}}
   \caption{
     SLOPE and lasso paths on the diabetes data set. Note that the \(x\) axis is
     reversed. Numbers indicate the indices of the predictors.
@@ -726,15 +738,15 @@ end result is given by
                 + (1 - \gamma ) \hat{\beta}_\text{relaxed} .
 \]
 
-Our packages support regularization through the \code{gamma} argument. Here, we
-fit fully relaxed~(\(\gamma = 0\)) and semi-relaxed~(\(\gamma = 0.5\)) models,
-along with standard SLOPE~(\(\gamma = 1\)) for comparison.
+Our packages support regularization through the \texttt{gamma} argument. Here,
+we fit fully relaxed~(\(\gamma = 0\)) and semi-relaxed~(\(\gamma = 0.5\))
+models, along with standard SLOPE~(\(\gamma = 1\)) for comparison.
 
-\begin{Code}
+\begin{Verbatim}
 R> fit_relaxed <- SLOPE(x, y, q = 0.1, gamma = 0)
 R> fit_semirelaxed <- SLOPE(x, y, q = 0.1, gamma = 0.5)
 R> fit_standard <- SLOPE(x, y, q = 0.1, gamma = 1)
-\end{Code}
+\end{Verbatim}
 
 We plot the resulting paths in \autoref{fig:relaxed-slope}. Observe the
 jaggedness of the relaxed paths, which change dramatically as clusters form,
@@ -742,7 +754,7 @@ merge, and split.
 
 \begin{figure}[tp]
   \centering
-  \includegraphics[width=\natwidth]{images/slope-relaxed.pdf}
+  \includegraphics{images/slope-relaxed.pdf}
   \caption{
     %
     SLOPE with various levels of relaxation \(\gamma\), with \(\gamma = 0\)
@@ -761,33 +773,31 @@ demonstrate the CV functionality by cross-validating across two values of the
 \(q\) parameter and printing the results, which displays the optimal values for
 all the cross-validated parameters.
 
-\begin{CodeChunk}
-  \begin{CodeInput}
+\begin{Verbatim}
 R> set.seed(48)
 R> fit_cv <- cvSLOPE(x, y, q = c(0.1, 0.2))
 R> fit_cv
-\end{CodeInput}
-  \begin{CodeOutput}
+\end{Verbatim}
+\begin{Verbatim}
 Call:
 cvSLOPE(x = x, y = y, q = c(0.1, 0.2))
 
 Optimum values:
     q gamma     alpha measure     mean      se       lo       hi
 1 0.2     0 0.3379402     mse 3012.926 234.652 2482.106 3543.745
-\end{CodeOutput}
-\end{CodeChunk}
+\end{Verbatim}
 
 It is also easy to plot the cross-validation results~(\autoref{fig:cv}), which
 show the cross-validation error with 95\% confidence intervals and a dashed line
 indicating the optimal value of \(\alpha\) for the best value of \(q\).
 
-\begin{Code}
+\begin{Verbatim}
 R> plot(fit_cv)
-\end{Code}
+\end{Verbatim}
 
 \begin{figure}[tp]
   \centering
-  \includegraphics[width=\natwidth]{images/slope-cv.pdf}
+  \includegraphics{images/slope-cv.pdf}
   \caption{
     %
     Mean-squared error (MSE) from cross-validation of \(q\) and \(\alpha\) for
@@ -805,28 +815,28 @@ we examine the performance of SLOPE when fitting for a single value of
 \(\alpha\), while in \autoref{sec:path-benchmark}, we benchmark the performance
 of fitting the full regularization path.
 
-Our benchmarks are organized and run using \pkg{benchopt}~\citep{moreau2022a}.
-They are available as public git repositories at
-\myurl{github.com/benchopt/benchmark\_slope} and
+Our benchmarks are organized and run using
+\textbf{benchopt}~\citep{moreau2022a}. They are available as public git
+repositories at \myurl{github.com/benchopt/benchmark\_slope} and
 \myurl{github.com/jolars/benchmark\_slope\_path} for the single solution and
 path benchmarks, respectively. Both feature the Python version of our
-implementation, \pkg{sortedl1}\footnote{The \proglang{R} package \pkg{SLOPE} is
-also included, but we have omitted it from the benchmark here since it is
-essentially equivalent to the \proglang{Python} package \pkg{sortedl1}.}. The
+implementation, \textbf{sortedl1}\footnote{The \textsf{R} package \textbf{SLOPE}
+is also included, but we have omitted it from the benchmark here since it is
+essentially equivalent to the \textsf{Python} package \textbf{sortedl1}.}. The
 single solution benchmark includes four variations on proximal gradient descent
 (PGD), using Anderson acceleration~\citep{anderson1965, zhang2020},
 Barzilai--Borwein step sizes, safe screening rules, and the fast iterative
 shrinking and thresholding algorithm (FISTA)~\citep{beck2009}. The latter of
-these is also included through the \pkg{skglm} package~\citep{bertrand2022}. We
-also include the alternating direction method of multipliers
+these is also included through the \textbf{skglm} package~\citep{bertrand2022}.
+We also include the alternating direction method of multipliers
 (ADMM)~\citep{boyd2010}, a semi-smooth Newton-based method~\citep{luo2019}, and
-an approximate homotopy method, \pkg{SolutionPath}~\citep{dupuis2024}. See
+an approximate homotopy method, \textbf{SolutionPath}~\citep{dupuis2024}. See
 \autoref{sec:solver-details} for more details on the solvers and their
-implementations. The path benchmark compares \pkg{sortedl1} with a subset of
-these solvers, namely \pkg{FISTA}, \pkg{SolutionPath}, and \pkg{ADMM}. All of
-the benchmarks were run on a system with an AMD Ryzen 9 7900 CPU (12 cores and
-24 threads, with a maximum boost clock of 5.5 GHz), 64 GB of RAM, and NixOS
-26.11 (Linux).
+implementations. The path benchmark compares \textbf{sortedl1} with a subset of
+these solvers, namely \textbf{FISTA}, \textbf{SolutionPath}, and \textbf{ADMM}.
+All of the benchmarks were run on a system with an AMD Ryzen 9 7900 CPU (12
+cores and 24 threads, with a maximum boost clock of 5.5 GHz), 64 GB of RAM, and
+NixOS 26.11 (Linux).
 
 We have run the benchmarks for both simulated~(\autoref{tab:simulated-data}) as
 well as real data~(\autoref{tab:real-data}). For all real data, we standardize
@@ -849,12 +859,14 @@ evaluations taking no more than 30 seconds.
 
 \begin{table}[tp]
   \centering
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
   \begin{tabular}{
       l
       S[table-format=6.0]
       S[table-format=7.0]
       S[table-format=1.5,round-mode=figures,round-precision=2]
-      p{5cm}
+      l
     }
     \toprule
     Dataset                     & {\(n\)} & {\(p\)} & {\(X\) density} & {References}                        \\
@@ -920,7 +932,7 @@ all nine combinations of simulation setting and regularization level. The
 difference is especially pronounced for high levels of regularization, where our
 method is often many times faster than the next best method. Newt-ALM also
 reaches the threshold rapidly in the (\(\alpha_\text{max} / 50\), High Dim)
-setting, although \pkg{sortedl1} reaches it first. Our current implementation
+setting, although \textbf{sortedl1} reaches it first. Our current implementation
 shows improved performance compared to \citet{larsson2023}, which also featured
 the hybrid method. We believe this is likely due to the addition of screening
 rules as well as algorithmic improvements. Newt-ALM also performs better than in
@@ -928,7 +940,7 @@ rules as well as algorithmic improvements. Newt-ALM also performs better than in
 
 \begin{figure}[tp]
   \centering
-  \includegraphics[width=\natwidth]{images/benchmark_single_simulated.pdf}
+  \includegraphics{images/benchmark_single_simulated.pdf}
   \caption{
     %
     Performance of the solvers for the single solution benchmark for three
@@ -939,15 +951,15 @@ rules as well as algorithmic improvements. Newt-ALM also performs better than in
 \end{figure}
 
 For real data~\autoref{fig:real-data-single}, we see a mostly similar pattern.
-At a relative duality gap of \(10^{-7}\), \pkg{sortedl1} is the first solver to
-reach the threshold in 16 of the 18 combinations. ADMM is first for
+At a relative duality gap of \(10^{-7}\), \textbf{sortedl1} is the first solver
+to reach the threshold in 16 of the 18 combinations. ADMM is first for
 \dataset{YearPredictionMSD} at \(\alpha_\text{max}/10\) and
 \(\alpha_\text{max}/50\). The performance of the other algorithms is generally
 more sensitive to the dataset and regularization level.
 
 \begin{figure}[tp]
   \centering
-  \includegraphics[width=\natwidth]{images/benchmark_single_real.pdf}
+  \includegraphics{images/benchmark_single_real.pdf}
   \caption{
     %
     Performance of the solvers for the single solution benchmark for six
@@ -969,15 +981,16 @@ relative duality gap along the path.
 The results are presented in \autoref{fig:real-data-path}. Note that the
 interpretation of progress towards convergence does not hold quite the same way
 as for the single solution benchmarks since we fit a full path. Nevertheless,
-\pkg{sortedl1} is the only solver to reduce the maximum relative duality gap to
-\(10^{-7}\), reaching it in eight of the nine combinations of dataset and path
-length, and doing so by a large time margin. No solver reaches the threshold for
-\dataset{BRCA1} with 200 path points within the time limit; \pkg{sortedl1} comes
-closest, with a maximum relative duality gap of \(2.5 \times 10^{-7}\).
+\textbf{sortedl1} is the only solver to reduce the maximum relative duality gap
+to \(10^{-7}\), reaching it in eight of the nine combinations of dataset and
+path length, and doing so by a large time margin. No solver reaches the
+threshold for \dataset{BRCA1} with 200 path points within the time limit;
+\textbf{sortedl1} comes closest, with a maximum relative duality gap of
+\(2.5 \times 10^{-7}\).
 
 \begin{figure}[tp]
   \centering
-  \includegraphics[width=\natwidth]{images/benchmark_path_real.pdf}
+  \includegraphics{images/benchmark_path_real.pdf}
   \caption{
     %
     Benchmark for fitting the full regularization path on real data sets with
@@ -1008,40 +1021,40 @@ and 71 controls), each with 138 metabolite features.
 
 We first create the design matrix \texttt{x} and the response vector \texttt{y}:
 
-\begin{Code}
+\begin{Verbatim}
 R> x <- glioma$x
 R> y <- glioma$y
-\end{Code}
+\end{Verbatim}
 
 We then fit a SLOPE model with cross-validation to select the regularization
 parameter. The function \texttt{cvSLOPE()} performs $K$-fold cross-validation
 and optimizes over~$\alpha$:
 
-\begin{Code}
+\begin{Verbatim}
 R> slope_cv <- cvSLOPE(x, y, q = 0.1, family = "binomial", measure = "auc")
 R> alpha_cv <- slope_cv$optima$alpha
 R> slope_model <- SLOPE(x, y, q = 0.1, family = "binomial", alpha = alpha_cv)
-\end{Code}
+\end{Verbatim}
 
 Predicted probabilities for new data can be obtained with the \texttt{predict()}
 method:
 
-\begin{Code}
+\begin{Verbatim}
 R> pred_prob <- predict(slope_model, x, type = "response")
-\end{Code}
+\end{Verbatim}
 
 For illustration, we also split the data into training and test sets. This
 allows us to evaluate out-of-sample classification performance when
 distinguishing glioma patients from healthy controls:
 
-\begin{Code}
+\begin{Verbatim}
 R> set.seed(222)
 R> train_index <- caret::createDataPartition(y, p = 0.7, list = FALSE)
 R> x_train <- x[train_index, ]
 R> y_train <- y[train_index]
 R> x_test  <- x[-train_index, ]
 R> y_test  <- y[-train_index]
-\end{Code}
+\end{Verbatim}
 
 In this example, SLOPE achieved an AUC of 0.913 on the test set, while the lasso
 obtained 0.929. Although the lasso performed slightly better in terms of AUC,
@@ -1054,14 +1067,14 @@ function\footnote{This functionality is specific to the R package.}. The plot
 highlights groups of variables with coefficients of the same magnitude (up to
 sign):
 
-\begin{Code}
+\begin{Verbatim}
 R> fit_pat <- SLOPE(x, y, q = 0.1, pattern = TRUE, family = "binomial")
 R> plotClusters(fit_pat, include_zeroes = FALSE)
-\end{Code}
+\end{Verbatim}
 
 \begin{figure}[tp]
   \centering
-  \includegraphics[width=\textwidth]{images/glioma-clusters.pdf}
+  \includegraphics{images/glioma-clusters.pdf}
   \caption{
     Cluster structure of metabolites selected by SLOPE@\. Variables are grouped
     by effect size, with colors indicating distinct clusters.
@@ -1097,12 +1110,12 @@ however, SLOPE represents a more challenging optimization problem due to the
 penalty term's inseparability.
 
 Despite the complexity of the problem, we have here presented a collection of
-packages (in \proglang{R}, \proglang{Python}, \proglang{Julia}, and
-\proglang{C++}) that offer efficient and feature-rich implementations of
-SLOPE\@. We hope that this endeavor will make SLOPE accessible to a wider
-audience. Other implementations include \pkg{skglm} and the specialized
-approximate path method \pkg{SolutionPath}; our suite instead provides a common
-implementation and feature set across four programming languages.
+packages (in \textsf{R}, \textsf{Python}, \textsf{Julia}, and \textsf{C++}) that
+offer efficient and feature-rich implementations of SLOPE\@. We hope that this
+endeavor will make SLOPE accessible to a wider audience. Other implementations
+include \textbf{skglm} and the specialized approximate path method
+\textbf{SolutionPath}; our suite instead provides a common implementation and
+feature set across four programming languages.
 
 Our benchmarks show that the software generally performs strongly compared with
 the other algorithms and implementations considered here, both for fitting the
@@ -1118,25 +1131,25 @@ remaining path-fitting setting.
 
 Although our packages are full-fledged implementations of SLOPE, there are still
 some features that are missing and feature coverage is generally not on par with
-that of, for instance, \pkg{glmnet} for elastic net. For instance, we do not yet
-support observation weights or the full suite of loss functions from the family
-of generalized linear models. On the other hand, we \emph{do} support
+that of, for instance, \textbf{glmnet} for elastic net. For instance, we do not
+yet support observation weights or the full suite of loss functions from the
+family of generalized linear models. On the other hand, we \emph{do} support
 out-of-memory storage and much more granular normalization options, which are
-not supported in \pkg{glmnet}. We also do not yet support the group sorted
+not supported in \textbf{glmnet}. We also do not yet support the group sorted
 \(\ell_1\) norm, which would allow for an alternative penalization scheme for
 multivariate response problems. In addition, several possible improvements to
 the hybrid method could be considered, such as accelerated and parallelized
 coordinate steps. We leave these possibilities to future work but want to stress
 that our packages are modular and have been designed with extensibility in mind,
 which we hope will facilitate the addition of new features in the future.
-Because all of the packages rely on the same \proglang{C++} library,
-contributions will also propagate directly to the higher-level packages in
-\proglang{R}, \proglang{Julia}, and \proglang{Python}.
+Because all of the packages rely on the same \textsf{C++} library, contributions
+will also propagate directly to the higher-level packages in \textsf{R},
+\textsf{Julia}, and \textsf{Python}.
 
 We hope that our packages will be useful for researchers and practitioners alike
 and that the design of our software suite might inspire others to more closely
-couple the available features of \proglang{R}, \proglang{Python}, and
-\proglang{Julia}, and avoid redundant implementations of the same algorithms in
+couple the available features of \textsf{R}, \textsf{Python}, and
+\textsf{Julia}, and avoid redundant implementations of the same algorithms in
 each language.
 
 \section*{Acknowledgments}
@@ -1145,27 +1158,27 @@ This research was also supported in part by the French National Research
 Agency~(ANR) through the BenchArk project~(ANR-24-IAS2-0003) and by the National
 Science Centre Poland through the grant no. 2021/43/O/ST6/02805.
 
+\bibliographystyle{elsarticle-harv}
 \bibliography{main}
 
 \newpage
 
-\begin{appendix}
+\appendix
 
 \section{Examples in Julia, Python, and C++}%
 
 \label{sec:examples-julia-python}
 
-In this section, we provide \proglang{Python}, \proglang{Julia}, and
-\proglang{C++} equivalents of the \proglang{R} examples from
-\autoref{sec:first-steps}. As in the \proglang{R} case, some of the plotting
-code has been simplified for clarity. Please refer to the code repository for
-the full code.
+In this section, we provide \textsf{Python}, \textsf{Julia}, and \textsf{C++}
+equivalents of the \textsf{R} examples from \autoref{sec:first-steps}. As in the
+\textsf{R} case, some of the plotting code has been simplified for clarity.
+Please refer to the code repository for the full code.
 
 \subsection{Julia}
 
 We begin by loading the necessary packages.
 
-\begin{Code}
+\begin{Verbatim}
 julia> using SLOPE
 julia> using CSV
 julia> using ProjectRoot
@@ -1173,13 +1186,13 @@ julia> using DataFrames
 julia> using Statistics
 julia> using Random
 julia> using Plots
-  \end{Code}
+  \end{Verbatim}
 
 Next, we load the diabetes data set, which we have made available as a CSV file
 in the \texttt{data} directory of the repository. As before, we standardize the
 features to have mean zero and unit variance.
 
-\begin{Code}
+\begin{Verbatim}
 julia> df = CSV.read(file, DataFrame)
 julia> x = Matrix(df[:, 2:end])
 julia> y = df[:, 1]
@@ -1187,22 +1200,22 @@ julia> y = df[:, 1]
 julia> x_means = mean(x, dims = 1)
 julia> x_std = std(x, dims = 1)
 julia> x = (x .- x_means) ./ x_std
-\end{Code}
+\end{Verbatim}
 
-We then fit SLOPE and lasso models to the data. Note that the \code{lambda}
-argument is actually the symbol $\lambda$ in the \proglang{Julia} package, so
-this code will not work if you write \code{lambda = "lasso"}.
+We then fit SLOPE and lasso models to the data. Note that the \texttt{lambda}
+argument is actually the symbol $\lambda$ in the \textsf{Julia} package, so this
+code will not work if you write \texttt{lambda = "lasso"}.
 
-\begin{Code}
+\begin{Verbatim}
 julia> fit_lasso = slope(x, y, lambda = :lasso)
 julia> fit_slope = slope(x, y, lambda = :bh)
-  \end{Code}
+  \end{Verbatim}
 
-Just like the \proglang{R} package, the \proglang{Julia} package supports
-plotting the solution paths directly. Here, we create a combined plot showing
-both the lasso and SLOPE paths side by side~(\autoref{fig:diabetes-julia}).
+Just like the \textsf{R} package, the \textsf{Julia} package supports plotting
+the solution paths directly. Here, we create a combined plot showing both the
+lasso and SLOPE paths side by side~(\autoref{fig:diabetes-julia}).
 
-\begin{Code}
+\begin{Verbatim}
 julia> plot(
 julia>     plot(fit_lasso)
 julia>     plot(fit_slope)
@@ -1210,11 +1223,11 @@ julia>     layout = (1, 2),
 julia>     size = (400, 200),
 julia>     title = ["Lasso" "SLOPE"],
 julia> )
-  \end{Code}
+  \end{Verbatim}
 
 \begin{figure}[htpb]
   \centering
-  \includegraphics[width=\natwidth]{images/diabetes-slope-lasso-julia.pdf}
+  \includegraphics{images/diabetes-slope-lasso-julia.pdf}
   \caption{
     %
     SLOPE and lasso paths on the diabetes data set. Note that the \(x\) axis is
@@ -1223,23 +1236,23 @@ julia> )
   \label{fig:diabetes-julia}
 \end{figure}
 
-To perform cross-validation, we use the \code{slopecv} function, which also
-features a dedicated \code{plot} method\footnote{Note that our package only
-provides a recipe for the \pkg{Plots.jl} package, and does not depend on it
-directly. Users need to load the \pkg{Plots.jl} package (as we do here) to have
-access to these plotting methods.}.
+To perform cross-validation, we use the \texttt{slopecv} function, which also
+features a dedicated \texttt{plot} method\footnote{Note that our package only
+provides a recipe for the \textbf{Plots.jl} package, and does not depend on it
+directly. Users need to load the \textbf{Plots.jl} package (as we do here) to
+have access to these plotting methods.}.
 
-\begin{Code}
+\begin{Verbatim}
 julia> Random.seed!(48)
 julia> fit_cv = slopecv(x, y)
 julia> pcv = plot(fit_cv)
-  \end{Code}
+  \end{Verbatim}
 
 The result is shown in \autoref{fig:cv-julia}.
 
 \begin{figure}[htpb]
   \centering
-  \includegraphics[width=\natwidth]{images/slope-cv-julia.pdf}
+  \includegraphics{images/slope-cv-julia.pdf}
   \caption{
     %
     Mean-squared error (MSE) from cross-validation over \(\alpha\), with
@@ -1253,41 +1266,41 @@ The result is shown in \autoref{fig:cv-julia}.
 
 We begin by loading the necessary packages.
 
-\begin{Code}
+\begin{Verbatim}
 >>> from matplotlib import pyplot as plt
 >>> from sklearn.datasets import load_diabetes
 >>> from sklearn.preprocessing import StandardScaler
 >>> from sortedl1 import Slope
-  \end{Code}
+  \end{Verbatim}
 
-Next, we load the diabetes data set from \pkg{scikit-learn} and standardize the
-features to have mean zero and unit variance.
+Next, we load the diabetes data set from \textbf{scikit-learn} and standardize
+the features to have mean zero and unit variance.
 
-\begin{Code}
+\begin{Verbatim}
 >>> x, y = load_diabetes(return_X_y=True)
 >>> scaler = StandardScaler()
 >>> x = scaler.fit_transform(x)
-  \end{Code}
+  \end{Verbatim}
 
 We then create SLOPE models with lasso and BH penalty sequences.
 
-\begin{Code}
+\begin{Verbatim}
 >>> model_lasso = Slope(lambda_type="lasso")
 >>> model_slope = Slope(lambda_type="bh", q=0.4)
-  \end{Code}
+  \end{Verbatim}
 
-We fit the models to the data using the \code{path} method.
+We fit the models to the data using the \texttt{path} method.
 
-\begin{Code}
+\begin{Verbatim}
 >>> fit_lasso = model_lasso.path(x, y)
 >>> fit_slope = model_slope.path(x, y)
-  \end{Code}
+  \end{Verbatim}
 
-Just like the \proglang{R} and \proglang{Julia} packages, the \proglang{Python}
+Just like the \textsf{R} and \textsf{Julia} packages, the \textsf{Python}
 package supports plotting the solution paths. The result is shown in
 \autoref{fig:diabetes-python}.
 
-\begin{Code}
+\begin{Verbatim}
 >>> fit_lasso.plot()
 >>> plt.title("Lasso")
 >>> plt.show()
@@ -1295,12 +1308,12 @@ package supports plotting the solution paths. The result is shown in
 >>> fit_slope.plot()
 >>> plt.title("SLOPE")
 >>> plt.show()
-  \end{Code}
+  \end{Verbatim}
 
 \begin{figure}[htpb]
   \centering
-  \includegraphics[width=\natwidth]{images/diabetes-slope-python.pdf}%
-  \includegraphics[width=\natwidth]{images/diabetes-lasso-python.pdf}%
+  \includegraphics{images/diabetes-slope-python.pdf}%
+  \includegraphics{images/diabetes-lasso-python.pdf}%
   \caption{
     %
     SLOPE and lasso paths on the diabetes data set. Note that the \(x\) axis is
@@ -1309,21 +1322,21 @@ package supports plotting the solution paths. The result is shown in
   \label{fig:diabetes-python}
 \end{figure}
 
-To perform cross-validation, we use the \code{cv} method.
+To perform cross-validation, we use the \texttt{cv} method.
 
-\begin{Code}
+\begin{Verbatim}
 >>> fit_cv = model_slope.cv(x, y, q=[0.1, 0.2])
 >>> fit_cv.plot()
-  \end{Code}
+  \end{Verbatim}
 
 \subsection{C++}
 
-Finally, we provide an example in \proglang{C++} with similar functionality.
-Since our \proglang{C++} library does not have built-in plotting capabilities,
-nor serialization functionality, we focus here on fitting the models and
-printing the coefficients to the console.
+Finally, we provide an example in \textsf{C++} with similar functionality. Since
+our \textsf{C++} library does not have built-in plotting capabilities, nor
+serialization functionality, we focus here on fitting the models and printing
+the coefficients to the console.
 
-\begin{Code}
+\begin{Verbatim}
 #include <Eigen/Dense>
 #include <iostream>
 #include <slope.h>
@@ -1376,23 +1389,22 @@ int main() {
 
   return 0;
 }
-  \end{Code}
+  \end{Verbatim}
 
 If the code above is saved in a file named
 \texttt{code/example.cpp}\footnote{This is included in the supplementary
 material as well.}, it can be compiled with the following command, provided that
-GCC is installed along with the \pkg{slope} and \pkg{Eigen3} libraries.
-\begin{Code}
+GCC is installed along with the \textbf{slope} and \textbf{Eigen3} libraries.
+\begin{Verbatim}
 g++ -std=c++17 code/example.cpp -lslope -o example 
-  \end{Code}
+  \end{Verbatim}
 
 If the resulting executable is run, it produces the following output:
 
-\begin{CodeChunk}
-  \begin{CodeInput}
+\begin{Verbatim}
 ./example
-  \end{CodeInput}
-  \begin{CodeOutput}
+  \end{Verbatim}
+\begin{Verbatim}
 Lasso Coefficients:
  0.385777
 -0.397482
@@ -1406,8 +1418,7 @@ Best parameters from Cross-validation:
 alpha : 0.000154744
 gamma : 0
 q     : 0.1
-    \end{CodeOutput}
-\end{CodeChunk}
+    \end{Verbatim}
 
 \section{Duality gap and convergence criteria}
 \label{sec:convergence-criteria-details}
@@ -1571,9 +1582,8 @@ packages.
 
   \item[BB PGD] PGD with Barizilai--Borwein~\citep{barzilai1988} step sizes.
 
-  \item[FISTA] The fast iterative shrinking and thresholding
-        algorithm~\citep{beck2009}, which is an accelerated version of iterative
-        soft-thresholding algorithm (ISTA)~\citep{wright2009}.
+  \item[FISTA] Fast iterative shrinkage-thresholding~\citep{beck2009}, which
+        accelerates ISTA~\citep{wright2009}.
 
   \item[Safe PGD] FISTA with acceleration using safe screening
         rules~\citep{elvira2023}.
@@ -1586,7 +1596,7 @@ packages.
         \(\rho\) selection method from \citet{boyd2010}, but have avoided doing
         so since it, as shown by \citet{larsson2023}, may lead to erratic
         convergence behavior in practice. We use \fct{lsqr} from
-        \pkg{SciPy}~\citep{virtanen2020} to solve the linear system if
+        \textbf{SciPy}~\citep{virtanen2020} to solve the linear system if
         \(\min\{n, p\} > \num{1000}\) and otherwise solve the linear system as
         suggested by \citet{boyd2010}.
 
@@ -1595,15 +1605,13 @@ packages.
         but improved with better heuristics for selecting the inner solver,
         improved conjugate gradient solver, and a bug fix for the Woodbury-based
         solver. For the conjugate gradient solver, we use \fct{cg} from
-        \pkg{SciPy}~\citep{virtanen2020}.
+        \textbf{SciPy}~\citep{virtanen2020}.
 
-  \item[skglm] Another implementation of FISTA from the \pkg{skglm}
+  \item[skglm] Another implementation of FISTA from the \textbf{skglm}
         package~\citep{bertrand2022}.
 
   \item[SolutionPath] An approximate homotopy method by \citet{dupuis2024},
         which is similar to the lars algorithm for the lasso~\citep{efron2004}.
 \end{description}
-
-\end{appendix}
 
 \end{document}

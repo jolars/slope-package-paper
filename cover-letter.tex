@@ -1,8 +1,8 @@
 \PassOptionsToPackage{unicode,pdfusetitle}{hyperref}
 \PassOptionsToPackage{hyphens}{xurl}
-\PassOptionsToPackage{usenames,dvipsnames}{xcolor}
+\PassOptionsToPackage{dvipsnames}{xcolor}
 
-\documentclass[english,a4paper,14pt]{letter}
+\documentclass[english,a4paper,12pt]{letter}
 
 \usepackage{babel}
 
@@ -47,69 +47,41 @@
 
 \begin{document}
 
-\begin{letter}{Journal of Statistical Software}
+\begin{letter}{Computational Statistics \& Data Analysis}
   \opening{Dear editor,}
 
-  We are pleased to submit our revised manuscript titled ``Efficient Solvers for
-  SLOPE in R, Python, Julia, and C++'' for consideration for publication in the
-  Journal of Statistical Software.
+  Please consider our manuscript, ``Efficient Solvers for SLOPE in R, Python,
+  Julia, and C++,'' for publication in \emph{Computational Statistics \& Data
+  Analysis}.
 
-  This is the third resubmission of a manuscript that was originally submitted
-  as number 6061 in November 2025, then as number 6222 in February, and finally
-  as number 6420 in April. We are thankful for the feedback on our previous
-  submission and apologize for the recurring issues encountered in the
-  submissions.
+  The paper presents a suite of packages for fitting generalized linear models
+  with the sorted $\ell_1$ penalty. A shared C++ library supplies the solver to
+  R, Python, and Julia. The implementation supports dense, sparse, and
+  out-of-memory data, full regularization paths, cross-validation, and relaxed
+  SLOPE. It extends the previously published hybrid coordinate descent method
+  with screening rules and other implementation improvements.
 
-  Since the last submission, we have addressed the main problem with installing
-  the reproducibility materials by contributing the R package \texttt{SLOPE} to
-  the conda-forge channel and updating all the Benchopt benchmarks to now use
-  conda-forge for installation. We have verified that this works on Windows,
-  Linux, and MacOS on both cloud and local machines and hope that this will now
-  resolve the installation issues that were previously encountered.
+  We evaluate the software in reproducible Benchopt experiments on simulated
+  and real data. The benchmarks compare both individual solutions and full
+  regularization paths at a common duality-gap threshold. We also illustrate
+  the packages in a metabolomics analysis. We believe the combination of
+  statistical software, numerical algorithms, and empirical evaluation fits
+  the journal's Computational Statistics section.
 
-  We have also updated all of the software packages, which include performance
-  improvements and a critical bug fix in the computation of the duality gap for
-  the SLOPE problem. The paper has also been updated with this new, fixed
-  duality gap computation. The benchopt benchmarks have also been updated and
-  all of the benchmarks have been rerun with the new software versions.
+  The manuscript and its reproducibility materials are available at
+  \url{https://github.com/jolars/slope-package-paper}. The software packages
+  are available through their respective package repositories.
 
-  Again, we apologize for the inconvenience caused by the previous submissions
-  and hope that you will find the current submission to be complete and ready
-  for review.
+  The manuscript has not been published elsewhere and is not under
+  consideration by another journal.
 
-  This paper presents a comprehensive suite of software packages implementing
-  efficient solvers for Sorted L-One Penalized Estimation (SLOPE) across four
-  programming languages: R, Python, Julia, and C++. The packages support
-  generalized linear models with various loss functions and handle diverse data
-  structures including dense, sparse, and out-of-memory matrices. Our
-  implementation features a highly efficient hybrid coordinate descent algorithm
-  and we provide comprehensive benchmarks to showcase its performance as well as
-  instructive examples on how to use our software in practice.
-
-  We believe this work makes a significant contribution to the statistical
-  software community by providing high-quality, well-documented, and performant
-  implementations of SLOPE that are readily accessible across multiple
-  programming environments. The packages are already available through standard
-  package repositories (CRAN, PyPI, and the Julia General Registry) and have
-  been designed with reproducibility and ease of use in mind.
-
-  The submission includes the complete manuscript, all source code for the
-  packages, and replication materials that allow readers to reproduce all
-  figures and results presented in the paper.
-
-  We confirm that this manuscript has not been published elsewhere and is not
-  under consideration by any other journal. All authors have approved the
-  manuscript and agree with its submission to JSS.
-
-  Thank you for considering our manuscript. We look forward to your feedback and
-  hope that you will find our revised submission suitable for publication in the
-  Journal of Statistical Software.
+  Thank you for considering our submission.
 
   \closing{Yours sincerely,\\[1ex] Johan Larsson, Ma\l{}gorzata Bogdan, Krystyna
     Grzesiak, Mathurin Massias, and Jonas Wallin
   }
 
-  \encl{manuscript, software, replication materials}
+  \encl{manuscript and replication materials}
 \end{letter}
 
 \end{document}

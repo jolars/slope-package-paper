@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-FULL_WIDTH = 6
+# The CSDA elsarticle preprint text block is 390 pt (about 5.4 inches).
+# Leave room for the PDF crop and place figures at their exported size.
+FULL_WIDTH = 5.2
 
 
 def reg_labels(reg):

@@ -1,3 +1,5 @@
+ENV["GKSwstype"] = "100"  # Export PDFs without opening a Qt window.
+
 using SLOPE
 using CSV
 using ProjectRoot
@@ -34,7 +36,7 @@ p_comb = plot(
     p1,
     p2,
     layout = (1, 2),
-    size = (400, 200),
+    size = (380, 200),
     title = ["Lasso" "SLOPE"],
     bottom_margin = 5pt,
     left_margin = 5pt,

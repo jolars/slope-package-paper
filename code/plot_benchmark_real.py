@@ -100,7 +100,7 @@ solver_markers = dict(zip(solver_values, markers[: len(solver_values)]))
 fig, axes = plt.subplots(
     len(dataset_values),
     len(reg_values),
-    figsize=(FULL_WIDTH, 8),
+    figsize=(FULL_WIDTH, 6.4),
     sharex=False,
     sharey=True,
     constrained_layout=True,

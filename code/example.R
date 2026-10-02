@@ -21,7 +21,7 @@ y <- diabetes$y
 fit_slope <- SLOPE(x, y, q = 0.4)
 fit_lasso <- SLOPE(x, y, lambda = "lasso")
 
-width <- 6
+width <- 5.2
 height <- 4.2
 ps <- 8
 
@@ -92,7 +92,7 @@ set.seed(48)
 fit_cv <- cvSLOPE(x, y, q = c(0.1, 0.2))
 
 cv_file <- fig_name("slope-cv")
-pdf(cv_file, width = 5.8, height = 3, pointsize = ps)
+pdf(cv_file, width = width, height = 3, pointsize = ps)
 par(
   mfrow = c(1, 2),
   cex = 1,
