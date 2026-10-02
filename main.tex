@@ -1031,9 +1031,13 @@ parameter. The function \texttt{cvSLOPE()} performs $K$-fold cross-validation
 and optimizes over~$\alpha$:
 
 \begin{Verbatim}
-R> slope_cv <- cvSLOPE(x, y, q = 0.1, family = "binomial", measure = "auc")
+R> slope_cv <- cvSLOPE(
+R>   x, y, q = 0.1, family = "binomial", measure = "auc"
+R> )
 R> alpha_cv <- slope_cv$optima$alpha
-R> slope_model <- SLOPE(x, y, q = 0.1, family = "binomial", alpha = alpha_cv)
+R> slope_model <- SLOPE(
+R>   x, y, q = 0.1, family = "binomial", alpha = alpha_cv
+R> )
 \end{Verbatim}
 
 Predicted probabilities for new data can be obtained with the \texttt{predict()}
@@ -1068,7 +1072,9 @@ highlights groups of variables with coefficients of the same magnitude (up to
 sign):
 
 \begin{Verbatim}
-R> fit_pat <- SLOPE(x, y, q = 0.1, pattern = TRUE, family = "binomial")
+R> fit_pat <- SLOPE(
+R>   x, y, q = 0.1, pattern = TRUE, family = "binomial"
+R> )
 R> plotClusters(fit_pat, include_zeroes = FALSE)
 \end{Verbatim}
 
