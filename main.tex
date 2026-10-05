@@ -1,7 +1,6 @@
-\documentclass[preprint,12pt,authoryear]{elsarticle}
+\documentclass[a4paper,fleqn]{cas-sc}
 
-\usepackage[T1]{fontenc}
-\usepackage{orcidlink,lmodern}
+\usepackage[authoryear,longnamesfirst]{natbib}
 \usepackage{amssymb,amsmath,amsthm,mathtools,bm}
 \usepackage{upquote}
 \usepackage{fancyvrb}
@@ -12,72 +11,70 @@
 
 \usepackage{booktabs}
 \usepackage{array}
-\usepackage{caption}
-\usepackage{subcaption}
+\usepackage{tabularx}
 \usepackage{siunitx}
 
 \usepackage[linesnumbered,vlined,ruled]{algorithm2e}
 
 \usepackage{enumitem}
 \usepackage{xurl}
-\usepackage{hyperref}
-\hypersetup{hidelinks}
+\hypersetup{linkcolor=black,citecolor=black,urlcolor=blue}
 
 \input{tex/macros}
 
 \newcommand{\myurl}[1]{\href{https://#1}{\nolinkurl{#1}}}
 \def\algorithmautorefname{Algorithm}
 
-\journal{Computational Statistics \& Data Analysis}
-
 \begin{document}
-\begin{frontmatter}
+\shorttitle{Efficient Solvers for SLOPE}
+\shortauthors{Larsson et al.}
 
-  \title{Efficient Solvers for SLOPE in R, Python, Julia, and C++}
+\title[mode=title]{Efficient Solvers for SLOPE in R, Python, Julia, and C++}
 
-  \author[ku]{
-    Johan
-    Larsson\texorpdfstring{\corref{cor1}}{}~\orcidlink{0000-0002-4029-5945}
-  }
-  \ead{johan@jolars.co}
-  \author[uw]{Ma\l{}gorzata Bogdan~\orcidlink{0000-0002-0657-4342}}
-  \author[uw]{Krystyna Grzesiak~\orcidlink{0000-0003-2581-7722}}
-  \author[inria]{Mathurin Massias~\orcidlink{0000-0002-8950-0356}}
-  \author[lu]{Jonas Wallin~\orcidlink{0000-0003-0381-6593}}
-  \cortext[cor1]{Corresponding author.}
+\author[1]{Johan Larsson}[orcid=0000-0002-4029-5945]
+\cormark[1]
+\ead{johan@jolars.co}
+\author[2]{Ma\l{}gorzata Bogdan}[orcid=0000-0002-0657-4342]
+\author[2]{Krystyna Grzesiak}[orcid=0000-0003-2581-7722]
+\author[3]{Mathurin Massias}[orcid=0000-0002-8950-0356]
+\author[4]{Jonas Wallin}[orcid=0000-0003-0381-6593]
+\cortext[1]{Corresponding author.}
 
-  \affiliation[ku]{organization={Department of Mathematical Sciences, University
-      of Copenhagen},
-    addressline={Universitetsparken 5}, city={Copenhagen}, postcode={2100},
-    country={Denmark}}
-  \affiliation[uw]{organization={University of Wroc\l{}aw}, country={Poland}}
-  \affiliation[inria]{organization={Inria, ENS de Lyon, CNRS}, city={Lyon},
-    country={France}}
-  \affiliation[lu]{organization={Lund University}, country={Sweden}}
+\affiliation[1]{organization={Department of Mathematical Sciences, University of
+    Copenhagen},
+  addressline={Universitetsparken 5}, city={Copenhagen}, postcode={2100},
+  country={Denmark}}
+\affiliation[2]{organization={University of Wroc\l{}aw}, country={Poland}}
+\affiliation[3]{organization={Inria, ENS de Lyon, CNRS}, city={Lyon},
+  country={France}}
+\affiliation[4]{organization={Lund University}, country={Sweden}}
 
-  \begin{abstract}
-    We present a suite of packages in \textsf{R}, \textsf{Python},
-    \textsf{Julia}, and \textsf{C++} that efficiently solve the Sorted L-One
-    Penalized Estimation (SLOPE) problem. The packages feature a highly
-    efficient hybrid coordinate descent algorithm that fits generalized linear
-    models (GLMs) and supports a variety of loss functions, including Gaussian,
-    binomial, Poisson, and multinomial logistic regression. Our implementation
-    is designed to be fast, memory-efficient, and flexible. The packages support
-    a variety of data structures (dense, sparse, and out-of-memory matrices) and
-    are designed to efficiently fit the full SLOPE path as well as handle
-    cross-validation of SLOPE models, including the relaxed SLOPE. We present
-    examples of how to use the packages and benchmarks that demonstrate the
-    performance of the packages on both real and simulated data and show that
-    our packages generally outperform existing implementations of SLOPE in terms
-    of speed.
-  \end{abstract}
+\begin{abstract}
+  We present a suite of packages in \textsf{R}, \textsf{Python}, \textsf{Julia},
+  and \textsf{C++} that efficiently solve the Sorted L-One Penalized Estimation
+  (SLOPE) problem. The packages feature a highly efficient hybrid coordinate
+  descent algorithm that fits generalized linear models (GLMs) and supports a
+  variety of loss functions, including Gaussian, binomial, Poisson, and
+  multinomial logistic regression. Our implementation is designed to be fast,
+  memory-efficient, and flexible. The packages support a variety of data
+  structures (dense, sparse, and out-of-memory matrices) and are designed to
+  efficiently fit the full SLOPE path as well as handle cross-validation of
+  SLOPE models, including the relaxed SLOPE\@. We present examples of how to use
+  the packages and benchmarks that demonstrate the performance of the packages
+  on both real and simulated data and show that our packages generally
+  outperform existing implementations of SLOPE in terms of speed.
+\end{abstract}
 
-  \begin{keyword}
-    SLOPE \sep OWL \sep regularization \sep generalized linear models \sep R
-    \sep Python \sep Julia \sep C++
-  \end{keyword}
+\begin{keywords}
+  SLOPE \sep OWL \sep regularization \sep generalized linear models \sep R \sep
+  Python \sep Julia \sep C++
+\end{keywords}
 
-\end{frontmatter}
+% Use the CAS title option that prints the email address without an image icon.
+\ExplSyntaxOn
+\keys_set:nn { stm / mktitle } { nologo }
+\ExplSyntaxOff
+\maketitle
 
 \section{Introduction}
 
@@ -238,28 +235,17 @@ the gradient of the loss function with respect to \(\beta\) can be expressed as
 We summarize the loss, link, and inverse link functions for the GLMs supported
 by the SLOPE packages in \autoref{tab:glm}.
 
-\begin{table}[t!]
+\begin{table}[ht]
   \centering
-  \small
-  \begin{tabular}{@{}ll l@{}}
+
+  \begin{tabular}{lccc}
     \toprule
-    Model       & Quantity     & Expression                                                                            \\
+    Model       &                                         Loss                                          &                          Link                           &                                   Inverse link                                    \\
     \midrule
-    Gaussian    & Loss         & \(\frac{1}{2}(y - \eta)^2\)                                                           \\
-                & Link         & \(\mu\)                                                                               \\
-                & Inverse link & \(\eta\)                                                                              \\
-    \addlinespace
-    Binomial    & Loss         & \(\log(1 + e^\eta) - \eta y\)                                                         \\
-                & Link         & \(\log \left( \frac{\mu}{1 - \mu} \right)\)                                           \\
-                & Inverse link & \(\frac{e^\eta}{1 + e^\eta}\)                                                         \\
-    \addlinespace
-    Poisson     & Loss         & \(e^\eta - \eta y\)                                                                   \\
-                & Link         & \(\log(\mu)\)                                                                         \\
-                & Inverse link & \(e^\eta\)                                                                            \\
-    \addlinespace
-    Multinomial & Loss         & \(\log \left( 1 + \sum_{j=1}^{m-1} e^{\eta_j} \right) - \sum_{k=1}^{m-1} y_k \eta_k\) \\
-                & Link         & \(\left( \log \frac{\mu_k}{\mu_m} \right)_{k=1}^{m-1}\)                               \\
-                & Inverse link & \(\left( \frac{e^{\eta_k}}{1 + \sum_{j=1}^{m-1} e^{\eta_j}} \right)_{k=1}^{m-1}\)     \\
+    Gaussian    &                              \(\frac{1}{2}(y - \eta)^2\)                              &                         \(\mu\)                         &                                     \(\eta\)                                      \\
+    Binomial    &                             \(\log(1 + e^\eta) - \eta y\)                             &       \(\log \left( \frac{\mu}{1 - \mu} \right)\)       &                           \(\frac{e^\eta}{1 + e^\eta}\)                           \\
+    Poisson     &                                  \(e^\eta - \eta y\)                                  &                      \(\log(\mu)\)                      &                                    \(e^\eta\)                                     \\
+    Multinomial & \(\log \left( 1 + \sum_{j=1}^{m-1} e^{\eta_j} \right) - \sum_{k=1}^{m-1} y_k \eta_k\) & \(\left( \log \frac{\mu_k}{\mu_m} \right)_{k=1}^{m-1}\) & \(\left( \frac{e^{\eta_k}}{1 + \sum_{j=1}^{m-1} e^{\eta_j}} \right)_{k=1}^{m-1}\) \\
     \bottomrule
   \end{tabular}
   \caption{
@@ -381,7 +367,7 @@ omitted some details of the algorithm here.
 
 \end{algorithm}
 
-\begin{figure}[t]
+\begin{figure}
   \centering
   \includegraphics{images/slope-thresholding.pdf}
   \caption{
@@ -498,12 +484,12 @@ repositories~(\autoref{tab:slope-packages}).
   \centering
   \begin{tabular}{llll}
     \toprule
-    Language        & Package           & Repository                                        & Documentation                                  \\
+    Language        & Package           & Repository                         & Documentation                     \\
     \midrule
-    \textsf{R}      & \textbf{SLOPE}    & \href{https://github.com/jolars/SLOPE}{GitHub}    & \href{https://jolars.github.io/SLOPE}{Docs}    \\
-    \textsf{Python} & \textbf{sortedl1} & \href{https://github.com/jolars/sortedl1}{GitHub} & \href{https://jolars.github.io/sortedl1}{Docs} \\
-    \textsf{Julia}  & \textbf{SLOPE.jl} & \href{https://github.com/jolars/SLOPE.jl}{GitHub} & \href{https://jolars.github.io/SLOPE.jl}{Docs} \\
-    \textsf{C++}    & \textbf{slope}    & \href{https://github.com/jolars/libslope}{GitHub} & \href{https://jolars.github.io/libslope}{Docs} \\
+    \textsf{R}      & \textbf{SLOPE}    & \myurl{github.com/jolars/SLOPE}    & \myurl{jolars.github.io/SLOPE}    \\
+    \textsf{Python} & \textbf{sortedl1} & \myurl{github.com/jolars/sortedl1} & \myurl{jolars.github.io/sortedl1} \\
+    \textsf{Julia}  & \textbf{SLOPE.jl} & \myurl{github.com/jolars/SLOPE.jl} & \myurl{jolars.github.io/SLOPE.jl} \\
+    \textsf{C++}    & \textbf{slope}    & \myurl{github.com/jolars/libslope} & \myurl{jolars.github.io/libslope} \\
     \bottomrule
   \end{tabular}
   \caption{
@@ -708,7 +694,7 @@ there are many more \emph{kinks} in the SLOPE path, since they occur not only
 when new predictors become active, but also when they merge into or split from
 clusters.
 
-\begin{figure}[tp]
+\begin{figure}
   \centering
   {\includegraphics{images/diabetes-slope-lasso.pdf}}
   \caption{
@@ -752,7 +738,7 @@ We plot the resulting paths in \autoref{fig:relaxed-slope}. Observe the
 jaggedness of the relaxed paths, which change dramatically as clusters form,
 merge, and split.
 
-\begin{figure}[tp]
+\begin{figure}
   \centering
   \includegraphics{images/slope-relaxed.pdf}
   \caption{
@@ -795,7 +781,7 @@ indicating the optimal value of \(\alpha\) for the best value of \(q\).
 R> plot(fit_cv)
 \end{Verbatim}
 
-\begin{figure}[tp]
+\begin{figure}
   \centering
   \includegraphics{images/slope-cv.pdf}
   \caption{
@@ -857,16 +843,14 @@ basis for comparison. We use Benchopt's 30-second timeout, which is checked
 between successive evaluations of a solver, and restrict the figures to
 evaluations taking no more than 30 seconds.
 
-\begin{table}[tp]
+\begin{table}[htp]
   \centering
-  \footnotesize
-  \setlength{\tabcolsep}{4pt}
   \begin{tabular}{
       l
       S[table-format=6.0]
       S[table-format=7.0]
       S[table-format=1.5,round-mode=figures,round-precision=2]
-      l
+      p{0.48\textwidth}
     }
     \toprule
     Dataset                     & {\(n\)} & {\(p\)} & {\(X\) density} & {References}                        \\
@@ -938,7 +922,7 @@ the hybrid method. We believe this is likely due to the addition of screening
 rules as well as algorithmic improvements. Newt-ALM also performs better than in
 \citet{larsson2023}, following improvements to the implementation used here.
 
-\begin{figure}[tp]
+\begin{figure}
   \centering
   \includegraphics{images/benchmark_single_simulated.pdf}
   \caption{
@@ -957,7 +941,7 @@ to reach the threshold in 16 of the 18 combinations. ADMM is first for
 \(\alpha_\text{max}/50\). The performance of the other algorithms is generally
 more sensitive to the dataset and regularization level.
 
-\begin{figure}[tp]
+\begin{figure}
   \centering
   \includegraphics{images/benchmark_single_real.pdf}
   \caption{
@@ -988,7 +972,7 @@ threshold for \dataset{BRCA1} with 200 path points within the time limit;
 \textbf{sortedl1} comes closest, with a maximum relative duality gap of
 \(2.5 \times 10^{-7}\).
 
-\begin{figure}[tp]
+\begin{figure}
   \centering
   \includegraphics{images/benchmark_path_real.pdf}
   \caption{
@@ -1078,7 +1062,7 @@ R> )
 R> plotClusters(fit_pat, include_zeroes = FALSE)
 \end{Verbatim}
 
-\begin{figure}[tp]
+\begin{figure}
   \centering
   \includegraphics{images/glioma-clusters.pdf}
   \caption{
@@ -1164,10 +1148,10 @@ This research was also supported in part by the French National Research
 Agency~(ANR) through the BenchArk project~(ANR-24-IAS2-0003) and by the National
 Science Centre Poland through the grant no. 2021/43/O/ST6/02805.
 
-\bibliographystyle{elsarticle-harv}
+\bibliographystyle{cas-model2-names}
 \bibliography{main}
 
-\newpage
+\clearpage
 
 \appendix
 
@@ -1231,7 +1215,7 @@ julia>     title = ["Lasso" "SLOPE"],
 julia> )
   \end{Verbatim}
 
-\begin{figure}[htpb]
+\begin{figure}
   \centering
   \includegraphics{images/diabetes-slope-lasso-julia.pdf}
   \caption{
@@ -1256,7 +1240,7 @@ julia> pcv = plot(fit_cv)
 
 The result is shown in \autoref{fig:cv-julia}.
 
-\begin{figure}[htpb]
+\begin{figure}
   \centering
   \includegraphics{images/slope-cv-julia.pdf}
   \caption{
@@ -1316,7 +1300,7 @@ package supports plotting the solution paths. The result is shown in
 >>> plt.show()
   \end{Verbatim}
 
-\begin{figure}[htpb]
+\begin{figure}
   \centering
   \includegraphics{images/diabetes-slope-python.pdf}%
   \includegraphics{images/diabetes-lasso-python.pdf}%
@@ -1620,4 +1604,7 @@ packages.
         which is similar to the lars algorithm for the lasso~\citep{efron2004}.
 \end{description}
 
+\clearpage
+% The CAS footer reads the page counter after \clearpage advances it.
+\addtocounter{page}{-1}
 \end{document}

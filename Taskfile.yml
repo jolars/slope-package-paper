@@ -6,7 +6,7 @@ tasks:
       - rm -rf _build/arxiv
       - mkdir -p _build/arxiv
       - mkdir -p _build/arxiv/tex
-      - latexmk -pdf -interaction=nonstopmode
+      - latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
       - |
         cp -r \
           main.bbl \
@@ -15,7 +15,9 @@ tasks:
           images/ \
           _build/arxiv/
         cp -r tex/macros.tex _build/arxiv/tex/
-      - cp "$(kpsewhich elsarticle.cls)" _build/arxiv/
+      - >-
+        cp "$(kpsewhich cas-sc.cls)" "$(kpsewhich cas-common.sty)"
+        "$(kpsewhich cas-model2-names.bst)" _build/arxiv/
       - rm -f _build/arxiv-{{.DATE}}.tar.gz
       - cd _build/arxiv && tar -czf ../arxiv-{{.DATE}}.tar.gz .
       - rm -rf _build/arxiv-temp
@@ -47,15 +49,19 @@ tasks:
     cmds:
       - rm -rf _build/csda
       - mkdir -p _build/csda
-      - latexmk -pdf -interaction=nonstopmode
+      - latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
       - cp main.tex main.bib main.bbl tex/macros.tex images/*.pdf _build/csda/
+      - >-
+        cp "$(kpsewhich cas-sc.cls)" "$(kpsewhich cas-common.sty)"
+        "$(kpsewhich cas-model2-names.bst)" _build/csda/
       - sed -i -e 's@tex/macros@macros@' -e 's@images/@@g' _build/csda/main.tex
       - latexmk -cd -pdf -interaction=nonstopmode _build/csda/main.tex
       - >-
         tar -czf _build/csda-source-{{.DATE}}.tar.gz
         --exclude=main.pdf --exclude='*.aux' --exclude='*.fdb_latexmk'
         --exclude='*.fls' --exclude='*.log' --exclude='*.out'
-        --exclude='*.spl' -C _build/csda .
+        --exclude='*.spl' --exclude='*.abs' --exclude='*.blg'
+        -C _build/csda .
     vars:
       DATE:
         sh: date +%Y%m%d
