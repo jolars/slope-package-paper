@@ -56,8 +56,8 @@ This repository is organized into several key components:
   across solvers
 - **Analysis Code** (`code/`, `slopeutils/`): R and Python scripts for
   reproducing figures and analyses from the paper
-- **Manuscript** (`main.tex`, `main.pdf`, `tex/`): LaTeX source and compiled
-  paper
+- **Manuscript** (`main.tex`, `main.pdf`, `tex/`, `els-cas-templates/`): LaTeX
+  source, compiled paper, and the Elsevier CAS templates
 
 <details>
 <summary>Directory tree</summary>
@@ -108,6 +108,7 @@ This repository is organized into several key components:
 ├── Taskfile.yml                # Task automation
 ├── main.tex                    # Paper LaTeX source
 ├── main.bib                    # Bibliography
+├── els-cas-templates/          # Elsevier CAS classes, samples, and documentation
 └── README.md
 ```
 
@@ -236,11 +237,15 @@ benchmark-data-checksums > benchmark-data.sha256
 ## Compiling the Paper
 
 To compile the LaTeX source of the paper, ensure you have a LaTeX distribution
-installed, then run:
+installed, then run from the repository root:
 
 ```bash
 latexmk -pdf -interaction=nonstopmode main.tex
 ```
+
+The `.latexmkrc` file makes LaTeX and BibTeX use the Elsevier CAS files in
+`els-cas-templates/`. The directory also contains the original sample files and
+documentation for comparison.
 
 ## Code in Paper
 
