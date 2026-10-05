@@ -5,7 +5,7 @@ tasks:
     cmds:
       - rm -rf _build/arxiv
       - mkdir -p _build/arxiv
-      - mkdir -p _build/arxiv/tex
+      - mkdir -p _build/arxiv/tex _build/arxiv/code
       - latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
       - |
         cp -r \
@@ -15,6 +15,7 @@ tasks:
           images/ \
           _build/arxiv/
         cp -r tex/macros.tex _build/arxiv/tex/
+        cp code/example.cpp _build/arxiv/code/
       - >-
         cp els-cas-templates/cas-sc.cls els-cas-templates/cas-common.sty
         els-cas-templates/cas-model2-names.bst _build/arxiv/
@@ -48,9 +49,10 @@ tasks:
     desc: "Prepare flat LaTeX source for Editorial Manager"
     cmds:
       - rm -rf _build/csda
-      - mkdir -p _build/csda
+      - mkdir -p _build/csda/code
       - latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
       - cp main.tex main.bib main.bbl tex/macros.tex images/*.pdf _build/csda/
+      - cp code/example.cpp _build/csda/code/
       - >-
         cp els-cas-templates/cas-sc.cls els-cas-templates/cas-common.sty
         els-cas-templates/cas-model2-names.bst _build/csda/
