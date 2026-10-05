@@ -173,10 +173,14 @@ convergence.
 In this paper we make this algorithm available to a wide audience by presenting
 a collection of packages in \textsf{R}~\citep{rcoreteam2025},
 \textsf{Python}~\citep{pythonsoftwarefoundation2025},
-\textsf{Julia}~\citep{bezanson2017}, and \textsf{C++}. For \textsf{Julia} and
-\textsf{Python}, these are, to the best of our knowledge, the first and only
-available implementations of SLOPE\@. For \textsf{R}, our package was the first
-implementation of SLOPE, although there is now also support for SLOPE through
+\textsf{Julia}~\citep{bezanson2017}, and \textsf{C++}. For \textsf{Julia}, our
+package is, to the best of our knowledge, the first and only available
+implementation of SLOPE\@. For \textsf{Python}, \textbf{tick}~\citep{bacry2018}
+provides a SLOPE proximal operator that can be combined with its solvers, and
+\textbf{skglm}~\citep{moufad2025} supports fitting SLOPE with FISTA\@. Our
+\textbf{sortedl1} package makes the hybrid coordinate descent algorithm
+described above available in \textsf{Python}. For \textsf{R}, our package was
+the first implementation of SLOPE, although there is now also support through
 the \textbf{sgs}~\citep{feser2023} and \textbf{grpSLOPE}~\citep{brzyski2018}
 packages. Additionally, an implementation for \textsf{MATLAB} is also available
 from \citet{candes2013} and is also included in TFOCS~\citep{becker2011}.
