@@ -419,10 +419,14 @@ Here is a BibLaTeX entry for citing the paper:
 
 ## License
 
-This repository is dual-licensed:
+The author-created materials in this repository use two licenses:
 
-- **Paper and Documentation** (LaTeX files, PDFs, markdown, images):
-  [CC-BY-3.0](LICENSE-PAPER)
-- **Software Code** (Python, R, benchmarks): [GPL-3.0](LICENSE-CODE)
+- **Preprint and documentation:** Author-released preprint versions, their
+  LaTeX source, corresponding PDFs, original figures, and author-created
+  documentation use [CC BY 3.0](LICENSE-PAPER). Previously released versions
+  remain licensed under CC BY 3.0. This license does not automatically cover
+  a later accepted manuscript or the final published article.
+- **Software code** (Python, R, benchmarks): [GPL-3.0](LICENSE-CODE).
 
-See [LICENSE](LICENSE) for the complete dual license notice.
+Third-party materials, including the Elsevier CAS templates, retain their own
+licenses. See [LICENSE](LICENSE) for the full scope of this notice.

@@ -1,13 +1,20 @@
 DUAL LICENSE NOTICE
 ===================
 
-This repository contains materials under two different licenses:
+The author-created materials in this repository use two licenses:
 
-1. PAPER AND DOCUMENTATION (CC-BY-3.0)
-   - All paper content (*.tex, *.pdf, main.bib)
-   - Documentation files (*.md, images/)
-   - Licensed under Creative Commons Attribution 3.0 Unported
+1. PREPRINT AND DOCUMENTATION (CC BY 3.0)
+   - Author-released preprint versions of the paper, including their LaTeX
+     source (main.tex, tex/, main.bib), corresponding PDFs, and original
+     figures in images/.
+   - Author-created documentation.
+   - Licensed under Creative Commons Attribution 3.0 Unported.
    - See LICENSE-PAPER for full text
+
+   This license applies to versions released under it. It does not
+   automatically license a later accepted manuscript or the final
+   published article. CC BY 3.0 grants for previously released versions
+   remain in effect.
 
 2. SOFTWARE CODE (GPL-3.0)
    - All code files (code/, slopeutils/, benchmark_*/)
@@ -17,5 +24,8 @@ This repository contains materials under two different licenses:
 
 Configuration files (*.yml, *.yaml, devenv.nix) follow the license
 of the code they configure (GPL-3.0).
+
+Third-party materials, including els-cas-templates/, retain their own
+licenses and are not covered by this notice.
 
 For specific licensing questions, please contact the repository maintainer.
