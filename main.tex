@@ -40,20 +40,41 @@
 \author[4]{Jonas Wallin}[orcid=0000-0003-0381-6593]
 \cortext[1]{Corresponding author.}
 
-\affiliation[1]{organization={Department of Mathematical Sciences, University of
-    Copenhagen},
-  addressline={Universitetsparken 5}, city={Copenhagen \O}, postcode={2100},
-  country={Denmark}}
+% badness off
+
+\affiliation[1]{
+  organization={Department of Mathematical Sciences, University ofCopenhagen},
+  addressline={Universitetsparken 5},
+  city={Copenhagen \O},
+  postcode={2100},
+  country={Denmark}
+}
+
 % TODO: Confirm the institute name for both Wroclaw authors: [________].
-\affiliation[2]{organization={Institute of Mathematics, University of Wroc\l{}aw},
-  addressline={Joliot-Curie 15}, city={Wroc\l{}aw}, postcode={50-383},
-  country={Poland}}
-% TODO: Add the formal laboratory name or unit number, if needed: [________].
-\affiliation[3]{organization={Inria, ENS de Lyon, CNRS},
-  addressline={46 all\'ee d'Italie}, city={Lyon Cedex 07}, postcode={69364},
-  country={France}}
-\affiliation[4]{organization={Department of Statistics, Lund University},
-  addressline={Box 7080}, city={Lund}, postcode={220 07}, country={Sweden}}
+\affiliation[2]{
+  organization={Institute of Mathematics, University ofWroc\l{}aw},
+  addressline={Joliot-Curie 15},
+  city={Wroc\l{}aw},
+  postcode={50-383},
+  country={Poland}
+}
+
+\affiliation[3]{
+  organization={Inria, ENS de Lyon, CNRS},
+  addressline={46 all\'ee d'Italie},
+  city={Lyon},
+  postcode={69007},
+  country={France}
+}
+\affiliation[4]{
+  organization={Department of Statistics, Lund University},
+  addressline={Box 7080},
+  city={Lund},
+  postcode={220 07},
+  country={Sweden}
+}
+
+% badness on
 
 \begin{abstract}
   We present a suite of packages in \textsf{R}, \textsf{Python}, \textsf{Julia},
@@ -1171,8 +1192,26 @@ couple the available features of \textsf{R}, \textsf{Python}, and
 \textsf{Julia}, and avoid redundant implementations of the same algorithms in
 each language.
 
-% TODO (CSDA, encouraged): Add a data and code availability statement that
-% identifies the benchmark repositories, data sources, and any access limits.
+\section*{Data and code availability}
+
+The source code for the software packages is available from the repositories
+listed in \autoref{tab:slope-packages}. The code for the examples, analyses, and
+figures, together with the benchmark configurations, results, and pinned
+software environment, is available at
+\myurl{github.com/jolars/slope-package-paper}. The single-solution and path
+benchmark repositories are \myurl{github.com/benchopt/benchmark\_slope} and
+\myurl{github.com/jolars/benchmark\_slope\_path}, respectively.
+
+The benchmark repositories contain code to generate the simulated data and
+download the real datasets. \dataset{BRCA1}, \dataset{Koussounadis2014}, and
+\dataset{Rhee2006} are available from Patrick Breheny's collection at
+\myurl{github.com/IowaBiostat/data-sets}; \dataset{Real-Sim}, \dataset{RCV1},
+and \dataset{YearPredictionMSD} are available from the LIBSVM data collection of
+\citet{chang2016}. The diabetes data are included in the paper repository as
+\texttt{data/diabetes.csv}, and the glioma data from \citet{Godlewski2023} are
+distributed as \dataset{glioma} in the \textsf{R} package \textbf{SLOPE}. All
+data used in this study are publicly available without registration.
+
 % TODO (CSDA): Confirm whether the funders influenced the study design, data
 % collection, analysis, writing, or decision to submit, and state their roles.
 \section*{Acknowledgments}
