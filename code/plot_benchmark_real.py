@@ -19,7 +19,7 @@ from slopeutils import (
 set_plot_defaults()
 
 
-results_dir = "results/single_0831"
+results_dir = "results/single_1007"
 df = merge_parquet_files(results_dir)
 df = df[df["time"] <= 30].copy()
 df = extract_reg_param(df)
@@ -144,7 +144,8 @@ for i, dataset in enumerate(dataset_values):
 
         if j == len(reg_values) - 1:
             ax.yaxis.set_label_position("right")
-            ax.set_ylabel(dataset, rotation=270, va="bottom")
+            label = "YearPrediction\nMSD" if dataset == "YearPredictionMSD" else dataset
+            ax.set_ylabel(label, rotation=270, va="bottom")
 
         if i == 0:
             ax.set_title(reg_labels(reg))
@@ -182,7 +183,7 @@ fig.legend(
     handles,
     labels,
     loc="outside upper center",
-    ncol=min(3, len(solver_values)),
+    ncol=min(4, len(solver_values)),
 )
 
 save_fig = True

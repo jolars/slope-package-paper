@@ -1,0 +1,29 @@
+{
+  "rows": 4730,
+  "configured_cases": 270,
+  "recorded_cases": 245,
+  "skipped_cases": 24,
+  "timeouts": 100,
+  "divergences": 1,
+  "divergence_cases": [
+    {
+      "dataset": "libsvm[dataset=YearPredictionMSD,standardize=True]",
+      "objective": "SLOPE[fit_intercept=False,q=0.2,reg=0.5,target_rel_duality_gap=1e-07]",
+      "solver": "ADMM[adaptive_rho=False,rho=100]"
+    }
+  ],
+  "tick_cases": 27,
+  "tick_timeouts": 19,
+  "cases_by_solver": {
+    "ADMM[adaptive_rho=False,rho=100]": 26,
+    "Newt-ALM[inner_solver=auto]": 27,
+    "PGD[acceleration=anderson,prox=prox_fast_stack]": 27,
+    "PGD[acceleration=bb,prox=prox_fast_stack]": 27,
+    "PGD[acceleration=fista,prox=prox_fast_stack]": 27,
+    "PGD_safe_screening[accelerated=True]": 15,
+    "SlopePath": 15,
+    "skglm": 27,
+    "sortedl1[cd_type=permuted]": 27,
+    "tick": 27
+  }
+}

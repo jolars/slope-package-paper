@@ -36,7 +36,7 @@ def extract_dataset_name(data_name):
     return "Square"
 
 
-results_dir = "results/single_0831"
+results_dir = "results/single_1007"
 df = merge_parquet_files(results_dir)
 df = df[df["time"] <= 30].copy()
 df = extract_reg_param(df)
@@ -167,7 +167,7 @@ fig.legend(
     handles,
     labels,
     loc="outside upper center",
-    ncol=min(3, len(solver_values)),
+    ncol=min(4, len(solver_values)),
 )
 
 save_fig = True

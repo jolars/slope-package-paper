@@ -92,8 +92,8 @@ This repository is organized into several key components:
 │   ├── benchmark_single_simulated.pdf
 │   └── ...
 ├── results/                    # Benchmark results
-│   ├── path_0831/              # Path-fitting benchmark results
-│   └── single_0831/            # Single-penalty benchmark results
+│   ├── path_1007/              # Path-fitting benchmark results
+│   └── single_1007/            # Single-penalty benchmark results
 ├── slopeutils/                 # Utility functions
 │   ├── merge_parquet.py
 │   └── plot_utils.py
@@ -330,7 +330,7 @@ directly.
 ### Plots
 
 The benchmark plotting scripts in `code/plot_benchmark_*.py` use the results in
-`results/path_0831/` and `results/single_0831/`, so you can regenerate the
+`results/path_1007/` and `results/single_1007/`, so you can regenerate the
 figures without running the benchmarks. To plot a new run, change `results_dir`
 in the relevant script to a directory containing that run's Parquet files. The
 scripts combine all Parquet files in that directory.

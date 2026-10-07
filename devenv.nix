@@ -18,6 +18,7 @@ let
     ps.numba
     ps.rpy2
     ps.scikit-learn
+    benchmarkPackages.tick
     benchmarkPackages.benchopt
     benchmarkPackages.libsvmdata
     benchmarkPackages.skglm
@@ -223,6 +224,7 @@ in
           "slopepath",
           "slopescreening",
           "sortedl1",
+          "tick",
       )
       for package in packages:
           print(f"{package}: {version(package)}")
@@ -281,7 +283,7 @@ in
     python -c 'import importlib.metadata; assert importlib.metadata.version("sortedl1") == "${sortedl1Version}"'
     Rscript -e 'stopifnot(as.character(packageVersion("SLOPE")) == "${slopeRVersion}")'
     julia --project=. -e 'using Pkg; Pkg.instantiate(); using SLOPE; versions = [dep.version for dep in values(Pkg.dependencies()) if dep.name == "SLOPE"]; @assert only(versions) == v"${slopeJuliaVersion}"'
-    python -c 'import benchopt, libsvmdata, modules, rpy2, skglm, slopescreening'
+    python -c 'import benchopt, libsvmdata, modules, rpy2, skglm, slopescreening, tick'
     test "$(benchopt --version)" = "1.9.1"
     benchmark-smoke >/dev/null
     slope-example >/dev/null

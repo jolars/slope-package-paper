@@ -1,0 +1,13 @@
+d618fbb3b66096523df3029aab0d1e948f68eed2fa8392e50b1380ce46f77722  /home/jola/research/slope-package-paper/.benchmark-data/cache/benchmark_slope/Koussounadis2014.rds
+51b532e605d8594e70e9198053ccaf4da8bee2fd30660fc9c77e08c16b1cf47f  /home/jola/research/slope-package-paper/.benchmark-data/cache/benchmark_slope/Rhee2006.rds
+fef18f989a5599cf303ebd8cfaa72f611b07de700abb60832a221786f6350fe3  /home/jola/research/slope-package-paper/.benchmark-data/cache/benchmark_slope/brca1.rds
+d618fbb3b66096523df3029aab0d1e948f68eed2fa8392e50b1380ce46f77722  /home/jola/research/slope-package-paper/.benchmark-data/cache/benchmark_slope_path/Koussounadis2014.rds
+51b532e605d8594e70e9198053ccaf4da8bee2fd30660fc9c77e08c16b1cf47f  /home/jola/research/slope-package-paper/.benchmark-data/cache/benchmark_slope_path/Rhee2006.rds
+fef18f989a5599cf303ebd8cfaa72f611b07de700abb60832a221786f6350fe3  /home/jola/research/slope-package-paper/.benchmark-data/cache/benchmark_slope_path/brca1.rds
+af4147babe0ae332f05d5a64c152ce62e151ed41fd2660b86eb1d26e1912f9d1  /home/jola/research/slope-package-paper/.benchmark-data/cache/matplotlib/fontlist-v390.json
+c13c99753d634edcb53038f72686d18506205199b6d5ea5f785326c440406d4d  /home/jola/research/slope-package-paper/.benchmark-data/libsvm/libsvm/YearPredictionMSD_X.npy
+44c5935b94091fc4924d2502d84c8b8edf9b0396c0df3572c489fdbe20da2af8  /home/jola/research/slope-package-paper/.benchmark-data/libsvm/libsvm/YearPredictionMSD_y.npy
+49588dcec611f7126a63af83d6044c10b15d346592671ec0c0749cef89a04ac4  /home/jola/research/slope-package-paper/.benchmark-data/libsvm/libsvm/rcv1.binary_X.npz
+02efee9f6d31a9cf9e7b7ea61256a5d724f5dae83781f9f61fb863f722814d1a  /home/jola/research/slope-package-paper/.benchmark-data/libsvm/libsvm/rcv1.binary_y.npy
+2c0c87c82fcda20b6665944ce57fb131618a19903fdb8df70e3d6cc6915e411c  /home/jola/research/slope-package-paper/.benchmark-data/libsvm/libsvm/real-sim_X.npz
+55f5dc89411100e9fe94ca22a5c74adfa935e7e299915b50ee691b6f0c1d4ded  /home/jola/research/slope-package-paper/.benchmark-data/libsvm/libsvm/real-sim_y.npy

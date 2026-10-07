@@ -1,0 +1,17 @@
+objective:
+  - SLOPE_Path[fit_intercept=False,q=0.2,path_length=50,target_rel_duality_gap=1e-7]
+  - SLOPE_Path[fit_intercept=False,q=0.2,path_length=100,target_rel_duality_gap=1e-7]
+  - SLOPE_Path[fit_intercept=False,q=0.2,path_length=200,target_rel_duality_gap=1e-7]
+
+dataset:
+  - breheny[dataset=brca1,standardize=True]
+  - breheny[dataset=Koussounadis2014,standardize=True]
+  - breheny[dataset=Rhee2006,standardize=True]
+
+solver:
+  - sortedl1[cd_type=permuted]
+  - SolutionPath
+  - ADMM[rho=100]
+  - PGD[acceleration=fista]
+
+n-repetitions: 1

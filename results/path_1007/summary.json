@@ -1,0 +1,15 @@
+{
+  "rows": 408,
+  "configured_cases": 36,
+  "recorded_cases": 33,
+  "skipped_cases": 3,
+  "timeouts": 25,
+  "divergences": 0,
+  "divergence_cases": [],
+  "cases_by_solver": {
+    "ADMM[rho=100]": 9,
+    "PGD[acceleration=fista]": 9,
+    "SolutionPath": 6,
+    "sortedl1[cd_type=permuted]": 9
+  }
+}

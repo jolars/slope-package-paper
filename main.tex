@@ -340,10 +340,8 @@ omitted some details of the algorithm here.
     coefficient omitted and \(T\) is the SLOPE thresholding operator, which we
     have illustrated in \autoref{fig:slope-thresholding}.
   }
-  \label{alg:hybrid}
-  \SetKwInOut{Input}{input}
-  \SetKwComment{tcc}{$\triangleright$ }{}
-  \SetCommentSty{textit}
+  \label{alg:hybrid} \SetKwInOut{Input}{input}
+  \SetKwComment{tcc}{$\triangleright$ }{} \SetCommentSty{textit}
 
   \Input{%
     \(X \in \mathbb{R}^{n \times p}\),
@@ -352,7 +350,9 @@ omitted some details of the algorithm here.
     \(v \in \mathbb{N}\)
   }
 
-  \Repeat{\(P(\beta_0, \beta) - D(\theta) \leq \varepsilon|P(\beta_0, \beta)|\)}{
+  \Repeat{
+    \(P(\beta_0, \beta) - D(\theta) \leq \varepsilon|P(\beta_0, \beta)|\)
+  }{
     set \(t\) with backtracking line search\;
 
     \(\beta \gets \beta - t \nabla F(\beta_0, \beta)\)\;
@@ -375,12 +375,14 @@ omitted some details of the algorithm here.
         \(\gamma \gets \frac{1}{n} \sum_{i=1}^n w_i \tilde{x}_i \tilde{r}_i\)\tcc*{Gradient}
         \(\xi \gets \frac{1}{n} \sum_{i=1}^n w_i \tilde{x}_i^2\)\tcc*{Hessian}
         \(\tilde {c} \gets T(c_k \xi - \gamma; \xi, c^{\setminus k}, \lambda)\)\;
-        \(\beta_{\cC_k} \gets \tilde{c} \sign(\beta_{\cC_k})\)\; Update \(c\),
-        \(\mathcal{C}\)\; \(k \gets k + 1\)\;
+        \(\beta_{\cC_k} \gets \tilde{c} \sign(\beta_{\cC_k})\)\;
+        Update \(c\), \(\mathcal{C}\)\;
+        \(k \gets k + 1\)\;
       }
 
       \If{\(P(\beta) \geq P(\beta^\text{old})\)}{
-        \(\beta \gets \beta^\text{old}\)\; break\;
+        \(\beta \gets \beta^\text{old}\)\;
+        break\;
       }
     }
   }
@@ -835,16 +837,16 @@ single solution benchmark includes four variations on proximal gradient descent
 (PGD), using Anderson acceleration~\citep{anderson1965, zhang2020},
 Barzilai--Borwein step sizes, safe screening rules, and the fast iterative
 shrinking and thresholding algorithm (FISTA)~\citep{beck2009}. The latter of
-these is also included through the \textbf{skglm} package~\citep{bertrand2022}.
-We also include the alternating direction method of multipliers
-(ADMM)~\citep{boyd2010}, a semi-smooth Newton-based method~\citep{luo2019}, and
-an approximate homotopy method, \textbf{SolutionPath}~\citep{dupuis2024}. See
-\autoref{sec:solver-details} for more details on the solvers and their
-implementations. The path benchmark compares \textbf{sortedl1} with a subset of
-these solvers, namely \textbf{FISTA}, \textbf{SolutionPath}, and \textbf{ADMM}.
-All of the benchmarks were run on a system with an AMD Ryzen 9 7900 CPU (12
-cores and 24 threads, with a maximum boost clock of 5.5 GHz), 64 GB of RAM, and
-NixOS 26.11 (Linux).
+these is also included through the \textbf{skglm} package~\citep{bertrand2022}
+and the \textbf{tick} package~\citep{bacry2018}. We also include the alternating
+direction method of multipliers (ADMM)~\citep{boyd2010}, a semi-smooth
+Newton-based method~\citep{luo2019}, and an approximate homotopy method,
+\textbf{SolutionPath}~\citep{dupuis2024}. See \autoref{sec:solver-details} for
+more details on the solvers and their implementations. The path benchmark
+compares \textbf{sortedl1} with a subset of these solvers, namely
+\textbf{FISTA}, \textbf{SolutionPath}, and \textbf{ADMM}. All of the benchmarks
+were run on a system with an AMD Ryzen 9 7900 CPU (12 cores and 24 threads, with
+a maximum boost clock of 5.5 GHz), 64 GB of RAM, and NixOS 26.11 (Linux).
 
 We have run the benchmarks for both simulated~(\autoref{tab:simulated-data}) as
 well as real data~(\autoref{tab:real-data}). For all real data, we standardize
@@ -958,14 +960,15 @@ rules as well as algorithmic improvements. Newt-ALM also performs better than in
 
 For real data~\autoref{fig:real-data-single}, we see a mostly similar pattern.
 At a relative duality gap of \(10^{-7}\), \textbf{sortedl1} is the first solver
-to reach the threshold in 16 of the 18 combinations. ADMM is first for
+to reach the threshold in 15 of the 18 combinations. Newt-ALM is first for
+\dataset{Koussounadis2014} at \(\alpha_\text{max}/50\), and ADMM is first for
 \dataset{YearPredictionMSD} at \(\alpha_\text{max}/10\) and
 \(\alpha_\text{max}/50\). The performance of the other algorithms is generally
 more sensitive to the dataset and regularization level.
 
-\begin{figure}
+\begin{figure}[pos=p]
   \centering
-  \includegraphics{images/benchmark_single_real.pdf}
+  \includegraphics[]{images/benchmark_single_real.pdf}
   \caption{
     %
     Performance of the solvers for the single solution benchmark for six
@@ -975,6 +978,7 @@ more sensitive to the dataset and regularization level.
   }
   \label{fig:real-data-single}
 \end{figure}
+\clearpage
 
 \subsection{Path}
 \label{sec:path-benchmark}
@@ -992,7 +996,7 @@ to \(10^{-7}\), reaching it in eight of the nine combinations of dataset and
 path length, and doing so by a large time margin. No solver reaches the
 threshold for \dataset{BRCA1} with 200 path points within the time limit;
 \textbf{sortedl1} comes closest, with a maximum relative duality gap of
-\(2.5 \times 10^{-7}\).
+\(1.3 \times 10^{-6}\).
 
 \begin{figure}
   \centering
@@ -1007,16 +1011,16 @@ threshold for \dataset{BRCA1} with 200 path points within the time limit;
 \end{figure}
 
 Taken together, our benchmarks show that our method reaches a relative duality
-gap of \(10^{-7}\) first in 25 of the 27 single-solution settings and in eight
-of the nine path settings. ADMM is faster in the other two single-solution
-settings, while no solver reaches the threshold in the remaining path setting.
-In contrast to \citet{dupuis2024}, who showed mixed results when comparing their
-approximate homotopy method to the hybrid algorithm from \citet{larsson2023}, we
-find a clearer advantage for the current hybrid implementation. Possible
-explanations include the more stringent stopping criterion used by
-\citet{dupuis2024} (a duality gap of \(10^{-10}\)), the generally larger
-problems in our benchmarks, and enhancements over the original hybrid
-implementation from \citet{larsson2023}.
+gap of \(10^{-7}\) first in 24 of the 27 single-solution settings and in eight
+of the nine path settings. ADMM is faster in two single-solution settings, and
+Newt-ALM is faster in one, while no solver reaches the threshold in the
+remaining path setting. In contrast to \citet{dupuis2024}, who showed mixed
+results when comparing their approximate homotopy method to the hybrid algorithm
+from \citet{larsson2023}, we find a clearer advantage for the current hybrid
+implementation. Possible explanations include the more stringent stopping
+criterion used by \citet{dupuis2024} (a duality gap of \(10^{-10}\)), the
+generally larger problems in our benchmarks, and enhancements over the original
+hybrid implementation from \citet{larsson2023}.
 
 \section{Application to real-world data}
 
@@ -1137,8 +1141,8 @@ Our results support the effectiveness of the hybrid algorithm approach, with
 performance improvements over \citet{larsson2023} following the addition of
 screening rules and other algorithmic enhancements. The method reaches the
 reported accuracy threshold first in most of the settings considered here,
-including eight of the nine path-fitting settings, while another solver is
-faster in two single-solution settings. No solver reaches the threshold in the
+including eight of the nine path-fitting settings, while other solvers are
+faster in three single-solution settings. No solver reaches the threshold in the
 remaining path-fitting setting.
 
 Although our packages are full-fledged implementations of SLOPE, there are still
@@ -1634,6 +1638,11 @@ packages.
 
   \item[skglm] Another implementation of FISTA from the \textbf{skglm}
         package~\citep{bertrand2022}.
+
+  \item[tick] FISTA from the \textbf{tick} package~\citep{bacry2018}, using its
+        SLOPE proximal operator. We use a fixed step size equal to the inverse
+        of the average sample Lipschitz constant, which supports both dense and
+        sparse designs.
 
   \item[SolutionPath] An approximate homotopy method by \citet{dupuis2024},
         which is similar to the lars algorithm for the lasso~\citep{efron2004}.

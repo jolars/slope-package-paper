@@ -20,7 +20,7 @@ def extract_path_length(df):
     return df
 
 
-results_dir = "results/path_0831"
+results_dir = "results/path_1007"
 df = merge_parquet_files(results_dir)
 df = df[df["time"] <= 30].copy()
 df = extract_path_length(df)

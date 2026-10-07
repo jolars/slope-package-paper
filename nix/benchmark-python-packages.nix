@@ -32,6 +32,39 @@ let
   };
 in
 rec {
+  tick = pythonPackages.buildPythonPackage {
+    pname = "tick";
+    version = "0.8.0.2";
+    format = "wheel";
+
+    src = pkgs.fetchurl {
+      url = "https://files.pythonhosted.org/packages/b7/54/7825c1395ed018969213cc72e5594d0669d6f9344294a759020d3c6dfbe5/tick-0.8.0.2-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl";
+      hash = "sha256:11873300bb1cdf8ebc92731fb06c54874b3722f0abd07ebfdc63f4591a5a48c3";
+    };
+
+    nativeBuildInputs = [ pkgs.autoPatchelfHook ];
+    buildInputs = [ pkgs.stdenv.cc.cc.lib ];
+    dependencies = with pythonPackages; [
+      dill
+      matplotlib
+      numpy
+      # Tick builds runtime attribute definitions from its docstrings.
+      numpydoc
+      packaging
+      pandas
+      scikit-learn
+      scipy
+    ];
+
+    doCheck = false;
+    pythonImportsCheck = [
+      "tick.linear_model"
+      "tick.prox"
+      "tick.solver"
+    ];
+    meta.platforms = [ "x86_64-linux" ];
+  };
+
   benchopt = pythonPackages.buildPythonPackage rec {
     pname = "benchopt";
     version = "1.9.1";
