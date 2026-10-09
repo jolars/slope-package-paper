@@ -18,7 +18,7 @@
 
 \usepackage{enumitem}
 \usepackage{xurl}
-\hypersetup{linkcolor=black,citecolor=black,urlcolor=blue}
+\hypersetup{hidelinks}
 
 \input{tex/macros}
 
@@ -38,12 +38,14 @@
 \author[2]{Krystyna Grzesiak}[orcid=0000-0003-2581-7722]
 \author[3]{Mathurin Massias}[orcid=0000-0002-8950-0356]
 \author[4]{Jonas Wallin}[orcid=0000-0003-0381-6593]
+% TODO: Confirm CRediT roles for each author and add a \credit{...} command
+% immediately after each author's details above.
 \cortext[1]{Corresponding author.}
 
 % badness off
 
 \affiliation[1]{
-  organization={Department of Mathematical Sciences, University ofCopenhagen},
+  organization={Department of Mathematical Sciences, University of Copenhagen},
   addressline={Universitetsparken 5},
   city={Copenhagen \O},
   postcode={2100},
@@ -52,7 +54,7 @@
 
 % TODO: Confirm the institute names and addresses
 \affiliation[2]{
-  organization={Institute of Mathematics, University ofWroc\l{}aw},
+  organization={Institute of Mathematics, University of Wroc\l{}aw},
   addressline={Joliot-Curie 15},
   city={Wroc\l{}aw},
   postcode={50-383},
@@ -109,10 +111,6 @@
   \sep Julia \sep C++
 \end{keywords}
 
-% Use the CAS title option that prints the email address without an image icon.
-\ExplSyntaxOn
-\keys_set:nn { stm / mktitle } { nologo }
-\ExplSyntaxOff
 \maketitle
 
 \section{Introduction}
@@ -278,7 +276,14 @@ the gradient of the loss function with respect to \(\beta\) can be expressed as
 We summarize the loss, link, and inverse link functions for the GLMs supported
 by the SLOPE packages in \autoref{tab:glm}.
 
-\begin{table}[ht]
+\begin{table}[pos=ht]
+  \caption{
+    Loss functions, link functions, and inverse link functions for generalized
+    linear models in the SLOPE package. Note that in the case of multinomial
+    logistic regression, the input is vector-valued and
+    \(\mu_m = 1 - \sum_{k=1}^{m-1} \mu_k\) is the mean of the reference class.
+  }
+  \label{tab:glm}
   \centering
 
   \begin{tabular}{lccc}
@@ -291,13 +296,6 @@ by the SLOPE packages in \autoref{tab:glm}.
     Multinomial & \(\log \left( 1 + \sum_{j=1}^{m-1} e^{\eta_j} \right) - \sum_{k=1}^{m-1} y_k \eta_k\) & \(\left( \log \frac{\mu_k}{\mu_m} \right)_{k=1}^{m-1}\) & \(\left( \frac{e^{\eta_k}}{1 + \sum_{j=1}^{m-1} e^{\eta_j}} \right)_{k=1}^{m-1}\) \\
     \bottomrule
   \end{tabular}
-  \caption{
-    Loss functions, link functions, and inverse link functions for generalized
-    linear models in the SLOPE package. Note that in the case of multinomial
-    logistic regression, the input is vector-valued and
-    \(\mu_m = 1 - \sum_{k=1}^{m-1} \mu_k\) is the mean of the reference class.
-  }
-  \label{tab:glm}
 \end{table}
 
 A particular case of interest is the multinomial logistic regression model. Many
@@ -525,7 +523,12 @@ promptly take advantage of the latest developments. The entire suite of packages
 is open source and available in version-controlled online
 repositories~(\autoref{tab:slope-packages}).
 
-\begin{table}[tp]
+\begin{table}[pos=tp]
+  \caption{
+    A summary of the suite of packages that we have developed for solving SLOPE,
+    along with links to the source code repositories and documentation.
+  }
+  \label{tab:slope-packages}
   \centering
   \begin{tabular}{llll}
     \toprule
@@ -537,11 +540,6 @@ repositories~(\autoref{tab:slope-packages}).
     \textsf{C++}    & \textbf{slope}    & \myurl{github.com/jolars/libslope} & \myurl{jolars.github.io/libslope} \\
     \bottomrule
   \end{tabular}
-  \caption{
-    A summary of the suite of packages that we have developed for solving SLOPE,
-    along with links to the source code repositories and documentation.
-  }
-  \label{tab:slope-packages}
 \end{table}
 
 This is made possible via several pieces of software that enable us to link the
@@ -890,7 +888,15 @@ basis for comparison. We use Benchopt's 30-second timeout, which is checked
 between successive evaluations of a solver, and restrict the figures to
 evaluations taking no more than 30 seconds.
 
-\begin{table}[htp]
+\begin{table}[pos=htp]
+  \caption{
+    %
+    List of real datasets used in our experiments, along with some of their
+    properties, including the number of samples \(n\) and predictors \(p\).
+    \dataset{BRCA1}, \dataset{Koussounadis2014}, and \dataset{Rhee2006} were
+    obtained from \citet{breheny2022}, and the rest from \citet{chang2016}.
+  }
+  \label{tab:real-data}
   \centering
   \begin{tabular}{
       l
@@ -910,17 +916,16 @@ evaluations taking no more than 30 seconds.
     \dataset{YearPredictionMSD} & 463715  & 90      & 1               & \citet{bertin-mahieux2011}          \\
     \bottomrule
   \end{tabular}
-  \caption{
-    %
-    List of real datasets used in our experiments, along with some of their
-    properties, including the number of samples \(n\) and predictors \(p\).
-    \dataset{BRCA1}, \dataset{Koussounadis2014}, and \dataset{Rhee2006} were
-    obtained from \citet{breheny2022}, and the rest from \citet{chang2016}.
-  }
-  \label{tab:real-data}
 \end{table}
 
-\begin{table}[tp]
+\begin{table}[pos=tp]
+  \caption{
+    Scenarios for the simulated data in our benchmarks. \(\rho\) is the
+    auto-correlation between adjacent predictors, \(s\) is the number of nonzero
+    true coefficients, and \(n\) and \(p\) are the number of samples and
+    predictors, respectively.
+  }
+  \label{tab:simulated-data}
   \centering
   \begin{tabular}{
       l
@@ -938,13 +943,6 @@ evaluations taking no more than 30 seconds.
     Low Dim          & 20000   & 100     & 40      & 1               & 0.6        \\
     \bottomrule
   \end{tabular}
-  \caption{
-    Scenarios for the simulated data in our benchmarks. \(\rho\) is the
-    auto-correlation between adjacent predictors, \(s\) is the number of nonzero
-    true coefficients, and \(n\) and \(p\) are the number of samples and
-    predictors, respectively.
-  }
-  \label{tab:simulated-data}
 \end{table}
 
 \subsection{Single solution}
@@ -1223,19 +1221,6 @@ article for publication.
 
 % TODO (CSDA submission): Complete Elsevier's competing interests declaration
 % tool for all authors and upload the resulting .doc or .docx file separately.
-
-\section*{
-  Declaration of generative AI and AI-assisted technologies in the manuscript
-  preparation process
-}
-
-During the preparation of this manuscript, the authors used OpenAI Codex to
-assist with language editing and with the software itself, by repairing bugs and
-improving performance. The authors reviewed and edited the resulting material
-and take full responsibility for the content of the published article.
-
-\bibliographystyle{cas-model2-names}
-\bibliography{main}
 
 \clearpage
 
@@ -1697,6 +1682,23 @@ packages.
   \item[SolutionPath] An approximate homotopy method by \citet{dupuis2024},
         which is similar to the lars algorithm for the lasso~\citep{efron2004}.
 \end{description}
+
+% TODO: Add the confirmed author roles using \credit{...} above.
+% The CAS command below prints the author contribution statement.
+\printcredits
+
+\section*{
+  Declaration of generative AI and AI-assisted technologies in the manuscript
+  preparation process
+}
+
+During the preparation of this manuscript, the authors used OpenAI Codex to
+assist with language editing and with the software itself, by repairing bugs and
+improving performance. The authors reviewed and edited the resulting material
+and take full responsibility for the content of the published article.
+
+\bibliographystyle{cas-model2-names}
+\bibliography{main}
 
 \clearpage
 % The CAS footer reads the page counter after \clearpage advances it.
