@@ -3,12 +3,17 @@ import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-from slopeutils import FULL_WIDTH, legend_labels, merge_parquet_files, set_plot_defaults
+from slopeutils import (
+    FULL_WIDTH,
+    legend_labels,
+    merge_parquet_files,
+    set_plot_defaults,
+    solver_styles,
+)
 
 set_plot_defaults()
 
@@ -55,8 +60,7 @@ path_values = sorted(df_subset["path_length"].unique())
 dataset_values = sorted(df_subset["dataset"].unique())
 solver_values = sorted(df_subset["solver_name"].unique())
 
-colors = plt.cm.tab10(np.linspace(0, 1, len(solver_values)))
-solver_colors = dict(zip(solver_values, colors))
+solver_colors, solver_markers = solver_styles(solver_values)
 
 ymax_def = 15
 ymin_def = 1e-7
@@ -72,10 +76,6 @@ custom_limits = {
     (100, "BRCA1"): (-1, 16, ymin_def, ymax_def),
     (200, "BRCA1"): (-1.5, 19, ymin_def, ymax_def),
 }
-
-# Create markers for solvers
-markers = ["o", "s", "^", "D", "*", "x", "+", "v", "<", ">", "p", "h", "H", "d"]
-solver_markers = dict(zip(solver_values, markers[: len(solver_values)]))
 
 fig, axes = plt.subplots(
     len(dataset_values),

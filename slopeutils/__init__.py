@@ -5,6 +5,7 @@ from .plot_utils import (
     legend_labels,
     reg_labels,
     set_plot_defaults,
+    solver_styles,
 )
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "legend_labels",
     "reg_labels",
     "extract_reg_param",
+    "solver_styles",
 ]

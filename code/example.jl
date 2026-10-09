@@ -10,7 +10,7 @@ using Plots
 using Measures
 
 Plots.resetfontsizes()
-Plots.scalefontsizes(0.6)
+Plots.scalefontsizes(0.5)
 
 imgdir = @projectroot "images/"
 mkpath(imgdir)

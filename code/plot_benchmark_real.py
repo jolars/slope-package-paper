@@ -14,6 +14,7 @@ from slopeutils import (
     merge_parquet_files,
     reg_labels,
     set_plot_defaults,
+    solver_styles,
 )
 
 set_plot_defaults()
@@ -63,10 +64,7 @@ reg_values = np.asarray(np.flip(sorted(real_df["reg"].unique())), dtype="float64
 dataset_values = sorted(real_df["dataset"].unique())
 solver_values = sorted(real_df["solver_name"].unique())
 
-# Create a color palette for solvers
-# colors = sns.color_palette("tab10", len(solver_values))
-colors = plt.cm.tab10(np.linspace(0, 1, len(solver_values)))
-solver_colors = dict(zip(solver_values, colors))
+solver_colors, solver_markers = solver_styles(solver_values)
 
 ymax_def = 15
 ymin_def = 1e-7
@@ -91,10 +89,6 @@ custom_limits = {
     (0.1, "YearPredictionMSD"): (-0.5, 6, ymin_def, ymax_def),
     (0.02, "YearPredictionMSD"): (-1, 8, ymin_def, ymax_def),
 }
-
-# Create markers for solvers
-markers = ["o", "s", "^", "D", "*", "x", "+", "v", "<", ">", "p", "h", "H", "d"]
-solver_markers = dict(zip(solver_values, markers[: len(solver_values)]))
 
 # Set up the matplotlib figure and axes grid
 fig, axes = plt.subplots(

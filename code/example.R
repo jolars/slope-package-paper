@@ -21,8 +21,8 @@ y <- diabetes$y
 fit_slope <- SLOPE(x, y, q = 0.4)
 fit_lasso <- SLOPE(x, y, lambda = "lasso")
 
-width <- 5.2
-height <- 4.2
+width <- 6.4
+height <- 4.1
 ps <- 8
 
 slope_lasso_file <- fig_name("diabetes-slope-lasso")

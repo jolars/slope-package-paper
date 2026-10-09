@@ -1,6 +1,23 @@
 version: "3"
 
 tasks:
+  plots:
+    desc: "Regenerate all paper figures from examples and saved benchmark results"
+    dir: "{{.TASKFILE_DIR}}"
+    env:
+      MPLBACKEND: Agg
+      GKSwstype: "100"
+    cmds:
+      - Rscript code/example.R
+      - Rscript code/real-data.R
+      - python code/example.py
+      - julia --project=. -e 'using Pkg; Pkg.instantiate()'
+      - julia --project=. code/example.jl
+      - python code/plot_thresholding.py
+      - python code/plot_benchmark_real.py
+      - python code/plot_benchmark_simul.py
+      - python code/plot_benchmark_path.py
+
   arxiv:
     cmds:
       - rm -rf _build/arxiv

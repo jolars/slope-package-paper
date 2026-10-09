@@ -26,7 +26,7 @@ pattern
 
 width <- 4.5
 height <- 4.2
-ps <- 7
+ps <- 8
 
 patterns_glioma <- fig_name("glioma-clusters")
 pdf(patterns_glioma, width = width, height = height, pointsize = ps)

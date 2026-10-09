@@ -3,7 +3,29 @@ import pandas as pd
 
 # The CSDA elsarticle preprint text block is 390 pt (about 5.4 inches).
 # Leave room for the PDF crop and place figures at their exported size.
-FULL_WIDTH = 5.2
+FULL_WIDTH = 6.2
+
+# Keep solver identities consistent when a figure includes only a subset.
+SOLVER_STYLES = {
+    "ADMM": ("#1f77b4", "o"),
+    "Newt-ALM": ("#ff7f0e", "s"),
+    "Anderson PGD": ("#2ca02c", "^"),
+    "BB PGD": ("#d62728", "D"),
+    "FISTA": ("#9467bd", "*"),
+    "Safe PGD": ("#8c564b", "x"),
+    "SolutionPath": ("#e377c2", "+"),
+    "skglm": ("#7f7f7f", "v"),
+    "sortedl1 (ours)": ("#000000", "<"),
+    "tick": ("#17becf", ">"),
+}
+
+
+def solver_styles(solvers):
+    """Return fixed colors and markers for each solver's legend label."""
+    styles = {solver: SOLVER_STYLES[legend_labels(solver)] for solver in solvers}
+    colors = {solver: style[0] for solver, style in styles.items()}
+    markers = {solver: style[1] for solver, style in styles.items()}
+    return colors, markers
 
 
 def reg_labels(reg):
@@ -40,7 +62,7 @@ def legend_labels(solver):
     elif "ADMM" in solver:
         return "ADMM"
     elif "sortedl1" in solver:
-        return "sortedl1"
+        return "sortedl1 (ours)"
     elif "PGD_safe_screening" in solver:
         return "Safe PGD"
     elif "SlopePath" in solver:

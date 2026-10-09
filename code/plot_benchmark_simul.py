@@ -14,6 +14,7 @@ from slopeutils import (
     merge_parquet_files,
     reg_labels,
     set_plot_defaults,
+    solver_styles,
 )
 
 set_plot_defaults()
@@ -62,8 +63,7 @@ reg_values = np.asarray(np.flip(sorted(simulated_df["reg"].unique())), dtype="fl
 dataset_values = sorted(simulated_df["dataset"].unique())
 solver_values = sorted(simulated_df["solver_name"].unique())
 
-colors = plt.cm.tab10(np.linspace(0, 1, len(solver_values)))
-solver_colors = dict(zip(solver_values, colors))
+solver_colors, solver_markers = solver_styles(solver_values)
 
 ymax_def = 2
 ymin_def = 1e-7
@@ -79,9 +79,6 @@ custom_limits = {
     (0.1, "Low Dim"): (-0.05, 1.2, ymin_def, ymax_def),
     (0.02, "Low Dim"): (-0.05, 2.1, ymin_def, ymax_def),
 }
-
-markers = ["o", "s", "^", "D", "*", "x", "+", "v", "<", ">", "p", "h", "H", "d"]
-solver_markers = dict(zip(solver_values, markers[: len(solver_values)]))
 
 fig, axes = plt.subplots(
     len(dataset_values),
