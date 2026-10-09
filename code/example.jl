@@ -1,4 +1,4 @@
-ENV["GKSwstype"] = "100"  # Export PDFs without opening a Qt window.
+ENV["GKSwstype"] = "100" # Export PDFs without opening a Qt window.
 
 using SLOPE
 using CSV

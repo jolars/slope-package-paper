@@ -64,11 +64,7 @@ par(
   mar = c(4, 0.5, 2, 0.1),
   oma = c(0.1, 4.5, 0.1, 0.1)
 )
-plot(
-  fit_relaxed,
-  type = "S",
-  main = expression(paste(gamma, " = 0"))
-)
+plot(fit_relaxed, type = "S", main = expression(paste(gamma, " = 0")))
 mtext(expression(hat(beta)), side = 2, line = 2, outer = TRUE)
 plot(
   fit_semirelaxed,
