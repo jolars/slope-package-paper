@@ -383,7 +383,7 @@ omitted some details of the algorithm here.
   }{
     set \(t\) with backtracking line search\;
 
-    \(\beta \gets \beta - t \nabla F(\beta_0, \beta)\)\;
+    \(\beta \gets \operatorname{prox}_{t\alpha J_\lambda} \bigl(\beta - t \nabla_\beta F(\beta_0, \beta)\bigr)\)\;
 
     \For{\(i \gets 1,\dots,n\)}{
       \(\eta_i \gets x_i^T \beta + \beta_0\)\;
@@ -1218,9 +1218,9 @@ data used in this study are publicly available without registration.
 
 \section*{Funding}
 
-This work was supported by the French National Research Agency~(ANR)
-[grant number ANR-24-IAS2-0003] and the National Science Centre Poland
-[grant number 2021/43/O/ST6/02805].
+This work was supported by the French National Research Agency~(ANR) [grant
+number ANR-24-IAS2-0003] and the National Science Centre Poland [grant number
+2021/43/O/ST6/02805].
 
 The funders had no role in the study design, data collection, analysis and
 interpretation, writing of the report, or decision to submit the article for
