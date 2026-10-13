@@ -62,25 +62,51 @@ tasks:
       - curl -L -o _build/packages/SLOPE-jl-{{.JULIA_VER}}.tar.gz
         "https://github.com/jolars/SLOPE.jl/archive/refs/tags/v{{.JULIA_VER}}.tar.gz"
 
-  csda-source:
-    desc: "Prepare flat LaTeX source for Editorial Manager"
+  csda:
+    desc: "Prepare the cover letter, manuscript, code, and LaTeX source for CSDA"
+    dir: "{{.TASKFILE_DIR}}"
     cmds:
+      - git submodule update --init --recursive
       - rm -rf _build/csda
-      - mkdir -p _build/csda/code
+      - mkdir -p _build/csda/.staging/source/code _build/csda/.staging/supplementary
       - latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
-      - cp main.tex main.bib main.bbl tex/macros.tex images/*.pdf _build/csda/
-      - cp code/example.cpp _build/csda/code/
+      - latexmk -pdf -interaction=nonstopmode -halt-on-error cover-letter.tex
+      - cp main.pdf cover-letter.pdf _build/csda/
+      - cp main.tex main.bib main.bbl tex/macros.tex images/*.pdf _build/csda/.staging/source/
+      - cp code/example.cpp _build/csda/.staging/source/code/
       - >-
         cp els-cas-templates/cas-sc.cls els-cas-templates/cas-common.sty
-        els-cas-templates/cas-model2-names.bst _build/csda/
-      - sed -i -e 's@tex/macros@macros@' -e 's@images/@@g' _build/csda/main.tex
-      - latexmk -cd -pdf -interaction=nonstopmode _build/csda/main.tex
+        els-cas-templates/cas-model2-names.bst _build/csda/.staging/source/
+      - sed -i -e 's@tex/macros@macros@' -e 's@images/@@g' _build/csda/.staging/source/main.tex
+      - latexmk -cd -pdf -interaction=nonstopmode -halt-on-error _build/csda/.staging/source/main.tex
       - >-
-        tar -czf _build/csda-source-{{.DATE}}.tar.gz
+        tar -czf _build/csda/latex-source-{{.DATE}}.tar.gz
         --exclude=main.pdf --exclude='*.aux' --exclude='*.fdb_latexmk'
         --exclude='*.fls' --exclude='*.log' --exclude='*.out'
         --exclude='*.spl' --exclude='*.abs' --exclude='*.blg'
-        -C _build/csda .
+        --exclude='*.synctex.gz'
+        -C _build/csda/.staging/source .
+      - |
+        set -eu
+        set -o pipefail
+        git ls-files --recurse-submodules -z -- \
+          README.md LICENSE LICENSE-CODE LICENSE-PAPER Taskfile.yml \
+          devenv.nix devenv.yaml devenv.lock Project.toml Manifest.toml \
+          bench_config_*.yml code slopeutils data nix \
+          results/single_1007 results/path_1007 \
+          benchmark_slope benchmark_slope_path \
+          | tar --null -T - -cf - \
+          | tar -xf - -C _build/csda/.staging/supplementary
+        {
+          printf 'Paper commit: %s\n' "$(git rev-parse HEAD)"
+          git submodule status --recursive
+          printf '\nWorking tree changes included in this archive:\n'
+          git status --short
+        } > _build/csda/.staging/supplementary/source-versions.txt
+      - >-
+        tar -czf _build/csda/supplementary-code-{{.DATE}}.tar.gz
+        -C _build/csda/.staging/supplementary .
+      - rm -rf _build/csda/.staging
     vars:
       DATE:
         sh: date +%Y%m%d

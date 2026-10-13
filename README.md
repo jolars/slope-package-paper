@@ -133,6 +133,23 @@ git submodule update --init --recursive
 
 Run all commands below from the repository root.
 
+## CSDA Submission
+
+Run `task csda` to compile the manuscript and cover letter and prepare four
+upload files under `_build/csda/`:
+
+- `cover-letter.pdf`: The cover letter.
+- `main.pdf`: The manuscript.
+- `supplementary-code-YYYYMMDD.tar.gz`: The examples, analysis and plotting
+  scripts, benchmark sources, configurations, results used by the figures,
+  bundled data, and pinned software environment.
+- `latex-source-YYYYMMDD.tar.gz`: The flat LaTeX source, bibliography, figures,
+  journal templates, and C++ example for Editorial Manager.
+
+The code archive includes the initialized benchmark submodules and records
+their commit IDs in `source-versions.txt`. It copies tracked files from the
+working tree, including local edits, and excludes caches and downloaded data.
+
 ## Running Benchmarks
 
 We provide two separate benchmarks for comparing SLOPE solvers, one for
