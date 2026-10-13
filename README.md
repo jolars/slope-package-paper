@@ -135,11 +135,12 @@ Run all commands below from the repository root.
 
 ## CSDA Submission
 
-Run `task csda` to compile the manuscript and cover letter and prepare four
+Run `task csda` to compile the manuscript and cover letter and prepare five
 upload files under `_build/csda/`:
 
 - `cover-letter.pdf`: The cover letter.
 - `main.pdf`: The manuscript.
+- `abstract.txt`: The manuscript abstract as a single ASCII text paragraph.
 - `supplementary-code-YYYYMMDD.tar.gz`: The examples, analysis and plotting
   scripts, benchmark sources, configurations, results used by the figures,
   bundled data, and pinned software environment.

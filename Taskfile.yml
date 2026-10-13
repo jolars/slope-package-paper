@@ -63,16 +63,38 @@ tasks:
         "https://github.com/jolars/SLOPE.jl/archive/refs/tags/v{{.JULIA_VER}}.tar.gz"
 
   csda:
-    desc: "Prepare the cover letter, manuscript, code, and LaTeX source for CSDA"
+    desc: "Prepare the cover letter, abstract, manuscript, code, and LaTeX source for CSDA"
     dir: "{{.TASKFILE_DIR}}"
     cmds:
       - git submodule update --init --recursive
       - rm -rf _build/csda
-      - mkdir -p _build/csda/.staging/source/code _build/csda/.staging/supplementary
-      - latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
-      - latexmk -pdf -interaction=nonstopmode -halt-on-error cover-letter.tex
-      - cp main.pdf cover-letter.pdf _build/csda/
-      - cp main.tex main.bib main.bbl tex/macros.tex images/*.pdf _build/csda/.staging/source/
+      - mkdir -p _build/csda/.staging/source/code _build/csda/.staging/supplementary _build/csda/.staging/manuscript
+      - cp -r main.tex main.bib tex images _build/csda/.staging/manuscript/
+      - >-
+        cp els-cas-templates/cas-sc.cls els-cas-templates/cas-common.sty
+        els-cas-templates/cas-model2-names.bst _build/csda/.staging/manuscript/
+      - latexmk -cd -pdf -interaction=nonstopmode -halt-on-error _build/csda/.staging/manuscript/main.tex
+      - latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=_build/csda/.staging/manuscript cover-letter.tex
+      - cp _build/csda/.staging/manuscript/main.pdf _build/csda/.staging/manuscript/cover-letter.pdf _build/csda/
+      - |
+        python - <<'PY'
+        import re
+        from pathlib import Path
+
+        manuscript = Path("main.tex").read_text()
+        slash = chr(92)
+        abstract = manuscript.split(slash + "begin{abstract}", 1)[1]
+        abstract = abstract.split(slash + "end{abstract}", 1)[0]
+        abstract = re.sub(
+            re.escape(slash + "textsf") + "[{]([^{}]*)[}]",
+            lambda match: match[1], abstract
+        )
+        abstract = " ".join(abstract.replace(slash + "@", "").split())
+        if slash in abstract:
+            raise ValueError("The abstract contains unsupported LaTeX commands.")
+        Path("_build/csda/abstract.txt").write_text(abstract + chr(10), encoding="ascii")
+        PY
+      - cp main.tex main.bib _build/csda/.staging/manuscript/main.bbl tex/macros.tex images/*.pdf _build/csda/.staging/source/
       - cp code/example.cpp _build/csda/.staging/source/code/
       - >-
         cp els-cas-templates/cas-sc.cls els-cas-templates/cas-common.sty
