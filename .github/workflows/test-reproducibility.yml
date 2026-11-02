@@ -15,8 +15,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-        with:
-          submodules: recursive
 
       - name: Install Nix
         uses: cachix/install-nix-action@v31
@@ -50,31 +48,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-        with:
-          submodules: recursive
-
-      - name: Set up benchopt
-        if: matrix.benchmark == 'benchmark_slope_path'
-        uses: jolars/setup-benchopt@main
-
-      - name: Install benchmark dependencies
-        if: matrix.benchmark == 'benchmark_slope_path'
-        run: |
-          benchopt install ./${{ matrix.benchmark }} --config ${{ matrix.benchmark }}/example_config.yml -y
-
-      - name: Run benchmark with example config
-        if: matrix.benchmark == 'benchmark_slope_path'
-        run: |
-          benchopt run ./${{ matrix.benchmark }} --config ${{ matrix.benchmark }}/example_config.yml
 
       - name: Set up Python for Metewand
-        if: matrix.benchmark == 'benchmark_slope'
         uses: actions/setup-python@v7
         with:
           python-version: "3.13"
 
       - name: Check out pinned Metewand
-        if: matrix.benchmark == 'benchmark_slope'
         uses: actions/checkout@v7
         with:
           repository: jolars/metewand
@@ -82,29 +62,30 @@ jobs:
           path: .metewand-source
 
       - name: Set up Rust for Metewand
-        if: matrix.benchmark == 'benchmark_slope'
         uses: dtolnay/rust-toolchain@1.98.0
 
       - name: Build Metewand and install example dependencies
-        if: matrix.benchmark == 'benchmark_slope'
         shell: bash
         run: |
           git -C .metewand-source apply ../nix/metewand.patch
           cargo build --release --locked --manifest-path .metewand-source/Cargo.toml
           python -m pip install ./.metewand-source/packages/python \
-            numpy scipy scikit-learn numba sortedl1 'tick==0.8.0.2' libsvmdata pytest pyyaml
+            numpy scipy scikit-learn numba 'sortedl1==1.11.3' 'tick==0.8.0.2' libsvmdata pytest pyyaml
+
+      - name: Install path algorithm
+        if: matrix.benchmark == 'benchmark_slope_path'
+        run: python -m pip install git+https://github.com/jolars/slope-path@55165ab10079fe356ce56aef6e956750e6297060
 
       - name: Test native scientific code
-        if: matrix.benchmark == 'benchmark_slope'
-        run: python -m pytest benchmark_slope/tests -q
+        run: python -m pytest ${{ matrix.benchmark }}/tests -q
 
       - name: Validate native Metewand benchmark
-        if: matrix.benchmark == 'benchmark_slope'
         run: >-
           python benchmark_slope/validate.py
           --metewand .metewand-source/target/release/metewand
-          --manifest benchmark_slope/example_config.yml
-          --output-dir benchmark_slope/outputs/example
+          --manifest ${{ matrix.benchmark }}/example_config.yml
+          --metric ${{ matrix.benchmark == 'benchmark_slope_path' && 'max_rel_duality_gap' || 'rel_duality_gap' }}
+          --output-dir ${{ matrix.benchmark }}/outputs/example
 
       - name: Upload benchmark results
         if: always()

@@ -1,0 +1,58 @@
+{
+  "benchmark_slope_path": {
+    "repository": "https://github.com/jolars/benchmark_slope_path",
+    "revision": "b7950f2a218e2d3017096568e5e8dffaccb2b43e"
+  },
+  "correlated_data": {
+    "package": "benchopt",
+    "version": "1.9.1",
+    "license": "BSD-3-Clause"
+  },
+  "sources": {
+    "objective.py": {
+      "sha256": "df3b9787c996f7fd8d88d86d2ee29ef1cc67242f8c76fc68550ab57e6546c12d"
+    },
+    "solvers/admm.py": {
+      "sha256": "a01aca8a4ed7df31ee251df98f6ef1037541293132f77e857e8bb642ed32f3ec",
+      "references": [
+        "Boyd, S., Parikh, N., Chu, E., Peleato, B., & Eckstein, J. (2010). Distributed optimization and statistical learning via the alternating direction method of multipliers. Foundations and Trends in Machine Learning, 3(1), 1-122. https://doi.org/10.1561/2200000016"
+      ]
+    },
+    "solvers/pgd.py": {
+      "sha256": "0c27606b5c1524a269b522fefde48fafb1da30b66802c4ce93e91890b6dc4ff2",
+      "references": [
+        "A. Beck and M. Teboulle, \"A fast iterative shrinkage-thresholding algorithm for linear inverse problems\", SIAM J. Imaging Sci., vol. 2, no. 1, pp. 183-202 (2009)"
+      ]
+    },
+    "solvers/rslope.py": {
+      "sha256": "2ab3a934c588594402c98322652c9fd34af467bc14bd7a3ef266a240b0a8b827",
+      "references": [
+        "M. Bogdan, E. van den Berg, C. Sabatti, W. Su, and E. J. Candes, ",
+        "'SLOPE - adaptive variable selection via convex optimization,' ",
+        "Ann Appl Stat, vol. 9, no. 3, pp. 1103-1140, Sep. 2015, ",
+        "doi: 10.1214/15-AOAS842."
+      ]
+    },
+    "solvers/solution_path.py": {
+      "sha256": "b6d5dec5a5fdc1e89f7330055da8ba5aeaa5e3590a6c803db2b014b685318a1d",
+      "references": [
+        "Dupuis, X., & Tardivel, P. (2024). The solution path of SLOPE. Proceedings of The 27th International Conference on Artificial Intelligence and Statistics, 238, 775-783. https://proceedings.mlr.press/v238/dupuis24a.html"
+      ]
+    },
+    "solvers/sortedl1_solver.py": {
+      "sha256": "3c2212d82cc68e9c7f5bec39d01f061bafa20fb1dce1ba333c190ecd9c72de84",
+      "references": [
+        "J. Larsson, Q. Klopfenstein, M. Massias, and J. Wallin, \"Coordinate descent for SLOPE,\" in Proceedings of the 26th international conference on artificial intelligence and statistics, F. Ruiz, J. Dy, and J.-W. van de Meent, Eds., in Proceedings of machine learning research, vol. 206. Valencia, Spain: PMLR, Apr. 2023, pp. 4802-4821. [Online]. Available: https://proceedings.mlr.press/v206/larsson23a.html"
+      ]
+    },
+    "datasets/breheny.py": {
+      "sha256": "677a882802fad8fabc117dfb85f255a839be4a9df088171daae02e505af82fd3"
+    },
+    "datasets/libsvm.py": {
+      "sha256": "8d567a42e11bab8ab9fe59de43b1dd402bc6517c81c74d9c7a165c78e11d79d3"
+    },
+    "datasets/simulated.py": {
+      "sha256": "1f32fe64cb03b9d51197640ca2206884f62e6bcb9478a0270ab5fa442f64f8a5"
+    }
+  }
+}

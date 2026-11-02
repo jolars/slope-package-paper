@@ -12,6 +12,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--metewand", default="metewand")
     parser.add_argument("--manifest", default="bench_config_smoke_single.yml")
+    parser.add_argument("--metric", default="rel_duality_gap")
     parser.add_argument("--output-dir", required=True)
     args = parser.parse_args()
     executable = shutil.which(args.metewand) or args.metewand
@@ -76,7 +77,7 @@ def main():
         assert any(row["completion"] == "reached" for row in rows)
         print(
             f"{candidate['implementation']} / {candidate['dataset']}: "
-            f"{len(rows)} points, gap {rows[-1]['metrics']['rel_duality_gap']:.3g}"
+            f"{len(rows)} points, gap {rows[-1]['metrics'][args.metric]:.3g}"
         )
     invoke(
         "explain", "explain", measured[0]["observation_id"], "--output-dir", str(output)

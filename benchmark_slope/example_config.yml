@@ -9,7 +9,9 @@ datasets:
     protocol-transport: socket
     entrypoint: dataset_worker.py
     args: [simulated]
-    sources: &id002 ['*.py', solvers/*.py, datasets/*.py, ORIGINS.json]
+    sources: &id002 [__init__.py, artifacts.py, dataset_worker.py,
+      evaluator.py, objective.py, solver_worker.py,
+      validate.py, solvers/*.py, datasets/*.py, ORIGINS.json]
     output-schema: &id001
       type: object
       properties:

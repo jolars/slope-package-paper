@@ -25,7 +25,7 @@ let
     source = config.slopeBenchmark.metewandSource;
     toolchain = rustPkgs.rust-bin.fromRustupToolchainFile (inputs.metewand + "/rust-toolchain.toml");
   };
-  singlePythonPackages = ps: [
+  benchmarkPythonPackages = ps: [
     ps.appdirs
     ps.numba
     ps.rpy2
@@ -39,15 +39,22 @@ let
     benchmarkPackages.slopescreening
     sortedl1
   ];
-  benchmarkPythonPackages = ps: singlePythonPackages ps ++ [ benchmarkPackages.benchopt ];
   benchmarkPython = pkgs.python3.withPackages benchmarkPythonPackages;
-  singlePython = pkgs.python3.withPackages singlePythonPackages;
-  singleWorker =
-    pkgs.runCommand "slope-single-python" { nativeBuildInputs = [ pkgs.makeWrapper ]; }
+  benchmarkWorker =
+    pkgs.runCommand "slope-benchmark-python"
+      {
+        nativeBuildInputs = [ pkgs.makeWrapper ];
+        buildInputs = [
+          pkgs.R
+          SLOPE
+          pkgs.rPackages.Matrix
+        ];
+      }
       ''
         mkdir -p "$out/bin"
-        makeWrapper ${singlePython}/bin/python3 "$out/bin/python3" \
-          --prefix PATH : ${pkgs.R}/bin --set R_HOME ${pkgs.R}/lib/R
+        makeWrapper ${benchmarkPython}/bin/python3 "$out/bin/python3" \
+          --prefix PATH : ${pkgs.R}/bin --set R_HOME ${pkgs.R}/lib/R \
+          --set R_LIBS_SITE "$R_LIBS_SITE"
       '';
   developmentPython = pkgs.python3.withPackages (
     ps:
@@ -274,11 +281,11 @@ in
           exit 1
         }
         ${prepareBenchmarkData}
-        export PATH="${singleWorker}/bin:$PATH"
+        export PATH="${benchmarkWorker}/bin:$PATH"
         mkdir -p benchmark_slope/outputs "$benchmark_data_dir"
         have_output=false
         for argument in "$@"; do
-          if [ "$argument" = --output-dir ]; then have_output=true; fi
+          case "$argument" in --output-dir|--output-dir=*) have_output=true ;; esac
         done
         if ! "$have_output"; then
           set -- --output-dir "benchmark_slope/outputs/run-$(date +%Y%m%d-%H%M%S-%N)" "$@"
@@ -296,8 +303,17 @@ in
           exit 1
         }
         ${prepareBenchmarkData}
-        exec benchopt run ./benchmark_slope_path --config bench_config_path.yml \
-          --no-cache --timeout 30 "$@"
+        export PATH="${benchmarkWorker}/bin:$PATH"
+        mkdir -p benchmark_slope_path/outputs "$benchmark_data_dir"
+        have_output=false
+        for argument in "$@"; do
+          case "$argument" in --output-dir|--output-dir=*) have_output=true ;; esac
+        done
+        if ! "$have_output"; then
+          set -- --output-dir "benchmark_slope_path/outputs/run-$(date +%Y%m%d-%H%M%S-%N)" "$@"
+        fi
+        exec metewand run --manifest bench_config_path.yml \
+          --cache-dir "$benchmark_data_dir/metewand" "$@"
       '';
     };
 
@@ -308,7 +324,6 @@ in
         from importlib.metadata import version
 
         packages = (
-            "benchopt",
             "metewand",
             "libsvmdata",
             "numpy",
@@ -331,7 +346,6 @@ in
         printf 'benchmark source: %s\n' '${benchmarkSource}'
         if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
           printf 'paper: %s\n' "$(git rev-parse HEAD)"
-          git submodule status --recursive
         fi
         for variable in \
           BLIS_NUM_THREADS MKL_NUM_THREADS NUMEXPR_NUM_THREADS OMP_DYNAMIC \
@@ -348,18 +362,20 @@ in
       description = "Run fast checks through both pinned benchmark suites";
       exec = ''
         test -d benchmark_slope && test -d benchmark_slope_path || {
-          echo "Initialize the submodules and run benchmark-smoke from the repository root." >&2
+          echo "Run benchmark-smoke from the repository root." >&2
           exit 1
         }
         ${prepareBenchmarkData}
-        export PATH="${singleWorker}/bin:$PATH"
-        mkdir -p benchmark_slope/outputs "$benchmark_data_dir"
+        export PATH="${benchmarkWorker}/bin:$PATH"
+        mkdir -p benchmark_slope/outputs benchmark_slope_path/outputs "$benchmark_data_dir"
         metewand check --manifest bench_config_smoke_single.yml --workers
         metewand run --manifest bench_config_smoke_single.yml \
           --cache-dir "$benchmark_data_dir/metewand" \
           --output-dir "benchmark_slope/outputs/smoke-$(date +%Y%m%d-%H%M%S-%N)"
-        benchopt run ./benchmark_slope_path \
-          --config bench_config_smoke_path.yml --no-cache
+        metewand check --manifest bench_config_smoke_path.yml --workers
+        metewand run --manifest bench_config_smoke_path.yml \
+          --cache-dir "$benchmark_data_dir/metewand" \
+          --output-dir "benchmark_slope_path/outputs/smoke-$(date +%Y%m%d-%H%M%S-%N)"
       '';
     };
 
@@ -383,10 +399,10 @@ in
       python -c 'import importlib.metadata; assert importlib.metadata.version("sortedl1") == "${sortedl1Version}"'
       Rscript -e 'stopifnot(as.character(packageVersion("SLOPE")) == "${slopeRVersion}")'
       julia --project=. -e 'using Pkg; Pkg.instantiate(); using SLOPE; versions = [dep.version for dep in values(Pkg.dependencies()) if dep.name == "SLOPE"]; @assert only(versions) == v"${slopeJuliaVersion}"'
-      python -c 'import benchopt, libsvmdata, modules, rpy2, skglm, slopescreening, tick'
-      test "$(benchopt --version)" = "1.9.1"
+      python -c 'import libsvmdata, modules, rpy2, skglm, slopescreening, tick'
       python -c 'import metewand'
-      python -m pytest benchmark_slope/tests -q
+      python -m pytest benchmark_slope/tests slopeutils/tests -q
+      ${benchmarkWorker}/bin/python3 -m pytest benchmark_slope_path/tests -q
       benchmark-smoke >/dev/null
       slope-example >/dev/null
     '';

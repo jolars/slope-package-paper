@@ -97,6 +97,8 @@ def load_benchmark_results(path):
                 "tick": "tick",
                 "skglm": "skglm",
                 "slope-path": "SlopePath",
+                "solution-path": "SolutionPath",
+                "rslope": "rSLOPE",
                 "newt-alm": "Newt-ALM",
                 "safe-pgd": "PGD_safe_screening",
             }[method]
@@ -121,9 +123,15 @@ def load_benchmark_results(path):
             rows.append(
                 {
                     "data_name": _label(family, dataset),
-                    "objective_name": _label("SLOPE", problem),
+                    "objective_name": _label(
+                        "SLOPE_Path" if "path_length" in problem else "SLOPE", problem
+                    ),
                     "solver_name": _label(solver, implementation),
-                    "reg": problem["reg"],
+                    **{
+                        key: problem[key]
+                        for key in ("reg", "path_length")
+                        if key in problem
+                    },
                     "idx_rep": item.get("measurement_index", 0),
                     "implementation_rep": item.get("implementation_repetition", 0),
                     "stop_val": profile.get(

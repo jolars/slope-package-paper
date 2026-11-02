@@ -9,8 +9,9 @@ datasets:
     protocol-transport: socket
     entrypoint: benchmark_slope/dataset_worker.py
     args: [simulated]
-    sources: &id001 [benchmark_slope/*.py, benchmark_slope/solvers/*.py, benchmark_slope/datasets/*.py,
-      benchmark_slope/ORIGINS.json]
+    sources: &id001 [benchmark_slope/__init__.py, benchmark_slope/artifacts.py, benchmark_slope/dataset_worker.py,
+      benchmark_slope/evaluator.py, benchmark_slope/objective.py, benchmark_slope/solver_worker.py,
+      benchmark_slope/validate.py, benchmark_slope/solvers/*.py, benchmark_slope/datasets/*.py, benchmark_slope/ORIGINS.json]
     output-schema: &id002
       type: object
       properties:

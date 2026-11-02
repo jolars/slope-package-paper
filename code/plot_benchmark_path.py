@@ -1,3 +1,4 @@
+import argparse
 import re
 import sys
 from pathlib import Path
@@ -10,7 +11,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 from slopeutils import (
     FULL_WIDTH,
     legend_labels,
-    merge_parquet_files,
+    load_benchmark_results,
     set_plot_defaults,
     solver_styles,
 )
@@ -26,8 +27,15 @@ def extract_path_length(df):
     return df
 
 
-results_dir = "results/path_1007"
-df = merge_parquet_files(results_dir)
+parser = argparse.ArgumentParser(description="Plot solution-path convergence curves")
+parser.add_argument(
+    "--results",
+    default="results/path_1007",
+    help="Benchopt table directory or Metewand JSON export",
+)
+parser.add_argument("--output", help="Destination PDF")
+args = parser.parse_args()
+df = load_benchmark_results(args.results)
 df = df[df["time"] <= 30].copy()
 df = extract_path_length(df)
 
@@ -42,6 +50,9 @@ df_subset = df[
         "time",
         "objective_value",
         "objective_max_rel_duality_gap",
+        "implementation_rep",
+        "trajectory_id",
+        "partial",
     ]
 ].copy()
 
@@ -49,7 +60,7 @@ df_subset = df[
 # Extract dataset specifics from data_name to create shorter labels
 def extract_dataset_name(data_name):
     match = re.search(r"dataset=([^,\]]+)", data_name)
-    dataset = match.group(1) if match else "unknown"
+    dataset = match.group(1) if match else data_name.split("[", 1)[0]
     return "BRCA1" if dataset == "brca1" else dataset
 
 
@@ -82,6 +93,7 @@ fig, axes = plt.subplots(
     len(dataset_values),
     len(path_values),
     figsize=(FULL_WIDTH, 5),
+    squeeze=False,
     sharex=False,
     sharey=True,
     constrained_layout=True,
@@ -100,9 +112,11 @@ for i, dataset in enumerate(dataset_values):
 
         # Plot each solver
         for solver in solver_values:
-            solver_data = subplot_data[subplot_data["solver_name"] == solver]
-
-            if not solver_data.empty:
+            solver_groups = subplot_data[subplot_data["solver_name"] == solver].groupby(
+                ["data_name", "implementation_rep", "idx_rep", "trajectory_id"],
+                dropna=False,
+            )
+            for _, solver_data in solver_groups:
                 solver_data = solver_data.sort_values("time")
 
                 rel_gap = solver_data["objective_max_rel_duality_gap"]
@@ -111,7 +125,7 @@ for i, dataset in enumerate(dataset_values):
                     solver_data["time"],
                     rel_gap,
                     marker=solver_markers[solver],
-                    linestyle="-",
+                    linestyle="--" if solver_data["partial"].any() else "-",
                     color=solver_colors[solver],
                     label=solver,
                     markerfacecolor="white",
@@ -171,7 +185,7 @@ fig.legend(
 save_fig = True
 
 if save_fig:
-    figpath = "images/benchmark_path_real.pdf"
+    figpath = args.output or "images/benchmark_path_real.pdf"
     Path(figpath).parent.mkdir(parents=True, exist_ok=True)
     save_paper_figure(fig, figpath, bbox_inches="tight", pad_inches=0.05)
 else:

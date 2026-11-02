@@ -4,11 +4,6 @@
 
 let
   pythonPackages = pkgs.python3.pkgs;
-  lineProfiler = pythonPackages.line-profiler.overridePythonAttrs (_: {
-    # The source distribution omits fixtures required by two upstream tests.
-    doCheck = false;
-  });
-
   download = pythonPackages.buildPythonPackage rec {
     pname = "download";
     version = "0.3.5";
@@ -63,41 +58,6 @@ rec {
       "tick.solver"
     ];
     meta.platforms = [ "x86_64-linux" ];
-  };
-
-  benchopt = pythonPackages.buildPythonPackage rec {
-    pname = "benchopt";
-    version = "1.9.1";
-    pyproject = true;
-
-    src = pkgs.fetchPypi {
-      inherit pname version;
-      hash = "sha256-zHuMFiIvSNbhUbtLIN7Njjndt/ECPojTEoo8IyrxtKU=";
-    };
-
-    build-system = with pythonPackages; [
-      setuptools
-      wheel
-    ];
-
-    dependencies = with pythonPackages; [
-      click
-      joblib
-      lineProfiler
-      mako
-      matplotlib
-      numpy
-      pandas
-      plotly
-      psutil
-      pyarrow
-      pygithub
-      pyyaml
-      scipy
-    ];
-
-    doCheck = false;
-    pythonImportsCheck = [ "benchopt" ];
   };
 
   skglm = pythonPackages.buildPythonPackage rec {

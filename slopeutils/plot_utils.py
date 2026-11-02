@@ -18,6 +18,7 @@ SOLVER_STYLES = {
     "skglm": ("#7f7f7f", "v"),
     "sortedl1 (ours)": ("#000000", "<"),
     "tick": ("#17becf", ">"),
+    "rSLOPE": ("#bcbd22", "h"),
 }
 
 

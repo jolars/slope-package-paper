@@ -50,8 +50,8 @@ setting them to equal magnitudes.
 This repository is organized into several key components:
 
 - **Benchmarks** (`benchmark_slope/`, `benchmark_slope_path/`): Two
-  benchmarks for comparing SLOPE solvers: Metewand for single-penalty problems
-  and Benchopt for full path fitting
+  native Metewand benchmarks for comparing SLOPE solvers on single-penalty
+  problems and full path fitting
 - **Results** (`results/`): Benchmark outputs with performance comparisons
   across solvers
 - **Analysis Code** (`code/`, `slopeutils/`): R and Python scripts for
@@ -62,19 +62,11 @@ This repository is organized into several key components:
 
 ## Cloning the Repository
 
-The path benchmark is included as a git submodule, so clone the repository
-recursively:
+Both benchmarks are included in this repository:
 
 ```bash
-git clone --recurse-submodules https://github.com/jolars/slope-package-paper.git
+git clone https://github.com/jolars/slope-package-paper.git
 cd slope-package-paper
-```
-
-If you have already cloned the repository without `--recurse-submodules`, you
-can fetch the submodules from the repository root with:
-
-```bash
-git submodule update --init --recursive
 ```
 
 Run all commands below from the repository root.
@@ -110,37 +102,29 @@ journal review watermark and line numbers.
 
 ## Running Benchmarks
 
-The single-penalty benchmark uses [Metewand](https://github.com/jolars/metewand).
-The solution-path benchmark still uses [Benchopt](https://benchopt.github.io/).
-The pinned [Devenv environment](#using-devenv) and [container](#oci-container)
-provide both workflows:
+Both benchmarks use [Metewand](https://github.com/jolars/metewand). The pinned
+[Devenv environment](#using-devenv) and [container](#oci-container) provide both
+workflows:
 
 ```bash
 benchmark-single
 benchmark-path
 ```
 
-The full single-penalty configuration is `bench_config_single.yml`. It preserves
-all ten solver configurations and nine datasets and collects independently
-evaluated convergence curves. `benchmark-single` writes new runs beneath
-`benchmark_slope/outputs/`, with materialized data cached under `.benchmark-data/`.
-See the [native benchmark guide](benchmark_slope/README.md) for smaller runs,
-resuming, exports, plotting, timing boundaries, and local Metewand development.
+The full configurations are `bench_config_single.yml` and
+`bench_config_path.yml`. The single-penalty comparison preserves ten solver
+configurations and nine datasets. The path comparison preserves four solver
+configurations, three datasets, and requested path lengths 50, 100, and 200.
+Both collect independently evaluated convergence curves. New runs appear
+beneath the corresponding benchmark's `outputs/` directory, with materialized
+data cached under `.benchmark-data/`.
 
-### Path benchmark with Conda
-
-The path benchmark can also install its dependencies through Benchopt:
-
-```bash
-conda create -n benchopt -c conda-forge python=3.12
-conda activate benchopt
-pip install benchopt
-benchopt install ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
-benchopt run ./benchmark_slope_path --config benchmark_slope_path/example_config.yml
-```
-
-Use `bench_config_path.yml` and add `--no-cache --timeout 30` for the full path
-comparison. Its results remain under `benchmark_slope_path/outputs/`.
+The [single-penalty guide](benchmark_slope/README.md) and
+[path guide](benchmark_slope_path/README.md) cover smaller runs, resuming,
+exports, plotting, and timing boundaries. `benchmark-smoke` checks both suites
+on small dense and sparse inputs. Saved paper results under `results/` remain
+historical Benchopt tables; the plotting scripts accept those tables and new
+Metewand JSON exports.
 
 ### OCI Container
 
@@ -189,9 +173,8 @@ benchmark-path
 ```
 
 These commands use `bench_config_single.yml` and `bench_config_path.yml`.
-Metewand collects single-penalty profiles with a 30-second active-time budget.
-The path command retains its 30-second Benchopt timeout and disables the
-Benchopt result cache. Neither command installs dependencies during a run.
+Metewand collects both comparisons with a 30-second active-time budget per
+profile. Neither command installs dependencies during a run.
 
 Downloaded data is kept under `.benchmark-data/`. Set `SLOPE_BENCHMARK_DATA_DIR`
 to use another location. You can record the environment and data hashes after each
@@ -217,8 +200,8 @@ suites. A clean render needs all example dependencies and can take several
 minutes, especially while Julia compiles packages for the first time.
 
 The official Computo workflow is retained unchanged. Its `setup-render-ci.sh`
-hook initializes the path benchmark submodule and activates the same Nix-pinned
-R/Python environment used locally. Julia follows the exact version in
+hook activates the same Nix-pinned R and Python environment used locally. Julia
+follows the exact version in
 `Manifest.toml`. The journal manages Quarto, TinyTeX, and its format extension.
 Nix binary substitutions reduce setup time, but the journal's dependency cache
 does not retain the Nix store between runners.
@@ -306,11 +289,10 @@ directly.
 
 The benchmark plotting scripts in `code/plot_benchmark_*.py` use the results in
 `results/path_1007/` and `results/single_1007/`, so you can regenerate the
-figures without running the benchmarks. For a new single-penalty run, pass
-`--results` with a Metewand JSON export or a directory of Benchopt Parquet
-files to `code/plot_benchmark_real.py` or `code/plot_benchmark_simul.py`.
-For the path benchmark, change `results_dir` in `code/plot_benchmark_path.py`
-to the directory containing the run's Parquet files.
+figures without running the benchmarks. For a new run, pass `--results` with
+a Metewand JSON export or a directory of Benchopt Parquet files to
+`code/plot_benchmark_real.py`, `code/plot_benchmark_simul.py`, or
+`code/plot_benchmark_path.py`. Use `--output` to choose the destination PDF.
 
 Install these packages in addition to the dependencies in [Python
 Example](#python-example):
@@ -364,9 +346,9 @@ the Julia environment.
   | Julia `SLOPE.jl`  |   1.3.1 |
   | C++ `libslope`    |   6.5.4 |
 
-The paper repository owns the reproducible workflow. Its native sources and
-path submodule revision fix the benchmark code, while Devenv fixes the software
-closure used to execute it. `nix/metewand.nix` and `nix/metewand.patch` provide
+The paper repository owns the reproducible workflow and both native benchmark
+sources, while Devenv fixes the software closure used to execute them.
+`nix/metewand.nix` and `nix/metewand.patch` provide
 the pinned Metewand build. The generated OCI image carries that same
 closure to other Linux hosts.
 

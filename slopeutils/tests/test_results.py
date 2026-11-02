@@ -106,3 +106,36 @@ def test_censored_fresh_profile_marks_accepted_intermediate_points_as_partial(tm
     with pytest.warns(UserWarning, match="incomplete"):
         frame = load_benchmark_results(write(tmp_path, data))
     assert frame["partial"].tolist() == [True]
+
+
+@pytest.mark.parametrize(
+    "method,label",
+    [("solution-path", "SolutionPath"), ("pgd-fista", "PGD"), ("rslope", "rSLOPE")],
+)
+def test_path_exports_keep_path_parameters_and_maximum_gap(tmp_path, method, label):
+    data = snapshot()
+    row = data["observations"][0]
+    row["implementation"] = method
+    row["parameters"]["problem"] = {"path_length": 50, "q": 0.2, "fit_intercept": False}
+    row["parameters"]["dataset"] = {
+        "dataset": "brca1",
+        "path_length": 50,
+        "q": 0.2,
+        "fit_intercept": False,
+        "standardize": True,
+    }
+    row["parameters"]["implementation"] = {}
+    row["metrics"] = {"value": 1.0, "max_rel_duality_gap": 1e-8}
+    row["profile"] = {
+        "delivery": "fresh_sequence",
+        "schedule_index": 2,
+        "observation_control": {"tolerance": 0.01},
+    }
+    frame = load_benchmark_results(write(tmp_path, data))
+    assert frame.iloc[0]["objective_name"].startswith("SLOPE_Path[")
+    assert frame.iloc[0]["path_length"] == 50
+    assert "reg" not in frame
+    assert frame.iloc[0]["solver_name"] == label
+    assert frame.iloc[0]["objective_max_rel_duality_gap"] == 1e-8
+    assert frame.iloc[0]["time"] == 2e-6
+    assert frame.iloc[0]["stop_val"] == 0.01

@@ -3,7 +3,8 @@
 This native [Metewand](https://github.com/jolars/metewand) benchmark compares the
 ten solver configurations and nine datasets used by the paper. The full manifest
 selects three regularization values, giving 270 candidates before applicability
-exclusions. `benchmark_slope_path` still uses Benchopt.
+exclusions. The [path benchmark](../benchmark_slope_path/README.md) also uses
+Metewand.
 
 Run these commands from the paper repository root. The pinned Devenv environment
 includes the CLI, Python bindings, scientific dependencies, and R for reading
@@ -38,7 +39,7 @@ metewand run --manifest benchmark_slope/example_config.yml \
 
 Create the output parent first. The complete smoke manifest additionally uses
 skglm, slope-path, and slopescreening and covers dense and sparse designs. It
-runs through `benchmark-smoke`, alongside the unchanged path benchmark.
+runs through `benchmark-smoke`, alongside the native path benchmark.
 `validate.py` checks worker references, runs a comparison, exercises resume and
 inspection, and retains a complete JSON export:
 
@@ -80,6 +81,11 @@ sequence points retain their individual executor wall times. These coordinates
 and the framework's additional timing evidence remain separate in exports.
 The profile time budget accumulates measured work across fresh-sequence points.
 Runs remain serial; repetitions use the same materialized input.
+
+Top-level worker files are listed explicitly in the manifests because Metewand
+currently rejects `outputs/` beneath the literal prefix of a source glob,
+even when the output does not match it. This is tracked in
+[issue #16](https://github.com/jolars/metewand/issues/16).
 
 The analytic reference uses an identity design with two pooled coefficients.
 Tests construct its normal quantiles and KKT certificate independently. Dataset

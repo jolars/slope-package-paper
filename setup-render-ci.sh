@@ -6,7 +6,6 @@ set -euo pipefail
 : "${GITHUB_PATH:?This hook requires the GitHub Actions path file.}"
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
-git submodule update --init --recursive
 
 bootstrap_dir=$(mktemp -d)
 trap 'rm -rf "$bootstrap_dir"' EXIT

@@ -1,0 +1,35 @@
+from .correlated import make_correlated_data
+
+
+class Dataset:
+    name = "Simulated"
+
+    def __init__(
+        self,
+        n_samples=10,
+        n_features=50,
+        n_signals=5,
+        X_density=1.0,
+        rho=0,
+        standardize=True,
+        random_state=27,
+    ):
+        self.n_samples = n_samples
+        self.n_features = n_features
+        self.n_signals = n_signals
+        self.X_density = X_density
+        self.rho = rho
+        self.standardize = standardize
+        self.random_state = random_state
+
+    def get_data(self):
+        X, y, _ = make_correlated_data(
+            self.n_samples,
+            self.n_features,
+            rho=self.rho,
+            density=self.n_signals / self.n_features,
+            random_state=self.random_state,
+            X_density=self.X_density,
+        )
+
+        return {"X": X, "y": y}
