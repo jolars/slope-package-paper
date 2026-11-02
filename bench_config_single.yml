@@ -1,29 +1,413 @@
-objective:
-  - SLOPE[fit_intercept=False,q=0.2,reg=0.5,target_rel_duality_gap=1e-7]
-  - SLOPE[fit_intercept=False,q=0.2,reg=0.1,target_rel_duality_gap=1e-7]
-  - SLOPE[fit_intercept=False,q=0.2,reg=0.02,target_rel_duality_gap=1e-7]
-
-dataset:
-  - Simulated[X_density=1.0,n_features=20000,n_samples=100,rho=0.6,n_signals=20]
-  - Simulated[X_density=1.0,n_features=100,n_samples=20000,rho=0.6,n_signals=40]
-  - Simulated[X_density=0.001,n_features=200000,n_samples=2000,rho=0.6,n_signals=20]
-  - breheny[dataset=brca1,standardize=True]
-  - breheny[dataset=Rhee2006,standardize=True]
-  - breheny[dataset=Koussounadis2014,standardize=True]
-  - libsvm[dataset=rcv1.binary,standardize=True]
-  - libsvm[dataset=real-sim,standardize=True]
-  - libsvm[dataset=YearPredictionMSD,standardize=True]
-
-solver:
-  - tick
-  - PGD[prox=prox_fast_stack,acceleration=fista]
-  - PGD[prox=prox_fast_stack,acceleration=bb]
-  - PGD[prox=prox_fast_stack,acceleration=anderson]
-  - ADMM[adaptive_rho=False,rho=100]
-  - sortedl1[cd_type=permuted]
-  - skglm
-  - SlopePath
-  - Newt-ALM[inner_solver=auto]
-  - PGD_safe_screening[accelerated=True]
-
-n-repetitions: 1
+# Native Metewand convergence benchmark.
+version: 1
+name: slope-single
+worker-timeouts: {hello: 60 s, materialize: 30 min, prepare: 10 min, execute: 60 s, reset: 30 s, evaluate: 2
+    min, shutdown: 30 s}
+datasets:
+  simulated-high:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/dataset_worker.py
+    args: [simulated]
+    sources: &id001 [benchmark_slope/*.py, benchmark_slope/solvers/*.py, benchmark_slope/datasets/*.py,
+      benchmark_slope/ORIGINS.json]
+    output-schema: &id002
+      type: object
+      properties:
+        schema_version: {const: 1}
+        complete: {const: true}
+        files: {type: array, minItems: 1}
+      required: [schema_version, complete, files]
+    parameters:
+      n_samples: {type: integer, default: 100}
+      n_features: {type: integer, default: 20000}
+      n_signals: {type: integer, default: 20}
+      X_density: {type: number, default: 1.0}
+      rho: {type: number, default: 0.6}
+      random_state: {type: integer, default: 27}
+  simulated-low:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/dataset_worker.py
+    args: [simulated]
+    sources: *id001
+    output-schema: *id002
+    parameters:
+      n_samples: {type: integer, default: 20000}
+      n_features: {type: integer, default: 100}
+      n_signals: {type: integer, default: 40}
+      X_density: {type: number, default: 1.0}
+      rho: {type: number, default: 0.6}
+      random_state: {type: integer, default: 27}
+  simulated-sparse:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/dataset_worker.py
+    args: [simulated]
+    sources: *id001
+    output-schema: *id002
+    parameters:
+      n_samples: {type: integer, default: 2000}
+      n_features: {type: integer, default: 200000}
+      n_signals: {type: integer, default: 20}
+      X_density: {type: number, default: 0.001}
+      rho: {type: number, default: 0.6}
+      random_state: {type: integer, default: 27}
+  brca1:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/dataset_worker.py
+    args: [breheny]
+    sources: *id001
+    output-schema: *id002
+    parameters:
+      dataset: {type: string, default: brca1}
+      standardize: {type: boolean, default: true}
+  Rhee2006:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/dataset_worker.py
+    args: [breheny]
+    sources: *id001
+    output-schema: *id002
+    parameters:
+      dataset: {type: string, default: Rhee2006}
+      standardize: {type: boolean, default: true}
+  Koussounadis2014:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/dataset_worker.py
+    args: [breheny]
+    sources: *id001
+    output-schema: *id002
+    parameters:
+      dataset: {type: string, default: Koussounadis2014}
+      standardize: {type: boolean, default: true}
+  rcv1-binary:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/dataset_worker.py
+    args: [libsvm]
+    sources: *id001
+    output-schema: *id002
+    parameters:
+      dataset: {type: string, default: rcv1.binary}
+      standardize: {type: boolean, default: true}
+  real-sim:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/dataset_worker.py
+    args: [libsvm]
+    sources: *id001
+    output-schema: *id002
+    parameters:
+      dataset: {type: string, default: real-sim}
+      standardize: {type: boolean, default: true}
+  YearPredictionMSD:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/dataset_worker.py
+    args: [libsvm]
+    sources: *id001
+    output-schema: *id002
+    parameters:
+      dataset: {type: string, default: YearPredictionMSD}
+      standardize: {type: boolean, default: true}
+problems:
+  slope:
+    family: slope
+    parameters:
+      reg: {type: number, exclusiveMinimum: 0, default: 0.1}
+      q: {type: number, exclusiveMinimum: 0, exclusiveMaximum: 1, default: 0.2}
+      fit_intercept: {type: boolean, default: false}
+    dataset-schemas:
+    - *id002
+    result:
+      coefficients:
+        type: string
+        enum: [beta.npy]
+    metrics:
+      value: {type: number, optional: true}
+      duality_gap: {type: number, optional: true}
+      rel_duality_gap: {type: number, optional: true}
+      target_rel_duality_gap: {type: number, optional: true}
+    allowed-timing-scopes: [execute_only]
+    supported-budgets: [none]
+    semantics:
+      preprocessing:
+        shared_materialization: upstream_dataset_generation_and_standardization
+        implementation_conversion: preserve_values_and_order
+        allowed_outside_timed_scope: [dataset_loading, penalty_weights, solver_construction, jit_warmup]
+      validity: {relative_gap_floor: -1.0e-10, coefficients: finite_intercept_first_vector_matching_design,
+        absent_intercept: zero}
+      one_shot_completion: {rel_duality_gap: 1.0e-07}
+    reference-cases: [{dataset: benchmark_slope/reference/dataset, result: benchmark_slope/reference/result,
+        expected-metrics: benchmark_slope/reference/metrics.json}]
+    evaluator:
+      runner: python
+      protocol-transport: socket
+      entrypoint: benchmark_slope/evaluator.py
+      args: []
+      sources: *id001
+implementations:
+  pgd-fista:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/solver_worker.py
+    args: [python_pgd]
+    sources: *id001
+    problem-contracts: [slope]
+    capabilities: [streaming_profile, applicability]
+    parameters:
+      prox: {type: string, default: prox_fast_stack}
+      acceleration: {type: string, default: fista}
+  pgd-bb:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/solver_worker.py
+    args: [python_pgd]
+    sources: *id001
+    problem-contracts: [slope]
+    capabilities: [streaming_profile, applicability]
+    parameters:
+      prox: {type: string, default: prox_fast_stack}
+      acceleration: {type: string, default: bb}
+  pgd-anderson:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/solver_worker.py
+    args: [python_pgd]
+    sources: *id001
+    problem-contracts: [slope]
+    capabilities: [streaming_profile, applicability]
+    parameters:
+      prox: {type: string, default: prox_fast_stack}
+      acceleration: {type: string, default: anderson}
+  admm:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/solver_worker.py
+    args: [admm]
+    sources: *id001
+    problem-contracts: [slope]
+    capabilities: [streaming_profile, applicability]
+    parameters:
+      adaptive_rho: {type: boolean, default: false}
+      rho: {type: number, default: 100}
+  sortedl1:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/solver_worker.py
+    args: [sortedl1]
+    sources: *id001
+    problem-contracts: [slope]
+    capabilities: [fresh_sequence, applicability]
+    parameters:
+      cd_type: {type: string, default: permuted}
+  tick:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/solver_worker.py
+    args: [tick]
+    sources: *id001
+    problem-contracts: [slope]
+    capabilities: [fresh_sequence, applicability]
+    parameters: {}
+  skglm:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/solver_worker.py
+    args: [skglm]
+    sources: *id001
+    problem-contracts: [slope]
+    capabilities: [fresh_sequence, applicability]
+    parameters: {}
+  slope-path:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/solver_worker.py
+    args: [slope_path]
+    sources: *id001
+    problem-contracts: [slope]
+    capabilities: [fresh_sequence, applicability]
+    parameters: {}
+  newt-alm:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/solver_worker.py
+    args: [newt_alm]
+    sources: *id001
+    problem-contracts: [slope]
+    capabilities: [streaming_profile, applicability]
+    parameters:
+      inner_solver: {type: string, default: auto}
+  safe-pgd:
+    runner: python
+    protocol-transport: socket
+    entrypoint: benchmark_slope/solver_worker.py
+    args: [pgd_safe_screening]
+    sources: *id001
+    problem-contracts: [slope]
+    capabilities: [fresh_sequence, applicability]
+    parameters:
+      accelerated: {type: boolean, default: true}
+experiments:
+- name: single
+  problem: slope
+  datasets: [simulated-high, simulated-low, simulated-sparse, brca1, Rhee2006, Koussounadis2014, rcv1-binary,
+    real-sim, YearPredictionMSD]
+  implementations: [pgd-fista, pgd-bb, pgd-anderson, admm, sortedl1, tick, skglm, slope-path, newt-alm,
+    safe-pgd]
+  execution-policy: local
+  observation-policy: convergence
+  measurement-repetitions: 1
+  seed: 27
+  problem-parameters:
+    reg:
+      grid: [0.5, 0.1, 0.02]
+execution-policies:
+  local: {timing-scope: execute_only, primary-time: timed_wall_time, worker-reuse: true, warmup-runs: 1,
+    max-concurrency: 1, timeout: 30 s}
+observation-policies:
+  convergence:
+    kind: profile
+    metric: rel_duality_gap
+    direction: at_most
+    threshold: 1.0e-07
+    max-observations: 32
+    max-checkpoint-bytes: 67108864
+    max-active-time: 30 s
+    implementations:
+      pgd-fista:
+        delivery: streaming_profile
+        measurement-basis: executor_observed
+        check-schedule:
+          indices: &id003 [0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768,
+            65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864,
+            134217728, 268435456, 536870912, 1073741824]
+      pgd-bb:
+        delivery: streaming_profile
+        measurement-basis: executor_observed
+        check-schedule:
+          indices: *id003
+      pgd-anderson:
+        delivery: streaming_profile
+        measurement-basis: executor_observed
+        check-schedule:
+          indices: *id003
+      admm:
+        delivery: streaming_profile
+        measurement-basis: executor_observed
+        check-schedule:
+          indices: *id003
+      sortedl1:
+        delivery: fresh_sequence
+        control-schema:
+          type: object
+          oneOf:
+          - properties:
+              initial: {const: true}
+            required: [initial]
+            additionalProperties: false
+          - properties:
+              tolerance: {type: number, exclusiveMinimum: 0}
+            required: [tolerance]
+            additionalProperties: false
+        schedule:
+          kind: explicit
+          controls: [{initial: true}, {tolerance: 0.1}, {tolerance: 0.01}, {tolerance: 0.001}, {tolerance: 0.0001},
+            {tolerance: 1.0e-05}, {tolerance: 1.0e-06}, {tolerance: 1.0e-07}, {tolerance: 1.0e-08}, {
+              tolerance: 1.0e-09}, {tolerance: 1.0e-10}, {tolerance: 1.0e-11}, {tolerance: 1.0e-12}]
+      tick:
+        delivery: fresh_sequence
+        control-schema:
+          type: object
+          oneOf:
+          - properties:
+              initial: {const: true}
+            required: [initial]
+            additionalProperties: false
+          - properties:
+              iterations: {type: integer, minimum: 1}
+            required: [iterations]
+            additionalProperties: false
+        schedule:
+          kind: explicit
+          controls: [{initial: true}, {iterations: 1}, {iterations: 2}, {iterations: 4}, {iterations: 8},
+            {iterations: 16}, {iterations: 32}, {iterations: 64}, {iterations: 128}, {iterations: 256},
+            {iterations: 512}, {iterations: 1024}, {iterations: 2048}, {iterations: 4096}, {iterations: 8192},
+            {iterations: 16384}, {iterations: 32768}, {iterations: 65536}, {iterations: 131072}, {iterations: 262144},
+            {iterations: 524288}, {iterations: 1048576}, {iterations: 2097152}, {iterations: 4194304},
+            {iterations: 8388608}, {iterations: 16777216}, {iterations: 33554432}, {iterations: 67108864},
+            {iterations: 134217728}, {iterations: 268435456}, {iterations: 536870912}, {iterations: 1073741824}]
+      skglm:
+        delivery: fresh_sequence
+        control-schema:
+          type: object
+          oneOf:
+          - properties:
+              initial: {const: true}
+            required: [initial]
+            additionalProperties: false
+          - properties:
+              iterations: {type: integer, minimum: 1}
+            required: [iterations]
+            additionalProperties: false
+        schedule:
+          kind: explicit
+          controls: [{initial: true}, {iterations: 1}, {iterations: 2}, {iterations: 4}, {iterations: 8},
+            {iterations: 16}, {iterations: 32}, {iterations: 64}, {iterations: 128}, {iterations: 256},
+            {iterations: 512}, {iterations: 1024}, {iterations: 2048}, {iterations: 4096}, {iterations: 8192},
+            {iterations: 16384}, {iterations: 32768}, {iterations: 65536}, {iterations: 131072}, {iterations: 262144},
+            {iterations: 524288}, {iterations: 1048576}, {iterations: 2097152}, {iterations: 4194304},
+            {iterations: 8388608}, {iterations: 16777216}, {iterations: 33554432}, {iterations: 67108864},
+            {iterations: 134217728}, {iterations: 268435456}, {iterations: 536870912}, {iterations: 1073741824}]
+      slope-path:
+        delivery: fresh_sequence
+        control-schema:
+          type: object
+          oneOf:
+          - properties:
+              initial: {const: true}
+            required: [initial]
+            additionalProperties: false
+          - properties:
+              iterations: {type: integer, minimum: 1}
+            required: [iterations]
+            additionalProperties: false
+        schedule:
+          kind: explicit
+          controls: [{initial: true}, {iterations: 1}, {iterations: 2}, {iterations: 4}, {iterations: 8},
+            {iterations: 16}, {iterations: 32}, {iterations: 64}, {iterations: 128}, {iterations: 256},
+            {iterations: 512}, {iterations: 1024}, {iterations: 2048}, {iterations: 4096}, {iterations: 8192},
+            {iterations: 16384}, {iterations: 32768}, {iterations: 65536}, {iterations: 131072}, {iterations: 262144},
+            {iterations: 524288}, {iterations: 1048576}, {iterations: 2097152}, {iterations: 4194304},
+            {iterations: 8388608}, {iterations: 16777216}, {iterations: 33554432}, {iterations: 67108864},
+            {iterations: 134217728}, {iterations: 268435456}, {iterations: 536870912}, {iterations: 1073741824}]
+      newt-alm:
+        delivery: streaming_profile
+        measurement-basis: executor_observed
+        check-schedule:
+          indices: *id003
+      safe-pgd:
+        delivery: fresh_sequence
+        control-schema:
+          type: object
+          oneOf:
+          - properties:
+              initial: {const: true}
+            required: [initial]
+            additionalProperties: false
+          - properties:
+              iterations: {type: integer, minimum: 1}
+            required: [iterations]
+            additionalProperties: false
+        schedule:
+          kind: explicit
+          controls: [{initial: true}, {iterations: 1}, {iterations: 2}, {iterations: 4}, {iterations: 8},
+            {iterations: 16}, {iterations: 32}, {iterations: 64}, {iterations: 128}, {iterations: 256},
+            {iterations: 512}, {iterations: 1024}, {iterations: 2048}, {iterations: 4096}, {iterations: 8192},
+            {iterations: 16384}, {iterations: 32768}, {iterations: 65536}, {iterations: 131072}, {iterations: 262144},
+            {iterations: 524288}, {iterations: 1048576}, {iterations: 2097152}, {iterations: 4194304},
+            {iterations: 8388608}, {iterations: 16777216}, {iterations: 33554432}, {iterations: 67108864},
+            {iterations: 134217728}, {iterations: 268435456}, {iterations: 536870912}, {iterations: 1073741824}]

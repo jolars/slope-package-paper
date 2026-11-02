@@ -1,3 +1,4 @@
+import argparse
 import re
 import sys
 from pathlib import Path
@@ -11,7 +12,7 @@ from slopeutils import (
     FULL_WIDTH,
     extract_reg_param,
     legend_labels,
-    merge_parquet_files,
+    load_benchmark_results,
     reg_labels,
     set_plot_defaults,
     solver_styles,
@@ -20,8 +21,15 @@ from slopeutils import (
 set_plot_defaults()
 
 
-results_dir = "results/single_1007"
-df = merge_parquet_files(results_dir)
+parser = argparse.ArgumentParser(description="Plot single-penalty convergence curves")
+parser.add_argument(
+    "--results",
+    default="results/single_1007",
+    help="Benchopt table directory or Metewand JSON export",
+)
+parser.add_argument("--output", help="Destination PDF")
+args = parser.parse_args()
+df = load_benchmark_results(args.results)
 df = df[df["time"] <= 30].copy()
 df = extract_reg_param(df)
 
@@ -35,6 +43,9 @@ df_subset = df[
         "time",
         "objective_value",
         "objective_duality_gap",
+        "implementation_rep",
+        "trajectory_id",
+        "partial",
     ]
 ]
 
@@ -95,6 +106,7 @@ fig, axes = plt.subplots(
     len(dataset_values),
     len(reg_values),
     figsize=(FULL_WIDTH, 6.4),
+    squeeze=False,
     sharex=False,
     sharey=True,
     constrained_layout=True,
@@ -112,9 +124,12 @@ for i, dataset in enumerate(dataset_values):
 
         # Plot each solver
         for solver in solver_values:
-            solver_data = subplot_data[subplot_data["solver_name"] == solver]
+            solver_groups = subplot_data[subplot_data["solver_name"] == solver].groupby(
+                ["data_name", "implementation_rep", "idx_rep", "trajectory_id"],
+                dropna=False,
+            )
 
-            if not solver_data.empty:
+            for _, solver_data in solver_groups:
                 solver_data = solver_data.sort_values("time")
 
                 dual_gap = solver_data["objective_duality_gap"]
@@ -127,7 +142,7 @@ for i, dataset in enumerate(dataset_values):
                     solver_data["time"],
                     rel_gap,
                     marker=solver_markers[solver],
-                    linestyle="-",
+                    linestyle="--" if solver_data["partial"].any() else "-",
                     color=solver_colors[solver],
                     label=solver,
                     markerfacecolor="white",
@@ -183,7 +198,7 @@ fig.legend(
 save_fig = True
 
 if save_fig:
-    figpath = "images/benchmark_single_real.pdf"
+    figpath = args.output or "images/benchmark_single_real.pdf"
     Path(figpath).parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(figpath, bbox_inches="tight", pad_inches=0.05)
 else:

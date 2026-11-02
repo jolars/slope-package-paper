@@ -1,0 +1,98 @@
+import os
+import sys
+from math import inf as INFINITY
+
+import numpy as np
+
+from .base import SolverBase
+
+# On Windows, GitHub runners (and many statisticians' machines) ship a
+# system R whose bin\x64 is on PATH. rpy2 loads that R.dll by name, so the
+# conda-forge SLOPE and stats DLLs then bind to the wrong R runtime and
+# fail with "LoadLibrary failure: The specified procedure could not be
+# found." Pin R_HOME to the conda env and put its R bin on the DLL search
+# path before rpy2 is imported so the matching R.dll is the one that loads.
+if os.name == "nt":
+    r_home = os.path.join(sys.prefix, "Lib", "R")
+    r_bin = os.path.join(r_home, "bin", "x64")
+    os.environ["R_HOME"] = r_home
+    if os.path.isdir(r_bin):
+        os.add_dll_directory(r_bin)
+        os.environ["PATH"] = r_bin + os.pathsep + os.environ["PATH"]
+
+from rpy2 import robjects
+from rpy2.robjects import numpy2ri, packages
+from scipy import sparse
+
+packages.importr("SLOPE")
+
+
+class Solver(SolverBase):
+    name = "rSLOPE"
+
+    support_sparse = True
+
+    def set_objective(self, X, y, alphas, fit_intercept):
+        if sparse.issparse(X):
+            r_Matrix = packages.importr("Matrix")
+            X = X.tocoo()
+            self.X = r_Matrix.sparseMatrix(
+                i=robjects.IntVector(X.row + 1),
+                j=robjects.IntVector(X.col + 1),
+                x=robjects.FloatVector(X.data),
+                dims=robjects.IntVector(X.shape),
+            )
+        else:
+            self.X = X
+        self.y, self.alphas = y, alphas
+        self.fit_intercept = fit_intercept
+
+        self.slope = robjects.r["SLOPE"]
+
+    def run(self, tol):
+        if tol == INFINITY:
+            max_passes = 1
+            tol = 1
+        else:
+            max_passes = 1_000_000
+
+        # Convert numpy inputs to R explicitly. rpy2 removed the global
+        # numpy2ri.activate(), and a conversion context would also turn the
+        # returned SLOPE object into a plain dict, so we convert at the boundary
+        # and keep self.fit as an R object.
+        X = numpy2ri.numpy2rpy(self.X) if isinstance(self.X, np.ndarray) else self.X
+
+        self.fit = self.slope(
+            X,
+            numpy2ri.numpy2rpy(self.y),
+            intercept=self.fit_intercept,
+            scale="none",
+            alpha=1.0,
+            center=False,
+            max_passes=max_passes,
+            tol_rel_gap=tol * 0.1,
+            tol_infeas=tol,
+            tol_rel_coef_change=tol,
+            **{"lambda": numpy2ri.numpy2rpy(self.alphas)},
+        )
+
+    def get_result(self):
+        # SLOPE returns coefficients as a length-one list holding a sparse
+        # dgCMatrix (one entry per penalty sequence). Unwrap the list, then
+        # build the dense vector from the matrix slots directly. This avoids
+        # R-side S4 coercion, which rpy2 does not dispatch reliably.
+        coefs = self.fit.rx2("coefficients")
+        if tuple(coefs.rclass) == ("list",):
+            coefs = coefs[0]
+
+        data = np.asarray(coefs.do_slot("x"))
+        indices = np.asarray(coefs.do_slot("i"))
+        indptr = np.asarray(coefs.do_slot("p"))
+        dim = tuple(int(d) for d in coefs.do_slot("Dim"))
+        beta = np.asarray(
+            sparse.csc_matrix((data, indices, indptr), shape=dim).todense()
+        ).ravel()
+
+        beta = beta if self.fit_intercept else np.hstack((np.array([0.0]), beta))
+
+        return {"beta": beta}

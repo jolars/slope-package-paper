@@ -1,0 +1,84 @@
+{
+  "benchmark_slope": {
+    "repository": "https://github.com/benchopt/benchmark_slope",
+    "revision": "e841febeec95e31139b4a9f1ecd51ac92e3513a1"
+  },
+  "correlated_data": {
+    "package": "benchopt",
+    "version": "1.9.1",
+    "license": "BSD-3-Clause"
+  },
+  "sources": {
+    "solvers/admm.py": {
+      "sha256": "766bd08197bf0a3ab5b589092a59d53d7790e8e6b1e1744eeb4d1023de764a4a",
+      "references": [
+        "Boyd, S., Parikh, N., Chu, E., Peleato, B., & Eckstein, J. (2010). Distributed optimization and statistical learning via the alternating direction method of multipliers. Foundations and Trends in Machine Learning, 3(1), 1-122. https://doi.org/10.1561/2200000016"
+      ]
+    },
+    "solvers/newt_alm.py": {
+      "sha256": "6e38446fb5bd1a2f8706043be04bc57be6adafb785a392df5ac9488c87b2b4c6",
+      "references": [
+        "Luo, Z., Sun, D., Toh, K.-C., & Xiu, N. (2019). Solving the OSCAR and SLOPE models using a semismooth Newton-based augmented Lagrangian method. Journal of Machine Learning Research, 20(106), 1-25."
+      ]
+    },
+    "solvers/pgd_safe_screening.py": {
+      "sha256": "c4464beeb87f97ec535ba070eb01405ddfe1fd1e99e0fcf2af17de00dd7f853a",
+      "references": [
+        "C. Elvira and C. Herzet, 'Safe rules for the identification of zeros in ",
+        "the solutions of the SLOPE problem.' arXiv, Oct. 04, 2022. ",
+        "doi: 10.48550/arXiv.2110.11784."
+      ]
+    },
+    "solvers/python_pgd.py": {
+      "sha256": "c3cc691c008ec759c51281c8a514a252868a4c426fa5a7dc5756a058210144cc",
+      "references": [
+        "I. Daubechies, M. Defrise and C. De Mol, \"An iterative thresholding algorithm for linear inverse problems with a sparsity constraint\", Comm. Pure Appl. Math., vol. 57, pp. 1413-1457, no. 11, Wiley Online Library (2004)",
+        "A. Beck and M. Teboulle, \"A fast iterative shrinkage-thresholding algorithm for linear inverse problems\", SIAM J. Imaging Sci., vol. 2, no. 1, pp. 183-202 (2009)",
+        "Barzilai, J., & Borwein, J. M. (1988). Two-point step size gradient methods. IMA Journal of Numerical Analysis, 8(1), 141-148. https://doi.org/10.1093/imanum/8.1.141",
+        "Anderson, D. G. (1965). Iterative procedures for nonlinear integral equations. J. ACM, 12(4), 547-560. https://doi.org/10.1145/321296.321305"
+      ]
+    },
+    "solvers/rslope.py": {
+      "sha256": "dbe152e156441ccf7fdccee8c43e7a12f9aa0ffa8eaeee584827f042569d001e",
+      "references": [
+        "M. Bogdan, E. van den Berg, C. Sabatti, W. Su, and E. J. Candes, ",
+        "'SLOPE - adaptive variable selection via convex optimization,' ",
+        "Ann Appl Stat, vol. 9, no. 3, pp. 1103-1140, Sep. 2015, ",
+        "doi: 10.1214/15-AOAS842."
+      ]
+    },
+    "solvers/skglm.py": {
+      "sha256": "67aec663bac06a36d3a436bbf2ef2ccc86b6a15e8a80b3b09ac4a87df51c7868",
+      "references": [
+        "Q. Bertrand, Q. Klopfenstein, P.-A. Bannier, G. Gidel, and M. Massias,'Beyond L1: faster and better sparse models with skglm,' in Advances inNeural Information Processing Systems 35, New Orleans, USA: Curran Associates,Inc., Dec. 2022, pp. 38950-38965. Accessed: Jan. 08, 2024."
+      ]
+    },
+    "solvers/slope_path.py": {
+      "sha256": "d97156cc163c2cd3d46771948970ee5367e74a2d10db571a1bf3467bf76e7b87",
+      "references": [
+        "Dupuis, X., & Tardivel, P. (2024). The solution path of SLOPE. Proceedings of The 27th International Conference on Artificial Intelligence and Statistics, 238, 775-783. https://proceedings.mlr.press/v238/dupuis24a.html"
+      ]
+    },
+    "solvers/sortedl1.py": {
+      "sha256": "585193fd5f8ba194f9efc4e58a91de4edc9f05b9e27b5ddfa4db4d6ec2bff545",
+      "references": [
+        "J. Larsson, Q. Klopfenstein, M. Massias, and J. Wallin, 'Coordinate descent for SLOPE,' in Proceedings of the 26th international conference on artificial intelligence and statistics, F. Ruiz, J. Dy, and J.-W. van de Meent, Eds., in Proceedings of machine learning research, vol. 206. Valencia, Spain: PMLR, Apr. 2023, pp. 4802-4821. [Online]. Available: https://proceedings.mlr.press/v206/larsson23a.html"
+      ]
+    },
+    "solvers/tick.py": {
+      "sha256": "b0d0d71ecbd4ca25e4b08db6a5326d40bc4b708c8ae39c02c69bc4ed2f3a49e3"
+    },
+    "datasets/breheny.py": {
+      "sha256": "0153244a29b687ff4634f2dc8647dca90526a33d3d5078956e758dc3f966e151"
+    },
+    "datasets/libsvm.py": {
+      "sha256": "7808474cd9931d7827d91d1c6ae00a876b19632497a12ee499e1e69587de3c42"
+    },
+    "datasets/simulated.py": {
+      "sha256": "0b519336b7c796b98acdbebb53ba6820558924639b82c4fd0b74bd82317f3f5c"
+    },
+    "objective.py": {
+      "sha256": "8fd45d5c590972a3b3465b15c721607feae7d656066216f9002b4fc817aa78ae"
+    }
+  }
+}

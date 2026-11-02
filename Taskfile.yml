@@ -121,6 +121,8 @@ tasks:
           | tar -xf - -C _build/csda/.staging/supplementary
         {
           printf 'Paper commit: %s\n' "$(git rev-parse HEAD)"
+          printf 'Metewand base: %s\n' '10f6b13ef8d5607b6e26a7a1ab10ebca17d278e4'
+          printf 'Metewand local patches: nix/metewand.patch\n'
           git submodule status --recursive
           printf '\nWorking tree changes included in this archive:\n'
           git status --short

@@ -14,3 +14,11 @@ inputs:
         follows: nixpkgs
   mk-shell-bin:
     url: github:rrbutani/nix-mk-shell-bin
+  metewand:
+    url: github:jolars/metewand/10f6b13ef8d5607b6e26a7a1ab10ebca17d278e4
+    flake: false
+  rust-overlay:
+    url: github:oxalica/rust-overlay/b962e5d0c8cd97196c6a882d659fe451b52ad989
+    inputs:
+      nixpkgs:
+        follows: nixpkgs

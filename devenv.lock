@@ -61,6 +61,23 @@
         "type": "github"
       }
     },
+    "metewand": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793615644,
+        "narHash": "sha256-dGrJ570h20UFcEQLFAfMiUkdmZB/2Sean4pvdnpbeE0=",
+        "owner": "jolars",
+        "repo": "metewand",
+        "rev": "10f6b13ef8d5607b6e26a7a1ab10ebca17d278e4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jolars",
+        "repo": "metewand",
+        "rev": "10f6b13ef8d5607b6e26a7a1ab10ebca17d278e4",
+        "type": "github"
+      }
+    },
     "mk-shell-bin": {
       "locked": {
         "lastModified": 1677004959,
@@ -116,9 +133,32 @@
       "inputs": {
         "devenv": "devenv",
         "libslope": "libslope",
+        "metewand": "metewand",
         "mk-shell-bin": "mk-shell-bin",
         "nix2container": "nix2container",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "rust-overlay": "rust-overlay"
+      }
+    },
+    "rust-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791276535,
+        "narHash": "sha256-iwqAmHTX1IgzTumJR3JayNAQAo5xEmmOuGzB6b2pT/Q=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "b962e5d0c8cd97196c6a882d659fe451b52ad989",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "b962e5d0c8cd97196c6a882d659fe451b52ad989",
+        "type": "github"
       }
     },
     "systems": {
