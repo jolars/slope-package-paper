@@ -14,6 +14,7 @@ from slopeutils import (
     set_plot_defaults,
     solver_styles,
 )
+from slopeutils.plot_utils import save_paper_figure
 
 set_plot_defaults()
 
@@ -124,7 +125,7 @@ for i, dataset in enumerate(dataset_values):
             ax.set_ylabel(dataset, rotation=270, va="bottom")
 
         if i == 0:
-            ax.set_title(f"Path length: {path_values[j]}")
+            ax.set_title(f"Path length: {path_length}")
 
         # Apply custom limits if defined for this facet
         facet_key = (path_length, dataset)
@@ -172,6 +173,6 @@ save_fig = True
 if save_fig:
     figpath = "images/benchmark_path_real.pdf"
     Path(figpath).parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(figpath, bbox_inches="tight", pad_inches=0.05)
+    save_paper_figure(fig, figpath, bbox_inches="tight", pad_inches=0.05)
 else:
     plt.show(block=False)

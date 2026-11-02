@@ -1,4 +1,4 @@
-ENV["GKSwstype"] = "100" # Export PDFs without opening a Qt window.
+ENV["GKSwstype"] = "100" # Export figures without opening a Qt window.
 
 using SLOPE
 using CSV
@@ -42,11 +42,15 @@ p_comb = plot(
     left_margin = 5pt,
 )
 
-savefig(p_comb, imgdir * "diabetes-slope-lasso-julia.pdf")
+for extension in ("pdf", "svg")
+    savefig(p_comb, joinpath(imgdir, "diabetes-slope-lasso-julia.$extension"))
+end
 
 Random.seed!(48)
 fit_cv = slopecv(x, y)
 
 pcv = plot(fit_cv, size = (300, 200))
 
-savefig(pcv, imgdir * "slope-cv-julia.pdf")
+for extension in ("pdf", "svg")
+    savefig(pcv, joinpath(imgdir, "slope-cv-julia.$extension"))
+end

@@ -1,0 +1,140 @@
+project:
+  type: default
+  render:
+    - main.qmd
+    - README.qmd
+
+title: "Efficient Solvers for SLOPE in R, Python, Julia, and C++"
+author:
+  - name: Johan Larsson
+    corresponding: true
+    email: jola@math.ku.dk
+    orcid: 0000-0002-4029-5945
+    affiliations:
+      - ref: ucph
+    roles:
+      - conceptualization
+      - investigation
+      - methodology
+      - project administration
+      - software
+      - validation
+      - visualization
+      - writing - original draft
+      - writing - review & editing
+  - name: Małgorzata Bogdan
+    orcid: 0000-0002-0657-4342
+    affiliations:
+      - ref: wroclaw
+    roles:
+      - supervision
+      - writing - review & editing
+  - name: Krystyna Grzesiak
+    orcid: 0000-0003-2581-7722
+    affiliations:
+      - ref: wroclaw
+    roles:
+      - data curation
+      - software
+      - validation
+      - visualization
+      - writing - review & editing
+  - name: Mathurin Massias
+    orcid: 0000-0002-8950-0356
+    affiliations:
+      - ref: lyon
+    roles:
+      - investigation
+      - methodology
+      - software
+      - validation
+  - name: Jonas Wallin
+    orcid: 0000-0003-0381-6593
+    affiliations:
+      - ref: lund
+    roles:
+      - investigation
+      - methodology
+      - software
+      - supervision
+      - validation
+      - writing - review & editing
+
+affiliations:
+  - id: ucph
+    name: University of Copenhagen
+    department: Department of Mathematical Sciences
+    address: Universitetsparken 5
+    city: Copenhagen Ø
+    postal-code: "2100"
+    country: Denmark
+  - id: wroclaw
+    name: University of Wrocław
+    department: Institute of Mathematics
+    address: Joliot-Curie 15
+    city: Wrocław
+    postal-code: "50-383"
+    country: Poland
+  - id: lyon
+    name: Inria, ENS de Lyon, CNRS, Université Claude Bernard Lyon 1
+    department: LIP, UMR 5668
+    city: Lyon cedex 07
+    postal-code: "69342"
+    country: France
+  - id: lund
+    name: Lund University
+    department: Department of Statistics
+    address: Box 7080
+    city: Lund
+    postal-code: "220 07"
+    country: Sweden
+
+date: last-modified
+date-modified: last-modified
+description: >
+  A shared C++ implementation of hybrid coordinate descent for SLOPE
+  generalized linear models, with packages for R, Python, and Julia.
+abstract: >
+  We present a suite of packages in R, Python, Julia, and C++ that efficiently
+  solve the Sorted L-One Penalized Estimation (SLOPE) problem. The packages
+  feature a highly efficient hybrid coordinate descent algorithm that fits
+  generalized linear models (GLMs) and supports a variety of loss functions,
+  including Gaussian, binomial, Poisson, and multinomial logistic regression.
+  Our implementation is designed to be fast, memory-efficient, and flexible.
+  The packages support a variety of data structures (dense, sparse, and
+  out-of-memory matrices) and are designed to efficiently fit the full SLOPE
+  path as well as handle cross-validation of SLOPE models, including the
+  relaxed SLOPE. We present examples of how to use the packages and benchmarks
+  that demonstrate the performance of the packages on both real and simulated
+  data and show that our packages generally outperform existing
+  implementations of SLOPE in terms of speed.
+keywords: [SLOPE, regularization, R, Python, Julia, C++]
+bibliography: main.bib
+github-user: jolars
+repo: slope-package-paper
+citation:
+  type: article-journal
+  container-title: Computo
+  issn: "2824-7795"
+  # Computo's test DOI placeholder is replaced when a DOI is assigned.
+  doi: "10.5072/computo.0000"
+status: submitted
+license: CC-BY-4.0
+
+format:
+  computo-html: default
+  computo-pdf: default
+
+engine: knitr
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: false
+  error: false
+
+latex-tinytex: true
+
+filters:
+  - path: code/paper-format.lua
+    at: post-quarto

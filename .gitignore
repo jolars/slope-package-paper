@@ -633,3 +633,16 @@ devenv.local.yaml
 
 # pre-commit
 .pre-commit-config.yaml
+
+# Quarto sources are maintained; rendered documents and extensions are rebuilt.
+/main.tex
+/main.html
+/main_files/
+/.quarto/
+/_extensions/
+/public/
+/logo_notext_white.png
+/logo_text_white.pdf
+/images/*.svg
+
+**/*.quarto_ipynb

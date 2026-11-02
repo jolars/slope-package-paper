@@ -17,6 +17,7 @@ from slopeutils import (
     set_plot_defaults,
     solver_styles,
 )
+from slopeutils.plot_utils import save_paper_figure
 
 set_plot_defaults()
 
@@ -186,6 +187,6 @@ save_fig = True
 if save_fig:
     figpath = args.output or "images/benchmark_single_simulated.pdf"
     Path(figpath).parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(figpath, bbox_inches="tight", pad_inches=0.05)
+    save_paper_figure(fig, figpath, bbox_inches="tight", pad_inches=0.05)
 else:
     plt.show(block=False)

@@ -1,8 +1,9 @@
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# The CSDA elsarticle preprint text block is 390 pt (about 5.4 inches).
-# Leave room for the PDF crop and place figures at their exported size.
+# Computo's text block is 15.5 cm wide.
 FULL_WIDTH = 6.2
 
 # Keep solver identities consistent when a figure includes only a subset.
@@ -18,6 +19,14 @@ SOLVER_STYLES = {
     "sortedl1 (ours)": ("#000000", "<"),
     "tick": ("#17becf", ">"),
 }
+
+
+def save_paper_figure(figure, path, **kwargs):
+    """Export vector figures for both the PDF and HTML manuscripts."""
+    figure_path = Path(path)
+    figure_path.parent.mkdir(parents=True, exist_ok=True)
+    for extension in ("pdf", "svg"):
+        figure.savefig(figure_path.with_suffix(f".{extension}"), **kwargs)
 
 
 def solver_styles(solvers):

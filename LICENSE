@@ -1,31 +1,22 @@
-DUAL LICENSE NOTICE
-===================
+LICENSE NOTICE
+==============
 
-The author-created materials in this repository use two licenses:
+1. COMPUTO MANUSCRIPT AND ORIGINAL FIGURES (CC BY 4.0)
+   The current Quarto manuscript (main.qmd, _quarto.yml, main.bib), its
+   generated documents, and original figures are licensed under Creative
+   Commons Attribution 4.0 International. See LICENSE-PAPER.
 
-1. PREPRINT AND DOCUMENTATION (CC BY 3.0)
-   - Author-released preprint versions of the paper, including their LaTeX
-     source (main.tex, tex/, main.bib), corresponding PDFs, and original
-     figures in images/.
-   - Author-created documentation.
-   - Licensed under Creative Commons Attribution 3.0 Unported.
-   - See LICENSE-PAPER for full text
+2. EARLIER PREPRINTS AND DOCUMENTATION (CC BY 3.0)
+   Previously released preprints, their historical LaTeX source and PDFs,
+   and author-created documentation retain their Creative Commons
+   Attribution 3.0 Unported grants. See LICENSE-PREPRINT. The current
+   manuscript's license does not revoke those earlier grants.
 
-   This license applies to versions released under it. It does not
-   automatically license a later accepted manuscript or the final
-   published article. CC BY 3.0 grants for previously released versions
-   remain in effect.
+3. SOFTWARE (GPL-3.0)
+   Author-created software in code/, slopeutils/, and benchmark_*/ uses
+   GNU General Public License v3.0. See LICENSE-CODE. Configuration files
+   follow the license of the code they configure, except manuscript
+   metadata in _quarto.yml.
 
-2. SOFTWARE CODE (GPL-3.0)
-   - All code files (code/, slopeutils/, benchmark_*/)
-   - All Python, R, and shell scripts
-   - Licensed under GNU General Public License v3.0
-   - See LICENSE-CODE for full text
-
-Configuration files (*.yml, *.yaml, devenv.nix) follow the license
-of the code they configure (GPL-3.0).
-
-Third-party materials, including els-cas-templates/, retain their own
-licenses and are not covered by this notice.
-
-For specific licensing questions, please contact the repository maintainer.
+Third-party materials, including the Computo format extension, retain
+their own licenses.

@@ -63,6 +63,27 @@ let
       ps.ipython
     ]
   );
+  renderTex = pkgs.texlive.combine {
+    inherit (pkgs.texlive)
+      scheme-small
+      collection-latexextra
+      collection-luatex
+      algorithms
+      algorithmicx
+      collection-xetex
+      cm-super
+      dvipng
+      libertinus
+      libertinus-fonts
+      libertinus-otf
+      lm
+      latexmk
+      mathtools
+      pdfcrop
+      siunitx
+      type1cm
+      ;
+  };
   benchmarkSource = lib.cleanSourceWith {
     name = "slope-benchmark-source";
     src = ./.;
@@ -193,6 +214,10 @@ in
   config = {
     env = {
       PYTHONHASHSEED = "0";
+    }
+    // pkgs.lib.optionalAttrs (!config.container.isBuilding) {
+      # Keep personal Pandoc overrides from changing Quarto's document model.
+      QUARTO_PANDOC = "${pkgs.pandoc}/bin/pandoc";
     };
 
     packages =
@@ -210,7 +235,14 @@ in
       ++ lib.optionals (!config.container.isBuilding) [
         libslope
         apptainer
+        cmake
+        eigen
+        ghostscript
         go-task
+        librsvg
+        poppler-utils
+        quartoMinimal
+        renderTex
         (rWrapper.override {
           packages = with rPackages; [
             here
@@ -225,6 +257,8 @@ in
             glmnet
             pROC
             readxl
+            rmarkdown
+            svglite
           ];
         })
         developmentPython

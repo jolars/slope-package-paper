@@ -1,0 +1,173 @@
+#!/usr/bin/env bash
+# Build an arXiv-ready source tarball from the rendered paper.
+#
+# Pipeline:
+#   1. render main.qmd to computo-pdf,
+#      which also refreshes main_files/figure-pdf/
+#   2. stage the .tex plus only the graphics it actually references
+#   3. strip the journal-review furniture from the staged copy: the "submitted"
+#      watermark and the line numbers. The watermark is a claim about the
+#      paper's status at Computo and has no business on a preprint; the line
+#      numbers exist for referees.
+#   4. test-compile the staged tree and refuse to package anything that does
+#      not build cleanly or that still carries the watermark
+#   5. tar it up
+#
+# The Computo extension regenerates main.tex on every render, so step 3
+# edits the staged copy only --- never the working tree.
+#
+# Requires: quarto, latexmk, xelatex. Uses pdftotext for the watermark check
+# when available.
+
+set -euo pipefail
+
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &>/dev/null && pwd)"
+
+PAPER="main"
+# Declared in the staged source and used for the verification build, so the two
+# cannot drift apart.
+ENGINE="xelatex"
+SRC_TEX="$PROJECT_ROOT/$PAPER.tex"
+STAGE="$PROJECT_ROOT/_build/arxiv"
+TARBALL="$PROJECT_ROOT/_build/arxiv-$(date +%Y%m%d).tar.gz"
+PREVIEW="$PROJECT_ROOT/_build/arxiv-preview.pdf"
+
+log() { printf '==> %s\n' "$*"; }
+die() { printf 'error: %s\n' "$*" >&2; exit 1; }
+
+# 1. Refresh all inputs, including bibliography, metadata, and cached results.
+# Checking only the notebook's timestamp can silently package an old paper.
+if [[ "${ARXIV_SKIP_RENDER:-0}" == 1 ]]; then
+    [[ -f "$SRC_TEX" ]] || die "ARXIV_SKIP_RENDER=1 but $PAPER.tex does not exist"
+    log "skipping render (ARXIV_SKIP_RENDER=1)"
+else
+    log "rendering $PAPER.qmd to computo-pdf"
+    (cd "$PROJECT_ROOT" && quarto render "$PAPER.qmd" --to computo-pdf -M keep-tex:true)
+fi
+
+# 2. Stage the source.
+rm -rf "$STAGE"
+mkdir -p "$STAGE"
+cp "$SRC_TEX" "$STAGE/$PAPER.tex"
+
+# Copy every graphic the document references, preserving relative paths, so a
+# change of figure format or a branded header that pulls in a logo is picked up
+# without editing this script.
+mapfile -t figures < <(
+    grep -oE '\\includegraphics(\[[^]]*\])?\{[^}]*\}' "$SRC_TEX" |
+        sed 's/.*{//;s/}//' | sort -u
+)
+[[ ${#figures[@]} -gt 0 ]] || die "no \\includegraphics targets found in $PAPER.tex"
+
+resolve_graphic() {
+    local fig="$1"
+    local extension
+
+    if [[ -f "$PROJECT_ROOT/$fig" ]]; then
+        printf '%s\n' "$fig"
+        return
+    fi
+
+    # LaTeX permits omitted extensions in \includegraphics; the archive must
+    # contain the concrete file that graphicx resolves during compilation.
+    for extension in .pdf .png .jpg .jpeg .eps; do
+        if [[ -f "$PROJECT_ROOT/$fig$extension" ]]; then
+            printf '%s\n' "$fig$extension"
+            return
+        fi
+    done
+
+    return 1
+}
+
+for fig in "${figures[@]}"; do
+    resolved=$(resolve_graphic "$fig") || die "referenced graphic is missing: $fig"
+    mkdir -p "$STAGE/$(dirname "$resolved")"
+    cp "$PROJECT_ROOT/$resolved" "$STAGE/$resolved"
+done
+log "staged $PAPER.tex and ${#figures[@]} graphics"
+# Generated LaTeX belongs in the staging tree, leaving Quarto as the sole source.
+rm -f "$SRC_TEX"
+
+# 3. Strip the review furniture when the rendered format enabled it. The
+# verification below independently rejects a PDF that still contains the
+# submitted watermark.
+watermarks=$(grep -c '^\\DraftwatermarkOptions{stamp=true' "$STAGE/$PAPER.tex" || true)
+linenos=$(grep -c '^\\linenumbers$' "$STAGE/$PAPER.tex" || true)
+
+sed -i \
+    -e 's/^\\DraftwatermarkOptions{stamp=true.*$/\\DraftwatermarkOptions{stamp=false}/' \
+    -e '/^\\linenumbers$/d' \
+    -e 's/Date published:/Date:/' \
+    "$STAGE/$PAPER.tex"
+log "stripped watermark ($watermarks) and line numbers ($linenos)"
+
+# Use the arXiv-compatible XeLaTeX workflow for the staged preprint. Its fontconfig
+# database is sparse, so load the TeX Live fonts by filename in the staged copy.
+sed -i \
+    -e 's/\\setmathfont{Libertinus Math}/\\setmathfont{LibertinusMath-Regular.otf}/' \
+    -e 's/\\setmonofont\[Scale=0.92\]{Latin Modern Mono}/\\setmonofont[Scale=0.92,ItalicFont=lmmono10-italic.otf,BoldFont=lmmonolt10-bold.otf,BoldItalicFont=lmmonolt10-boldoblique.otf]{lmmono10-regular.otf}/' \
+    "$STAGE/$PAPER.tex"
+sed -i "1i %!TEX program = $ENGINE" "$STAGE/$PAPER.tex"
+cat > "$STAGE/00README.json" <<EOF
+{
+  "spec_version": 1,
+  "process": {"compiler": "$ENGINE"},
+  "sources": [{"filename": "$PAPER.tex", "usage": "toplevel"}],
+  "texlive_version": 2025
+}
+EOF
+log "declared engine: $ENGINE"
+
+# 4. Prove the staged tree builds on its own, the way arXiv will build it.
+if [[ "${ARXIV_SKIP_VERIFY:-0}" == 1 ]]; then
+    log "skipping verification build (ARXIV_SKIP_VERIFY=1)"
+else
+    command -v "$ENGINE" >/dev/null || die "$ENGINE not found; set ARXIV_SKIP_VERIFY=1 to package anyway"
+    command -v latexmk >/dev/null || die "latexmk not found; set ARXIV_SKIP_VERIFY=1 to package anyway"
+    log "test-compiling the staged source with $ENGINE"
+    (
+        cd "$STAGE"
+        # File-based font lookup must work without locally registered fonts.
+        fontconfig=$(mktemp)
+        trap 'rm -f "$fontconfig"' EXIT
+        printf '<fontconfig></fontconfig>\n' > "$fontconfig"
+        FONTCONFIG_FILE="$fontconfig" latexmk -xelatex -no-shell-escape \
+            -interaction=nonstopmode -halt-on-error "$PAPER.tex" >build.log 2>&1 ||
+            { tail -40 build.log >&2; die "latexmk failed"; }
+
+        errors=$(grep -cE '^! ' "$PAPER.log" || true)
+        [[ "$errors" -eq 0 ]] || { grep -E '^! ' "$PAPER.log" >&2; die "$errors LaTeX error(s)"; }
+
+        ! grep -q 'There were undefined references' "$PAPER.log" ||
+            die "undefined references remain after latexmk"
+
+        ! grep -qE '^\\(DraftwatermarkOptions\{stamp=true|linenumbers)' "$PAPER.tex" ||
+            die "review watermark or line numbers remain in the staged source"
+
+        if command -v pdftotext >/dev/null; then
+                    stamped=$(pdftotext -f 1 -l 1 "$PAPER.pdf" - 2>/dev/null | grep -ciw submitted || true)
+            [[ "$stamped" -eq 0 ]] || die "the built PDF still contains 'submitted' ($stamped hits)"
+        fi
+
+        if command -v pdfinfo >/dev/null; then
+            log "built $(pdfinfo "$PAPER.pdf" | awk '/^Pages/ {print $2}') pages, no errors"
+        fi
+    )
+    cp "$STAGE/$PAPER.pdf" "$PREVIEW"
+    # Build products are not part of the submission.
+    rm -f \
+        "$STAGE"/*.log \
+        "$STAGE"/*.aux \
+        "$STAGE"/*.out \
+        "$STAGE"/*.toc \
+        "$STAGE"/*.fls \
+        "$STAGE"/*.fdb_latexmk \
+        "$STAGE"/*.xdv \
+        "$STAGE/$PAPER.pdf"
+fi
+
+# 5. Package.
+rm -f "$TARBALL"
+tar czf "$TARBALL" -C "$STAGE" .
+log "wrote $TARBALL ($(du -h "$TARBALL" | cut -f1))"

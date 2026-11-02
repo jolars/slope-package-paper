@@ -9,6 +9,7 @@ from scipy import stats
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from slopeutils import FULL_WIDTH, set_plot_defaults
+from slopeutils.plot_utils import save_paper_figure
 
 
 def dual_norm_slope(X, theta, alphas):
@@ -159,6 +160,6 @@ y2_vals = np.sort(np.hstack((-np.delete(c, 1), np.delete(c, 1))))
 if savefig:
     figpath = "images/slope-thresholding.pdf"
     Path(figpath).parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(figpath, bbox_inches="tight", pad_inches=0.05)
+    save_paper_figure(fig, figpath, bbox_inches="tight", pad_inches=0.05)
 else:
     plt.show(block=False)

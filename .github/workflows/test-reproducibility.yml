@@ -231,25 +231,3 @@ jobs:
 
       - name: Run the example
         run: ./build/slope-example
-
-  paper:
-    name: Compile paper
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Compile the paper
-        uses: xu-cheng/latex-action@v3
-        with:
-          root_file: main.tex
-          args: -pdf -interaction=nonstopmode
-
-      - name: Upload paper
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: paper
-          path: main.pdf
-          retention-days: 30
