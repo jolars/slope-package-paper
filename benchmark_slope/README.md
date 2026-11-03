@@ -1,10 +1,16 @@
 # Single-penalty SLOPE benchmark
 
-This native [Metewand](https://github.com/jolars/metewand) benchmark compares the
-ten solver configurations and nine datasets used by the paper. The full manifest
-selects three regularization values, giving 270 candidates before applicability
-exclusions. The [path benchmark](../benchmark_slope_path/README.md) also uses
-Metewand.
+This native [Metewand](https://github.com/jolars/metewand) benchmark compares
+the ten solver configurations and nine datasets used by the paper. The full
+experiment selects three regularization values, giving 270 candidates before
+applicability exclusions. The [path
+benchmark](../benchmark_slope_path/README.md) also uses Metewand.
+
+The shared `bench_config_single.yml` defines `full`, `smoke`, and `example`
+experiments. `full` is the default; the smaller experiments reuse the same
+workers, scientific contract, and profile policies. Numerical-library thread
+limits are declared in the worker environment, including OpenMP and BLAS limits
+of one thread.
 
 Run these commands from the paper repository root. The pinned Devenv environment
 includes the CLI, Python bindings, scientific dependencies, and R for reading
@@ -31,17 +37,17 @@ For a small comparison, use a Python environment with Metewand's Python package,
 NumPy, SciPy, scikit-learn, Numba, sortedl1, and tick installed:
 
 ```sh
-metewand check --manifest benchmark_slope/example_config.yml --workers
-metewand plan --manifest benchmark_slope/example_config.yml
-metewand run --manifest benchmark_slope/example_config.yml \
+metewand check --manifest bench_config_single.yml --experiment example --workers
+metewand plan --manifest bench_config_single.yml --experiment example
+metewand run --manifest bench_config_single.yml --experiment example \
   --output-dir benchmark_slope/outputs/example
 ```
 
-Create the output parent first. The complete smoke manifest additionally uses
-skglm, slope-path, and slopescreening and covers dense and sparse designs. It
-runs through `benchmark-smoke`, alongside the native path benchmark.
-`validate.py` checks worker references, runs a comparison, exercises resume and
-inspection, and retains a complete JSON export:
+Create the output parent first. The smoke experiment additionally uses skglm,
+slope-path, and slopescreening and covers dense and sparse designs. It runs
+through `benchmark-smoke`, alongside the native path benchmark. `validate.py`
+checks worker references, runs a comparison, exercises resume and inspection,
+and retains a complete JSON export:
 
 ```sh
 python benchmark_slope/validate.py --output-dir benchmark_slope/outputs/smoke
@@ -61,8 +67,8 @@ Each materializer writes dense NumPy arrays or a sparse CSC matrix, plus the
 response vector. Implementations receive verified copies of the same data.
 Results contain `beta.npy`, with the intercept first. A separate evaluator
 checks dimensions, finite values, and the intercept, then recomputes the
-objective and dual certificate. It rejects relative gaps below `-1e-10` and
-uses the unrounded relative gap to decide whether the `1e-7` target is reached.
+objective and dual certificate. It rejects relative gaps below `-1e-10` and uses
+the unrounded relative gap to decide whether the `1e-7` target is reached.
 Reported metrics use twelve decimal places for stable reference checking.
 
 PGD, ADMM, and Newt-ALM expose streaming profiles from one solver trajectory.
@@ -78,14 +84,13 @@ measurement. Work inside each solver call, including spectral calculations and
 factorization, remains timed. Streaming active time excludes checkpoint
 evaluation and publication pauses and includes snapshot serialization. Fresh
 sequence points retain their individual executor wall times. These coordinates
-and the framework's additional timing evidence remain separate in exports.
-The profile time budget accumulates measured work across fresh-sequence points.
-Runs remain serial; repetitions use the same materialized input.
+and the framework's additional timing evidence remain separate in exports. The
+profile time budget accumulates measured work across fresh-sequence points. Runs
+remain serial; repetitions use the same materialized input.
 
-Top-level worker files are listed explicitly in the manifests because Metewand
-currently rejects `outputs/` beneath the literal prefix of a source glob,
-even when the output does not match it. This is tracked in
-[issue #16](https://github.com/jolars/metewand/issues/16).
+Worker sources use nonrecursive globs for the adapter files and explicit
+patterns for solver and dataset modules. Outputs can remain beneath the
+benchmark directory because those patterns do not capture `outputs/`.
 
 The analytic reference uses an identity design with two pooled coefficients.
 Tests construct its normal quantiles and KKT certificate independently. Dataset
@@ -108,24 +113,18 @@ timeouts or convergence misses. Plotting prefers a selected trajectory. If no
 stream was accepted, it shows one latest attempt's retained valid checkpoints
 with a dashed line. It keeps repetitions separate and warns about incomplete
 comparisons. Failure and applicability evidence remain in the loaded table's
-metadata. Existing plotting defaults continue to read the saved Benchopt results.
+metadata. Existing plotting defaults continue to read the saved Benchopt
+results.
 
 ## Developing Metewand alongside the benchmark
 
-The environment pins a Metewand revision and applies `nix/metewand.patch` for
-the unreleased deadline and checkpoint-schedule changes, reported in
-[issue #12](https://github.com/jolars/metewand/issues/12) and
-[issue #13](https://github.com/jolars/metewand/issues/13).
+The environment pins one Metewand revision for both the CLI and Python package.
+To build from a local checkout without changing the pin:
 
-To build from a local checkout instead, add this ignored `devenv.local.nix`:
-
-```nix
-{
-  slopeBenchmark.metewandSource = /home/jola/projects/metewand;
-}
+```sh
+devenv --option slopeBenchmark.metewandSource:path /home/jola/projects/metewand shell
 ```
 
-The override must include those changes. The CLI and Python bindings use the
-same source selection. Alternatively, build the CLI in the Metewand checkout
-and install its Python package in your scientific environment. Workers do not
-inherit an ambient `PYTHONPATH`.
+Alternatively, build the CLI in the Metewand checkout and install its Python
+package in your scientific environment. Workers do not inherit an ambient
+`PYTHONPATH`.

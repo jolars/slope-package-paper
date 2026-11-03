@@ -14,11 +14,6 @@ let
   slopeRVersion = "2.1.1";
   slopeJuliaVersion = "1.3.1";
   benchmarkPackages = import ./nix/benchmark-python-packages.nix { inherit pkgs; };
-  patchedMetewand = pkgs.applyPatches {
-    name = "metewand-source";
-    src = inputs.metewand;
-    patches = [ ./nix/metewand.patch ];
-  };
   rustPkgs = pkgs.extend (import inputs.rust-overlay);
   metewandPackages = import ./nix/metewand.nix {
     inherit pkgs;
@@ -104,8 +99,6 @@ let
         toString path == toString ./.
         || builtins.elem top [
           "bench_config_path.yml"
-          "bench_config_smoke_path.yml"
-          "bench_config_smoke_single.yml"
           "bench_config_single.yml"
           "benchmark_slope"
           "benchmark_slope_path"
@@ -214,7 +207,7 @@ in
 {
   options.slopeBenchmark.metewandSource = lib.mkOption {
     type = lib.types.path;
-    default = patchedMetewand;
+    default = inputs.metewand;
     description = "Metewand source, optionally overridden with a local development checkout.";
   };
 
@@ -347,12 +340,15 @@ in
         if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
           printf 'paper: %s\n' "$(git rev-parse HEAD)"
         fi
-        for variable in \
-          BLIS_NUM_THREADS MKL_NUM_THREADS NUMEXPR_NUM_THREADS OMP_DYNAMIC \
-          OMP_NUM_THREADS OPENBLAS_NUM_THREADS PYTHONHASHSEED \
-          VECLIB_MAXIMUM_THREADS; do
-          printf '%s: %s\n' "$variable" "''${!variable}"
-        done
+        python - <<'PYTHON'
+        import yaml
+        for manifest in ("bench_config_single.yml", "bench_config_path.yml"):
+            with open(manifest) as stream:
+                settings = yaml.safe_load(stream)["environments"]["local"]["environment-variables"]
+            print(f"Worker settings ({manifest}):")
+            for name, value in sorted(settings.items()):
+                print(f"{name}: {value}")
+        PYTHON
         uname -a
         lscpu
       '';
@@ -361,6 +357,7 @@ in
     scripts.benchmark-smoke = {
       description = "Run fast checks through both pinned benchmark suites";
       exec = ''
+        set -e
         test -d benchmark_slope && test -d benchmark_slope_path || {
           echo "Run benchmark-smoke from the repository root." >&2
           exit 1
@@ -368,12 +365,12 @@ in
         ${prepareBenchmarkData}
         export PATH="${benchmarkWorker}/bin:$PATH"
         mkdir -p benchmark_slope/outputs benchmark_slope_path/outputs "$benchmark_data_dir"
-        metewand check --manifest bench_config_smoke_single.yml --workers
-        metewand run --manifest bench_config_smoke_single.yml \
+        metewand check --manifest bench_config_single.yml --experiment smoke --workers
+        metewand run --manifest bench_config_single.yml --experiment smoke \
           --cache-dir "$benchmark_data_dir/metewand" \
           --output-dir "benchmark_slope/outputs/smoke-$(date +%Y%m%d-%H%M%S-%N)"
-        metewand check --manifest bench_config_smoke_path.yml --workers
-        metewand run --manifest bench_config_smoke_path.yml \
+        metewand check --manifest bench_config_path.yml --experiment smoke --workers
+        metewand run --manifest bench_config_path.yml --experiment smoke \
           --cache-dir "$benchmark_data_dir/metewand" \
           --output-dir "benchmark_slope_path/outputs/smoke-$(date +%Y%m%d-%H%M%S-%N)"
       '';

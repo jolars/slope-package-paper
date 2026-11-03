@@ -11,7 +11,8 @@ from pathlib import Path
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--metewand", default="metewand")
-    parser.add_argument("--manifest", default="bench_config_smoke_single.yml")
+    parser.add_argument("--manifest", default="bench_config_single.yml")
+    parser.add_argument("--experiment", default="smoke")
     parser.add_argument("--metric", default="rel_duality_gap")
     parser.add_argument("--output-dir", required=True)
     args = parser.parse_args()
@@ -25,6 +26,8 @@ def main():
     receipts.mkdir()
 
     def invoke(name, *arguments, allow_failure=False):
+        if arguments[0] in {"check", "plan", "run"}:
+            arguments = (*arguments, "--experiment", args.experiment)
         completed = subprocess.run(
             [executable, *arguments, "--output", "json"],
             capture_output=True,

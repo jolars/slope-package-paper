@@ -45,8 +45,10 @@ def write(tmp_path, value):
     return path
 
 
-def test_streams_use_active_time_and_keep_the_selected_trajectory(tmp_path):
+@pytest.mark.parametrize("method", ["pgd", "pgd-fista"])
+def test_streams_use_active_time_and_keep_the_selected_trajectory(tmp_path, method):
     data = snapshot()
+    data["observations"][0]["implementation"] = method
     failed = deepcopy(data["observations"][0])
     failed.update(attempt_id="failed-retry", retry_index=1, selected=False)
     data["observations"].append(failed)

@@ -7,7 +7,11 @@ import pytest
 from scipy import sparse
 from sortedl1 import Slope
 
-from benchmark_slope_path.artifacts import read_objective, write_dataset
+from benchmark_slope_path.artifacts import (
+    read_objective,
+    write_dataset,
+    write_preparation,
+)
 from benchmark_slope_path.datasets.simulated import Dataset
 from benchmark_slope_path.objective import Objective
 
@@ -42,15 +46,21 @@ def test_shared_grid_roundtrip_never_refits_the_path(
     objective = Objective(path_length=5, q=0.2)
     objective.set_data(X, y)
     objective.set_data(X, y, objective.alphas[:3], objective.lambdas)
-    dataset = write_dataset(X, y, objective, tmp_path)
-    (tmp_path / "data.json").write_text(json.dumps(dataset.data))
+    dataset_dir, problem_dir = tmp_path / "data", tmp_path / "problem"
+    dataset_dir.mkdir()
+    problem_dir.mkdir()
+    dataset = write_dataset(X, y, dataset_dir)
+    (dataset_dir / "data.json").write_text(json.dumps(dataset.data))
+    prepared = write_preparation(objective, problem_dir)
+    (problem_dir / "data.json").write_text(json.dumps(prepared.data))
 
     def fail(*args, **kwargs):
         raise AssertionError("Workers must use the already materialized grid")
 
     monkeypatch.setattr(Slope, "path", fail)
     context = SimpleNamespace(
-        dataset_dir=tmp_path,
+        dataset_dir=dataset_dir,
+        problem_dir=problem_dir,
         problem_parameters={"path_length": 5, "q": 0.2, "fit_intercept": False},
     )
     actual = read_objective(context)

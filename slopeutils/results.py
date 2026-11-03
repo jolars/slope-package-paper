@@ -89,6 +89,7 @@ def load_benchmark_results(path):
                 )
             method = item.get("implementation") or candidate["implementation"]
             solver = {
+                "pgd": "PGD",
                 "pgd-fista": "PGD",
                 "pgd-bb": "PGD",
                 "pgd-anderson": "PGD",

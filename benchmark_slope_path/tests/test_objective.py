@@ -6,7 +6,12 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from benchmark_slope_path.artifacts import read_objective, write_dataset, write_result
+from benchmark_slope_path.artifacts import (
+    read_objective,
+    write_dataset,
+    write_preparation,
+    write_result,
+)
 from benchmark_slope_path.evaluator import evaluate
 from benchmark_slope_path.objective import Objective
 from benchmark_slope_path.solvers.pgd import Solver
@@ -26,6 +31,7 @@ def test_analytic_pooled_path_and_independent_certificate():
     root = Path(__file__).parents[1] / "reference"
     context = SimpleNamespace(
         dataset_dir=root / "dataset",
+        problem_dir=root / "problem",
         problem_parameters={"path_length": 5, "q": 0.2, "fit_intercept": False},
     )
     objective = read_objective(context)
@@ -52,10 +58,15 @@ def make_context(tmp_path):
     result_dir.mkdir()
     objective = Objective(path_length=5, q=0.2)
     objective.set_data(np.eye(3), np.array([3.2, 3.1999, 1.0]))
-    dataset = write_dataset(objective.X, objective.y, objective, dataset_dir)
+    dataset = write_dataset(objective.X, objective.y, dataset_dir)
+    problem_dir = tmp_path / "problem"
+    problem_dir.mkdir()
+    prepared = write_preparation(objective, problem_dir)
+    (problem_dir / "data.json").write_text(json.dumps(prepared.data))
     (dataset_dir / "data.json").write_text(json.dumps(dataset.data))
     context = SimpleNamespace(
         dataset_dir=dataset_dir,
+        problem_dir=problem_dir,
         result_dir=result_dir,
         problem_parameters={"path_length": 5, "q": 0.2, "fit_intercept": False},
         semantics={
@@ -67,7 +78,14 @@ def make_context(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "gap,verdict", [(2e-7, "not_reached"), (1e-7, "reached"), (5e-8, "reached")]
+    "gap,verdict",
+    [
+        (2e-7, "not_reached"),
+        (1e-7, "reached"),
+        (np.nextafter(1e-7, np.inf), "not_reached"),
+        (np.nextafter(1e-7, 0), "reached"),
+        (5e-8, "reached"),
+    ],
 )
 def test_completion_uses_the_maximum_unrounded_gap(tmp_path, monkeypatch, gap, verdict):
     context, objective = make_context(tmp_path)
@@ -77,7 +95,9 @@ def test_completion_uses_the_maximum_unrounded_gap(tmp_path, monkeypatch, gap, v
         "evaluate_result",
         lambda self, **result: {"max_rel_duality_gap": gap, "min_rel_duality_gap": 0},
     )
-    assert evaluate(context).verdict == verdict
+    evaluation = evaluate(context)
+    assert evaluation.verdict == verdict
+    assert evaluation.metrics["max_rel_duality_gap"] == gap
 
 
 @pytest.mark.parametrize("invalid", ["shape", "intercept_shape", "nan", "intercept"])

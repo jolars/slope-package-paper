@@ -93,3 +93,15 @@ def test_negative_gap_beyond_roundoff_is_invalid(tmp_path, monkeypatch):
 def test_target_relative_duality_gap_must_be_positive():
     with pytest.raises(ValueError, match="strictly positive"):
         Objective(target_rel_duality_gap=0)
+
+
+@pytest.mark.parametrize("gap", [np.nextafter(1e-7, np.inf), np.nextafter(1e-7, 0)])
+def test_stopping_metric_is_not_rounded(tmp_path, monkeypatch, gap):
+    context = make_context(tmp_path)
+    write_result(np.zeros(4), context.result_dir)
+    monkeypatch.setattr(
+        Objective, "evaluate_result", lambda self, beta: {"rel_duality_gap": gap}
+    )
+    evaluation = evaluate(context)
+    assert evaluation.metrics["rel_duality_gap"] == gap
+    assert evaluation.verdict == ("reached" if gap <= 1e-7 else "not_reached")

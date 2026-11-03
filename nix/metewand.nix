@@ -5,6 +5,7 @@
 }:
 let
   cargoToml = builtins.fromTOML (builtins.readFile (source + "/Cargo.toml"));
+  pythonToml = builtins.fromTOML (builtins.readFile (source + "/packages/python/pyproject.toml"));
   rustPlatform = pkgs.makeRustPlatform {
     cargo = toolchain;
     rustc = toolchain;
@@ -36,8 +37,21 @@ in
 
   python = pkgs.python3.pkgs.buildPythonPackage {
     pname = "metewand";
-    version = cargoToml.package.version;
-    src = source + "/packages/python";
+    version = pythonToml.project.version;
+    src = pkgs.lib.cleanSourceWith {
+      src = source + "/packages/python";
+      filter =
+        path: type:
+        let
+          name = baseNameOf path;
+        in
+        !(builtins.elem name [
+          "build"
+          "dist"
+          "__pycache__"
+        ])
+        && !(pkgs.lib.hasSuffix ".egg-info" name);
+    };
     pyproject = true;
     build-system = [ pkgs.python3.pkgs.setuptools ];
     pythonImportsCheck = [ "metewand" ];

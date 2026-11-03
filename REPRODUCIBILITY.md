@@ -348,9 +348,10 @@ the Julia environment.
 
 The paper repository owns the reproducible workflow and both native benchmark
 sources, while Devenv fixes the software closure used to execute them.
-`nix/metewand.nix` and `nix/metewand.patch` provide
-the pinned Metewand build. The generated OCI image carries that same
-closure to other Linux hosts.
+`nix/metewand.nix` builds the CLI and Python package from the same pinned
+Metewand source. Each suite shares one manifest between its full, smoke, and
+example experiments. Worker thread limits are declared in those manifests. The
+generated OCI image carries that same closure to other Linux hosts.
 
 ## Citation
 

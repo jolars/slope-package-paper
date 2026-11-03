@@ -3,7 +3,8 @@
 from pathlib import Path
 
 import numpy as np
-from metewand import Artifact, Dataset, Result, read_json
+from metewand import Dataset, Result, read_json
+from metewand.arrays import read_array, write_array
 from scipy import sparse
 
 try:
@@ -14,39 +15,53 @@ except ImportError:
 GRID_PARAMETERS = ("path_length", "q", "fit_intercept")
 
 
-def write_dataset(X, y, objective, directory):
-    directory = Path(directory)
+def write_dataset(X, y, directory):
     is_sparse = sparse.issparse(X)
-    filename = "X.npz" if is_sparse else "X.npy"
-    if is_sparse:
-        sparse.save_npz(directory / filename, sparse.csc_matrix(X), compressed=False)
-    else:
-        np.save(directory / filename, X, allow_pickle=False)
-    arrays = {
-        "y": np.asarray(y).reshape(-1),
-        "alphas": objective.alphas,
-        "lambdas": objective.lambdas,
-    }
-    for name, value in arrays.items():
-        np.save(directory / f"{name}.npy", value, allow_pickle=False)
+    design = sparse.csc_matrix(X) if is_sparse else np.asarray(X)
+    files = [
+        write_array(directory, "X", design),
+        write_array(directory, "y", np.asarray(y).reshape(-1)),
+    ]
+    return Dataset(
+        {"sparse": is_sparse, "n_samples": X.shape[0], "n_features": X.shape[1]}, files
+    )
+
+
+def write_preparation(objective, directory):
     return Dataset(
         {
-            "sparse": is_sparse,
-            "n_samples": X.shape[0],
-            "n_features": X.shape[1],
             "problem_parameters": {
                 name: getattr(objective, name) for name in GRID_PARAMETERS
-            },
+            }
         },
         [
-            Artifact(name, "application/octet-stream")
-            for name in [filename, "y.npy", "alphas.npy", "lambdas.npy"]
+            write_array(directory, name, value)
+            for name, value in (
+                ("alphas", objective.alphas),
+                ("lambdas", objective.lambdas),
+            )
         ],
     )
 
 
+def read_dataset(directory):
+    directory = Path(directory)
+    metadata = read_json(directory / "data.json")
+    X = (
+        read_array(directory, "X.npz").tocsc()
+        if metadata["sparse"]
+        else read_array(directory, "X.npy")
+    )
+    y = read_array(directory, "y.npy")
+    if X.shape != (metadata["n_samples"], metadata["n_features"]) or y.shape != (
+        X.shape[0],
+    ):
+        raise ValueError("Dataset dimensions disagree with their metadata")
+    return X, y
+
+
 def read_objective(context, target_rel_duality_gap=1e-7):
-    directory = Path(context.dataset_dir)
+    directory = Path(context.problem_dir)
     metadata = read_json(directory / "data.json")
     objective = Objective(
         **context.problem_parameters, target_rel_duality_gap=target_rel_duality_gap
@@ -57,19 +72,10 @@ def read_objective(context, target_rel_duality_gap=1e-7):
         raise ValueError(
             "The materialized path grid does not match the requested problem"
         )
-    X = (
-        sparse.load_npz(directory / "X.npz").tocsc()
-        if metadata["sparse"]
-        else np.load(directory / "X.npy", allow_pickle=False)
+    X, y = read_dataset(context.dataset_dir)
+    alphas, lambdas = (
+        read_array(directory, f"{name}.npy") for name in ("alphas", "lambdas")
     )
-    y, alphas, lambdas = (
-        np.load(directory / f"{name}.npy", allow_pickle=False)
-        for name in ("y", "alphas", "lambdas")
-    )
-    if X.shape != (metadata["n_samples"], metadata["n_features"]) or y.shape != (
-        X.shape[0],
-    ):
-        raise ValueError("Dataset dimensions disagree with their metadata")
     if (
         alphas.ndim != 1
         or not 0 < len(alphas) <= objective.path_length
@@ -90,19 +96,14 @@ def read_objective(context, target_rel_duality_gap=1e-7):
 
 
 def write_result(coefs, intercepts, directory):
-    for name, value in (("coefs", coefs), ("intercepts", intercepts)):
-        np.save(Path(directory) / f"{name}.npy", value, allow_pickle=False)
-    return Result(
-        {"coefficients": "coefs.npy", "intercepts": "intercepts.npy"},
-        [
-            Artifact(f"{name}.npy", "application/octet-stream")
-            for name in ("coefs", "intercepts")
-        ],
-    )
+    files = [
+        write_array(directory, name, value)
+        for name, value in (("coefs", coefs), ("intercepts", intercepts))
+    ]
+    return Result({"coefficients": "coefs.npy", "intercepts": "intercepts.npy"}, files)
 
 
 def read_result(directory):
     return {
-        name: np.load(Path(directory) / f"{name}.npy", allow_pickle=False)
-        for name in ("coefs", "intercepts")
+        name: read_array(directory, f"{name}.npy") for name in ("coefs", "intercepts")
     }

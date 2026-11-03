@@ -5,11 +5,10 @@ from importlib import import_module, metadata
 
 import numpy as np
 from artifacts import read_dataset, write_result
-from metewand import serve_implementation
+from metewand import serve_implementation, stream_callback
 from objective import Objective
 
 CALLBACK_SOLVERS = {"python_pgd", "admm", "newt_alm"}
-_warmed = False
 
 
 def make_solver(context):
@@ -31,25 +30,9 @@ def applicability(context):
 
 
 def prepare(context):
-    global _warmed
     np.random.seed(context.seed % 2**32)
     solver, objective = make_solver(context)
     solver.set_objective(**objective.get_objective())
-    if not _warmed:
-        if sys.argv[1] in CALLBACK_SOLVERS:
-            calls = 0
-
-            def one_update():
-                nonlocal calls
-                calls += 1
-                return calls <= 1
-
-            solver.run(one_update)
-        else:
-            solver.run(0.1 if sys.argv[1] in {"sortedl1", "rslope"} else 1)
-        _warmed = True
-        solver, objective = make_solver(context)
-        solver.set_objective(**objective.get_objective())
     solver._benchmark_n_features = objective.n_features
     return solver
 
@@ -64,31 +47,27 @@ def execute(solver, context):
     return write_result(beta, context.output_dir)
 
 
+def warmup(solver, context):
+    if sys.argv[1] in CALLBACK_SOLVERS:
+        calls = 0
+
+        def one_update():
+            nonlocal calls
+            calls += 1
+            return calls <= 1
+
+        solver.run(one_update)
+    else:
+        solver.run(0.1 if sys.argv[1] in {"sortedl1", "rslope"} else 1)
+
+
 def execute_stream(solver, context):
-    index = 0
-    stopped = False
-
-    def checkpoint():
-        nonlocal index, stopped
-        progress = {"check_index": index, "work": {"iterations": index}}
-        decision = context.stream.checkpoint(
-            progress,
-            lambda: write_result(
-                solver.get_result()["beta"], context.stream.output_dir
-            ),
-        )
-        index += 1
-        stopped = decision.stop
-        return not stopped
-
-    solver.run(checkpoint)
-    if not stopped:
-        context.stream.finish(
-            {"check_index": index, "work": {"iterations": index}},
-            lambda: write_result(
-                solver.get_result()["beta"], context.stream.output_dir
-            ),
-        )
+    with stream_callback(
+        context.stream,
+        lambda: write_result(solver.get_result()["beta"], context.stream.output_dir),
+        work_field="iterations",
+    ) as checkpoint:
+        solver.run(checkpoint)
 
 
 def statistics(output, context):
@@ -116,6 +95,7 @@ def statistics(output, context):
 if __name__ == "__main__":
     callbacks = {
         "prepare": prepare,
+        "warmup": warmup,
         "reset": lambda state, context: None,
         "check_applicability": applicability,
         "statistics": statistics,

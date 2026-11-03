@@ -64,17 +64,17 @@
     "metewand": {
       "flake": false,
       "locked": {
-        "lastModified": 1793615644,
-        "narHash": "sha256-dGrJ570h20UFcEQLFAfMiUkdmZB/2Sean4pvdnpbeE0=",
+        "lastModified": 1793740657,
+        "narHash": "sha256-o6U+CbWhwpISKfWb9NHJbPQGbIjr+QT+k8inDmfvOZA=",
         "owner": "jolars",
         "repo": "metewand",
-        "rev": "10f6b13ef8d5607b6e26a7a1ab10ebca17d278e4",
+        "rev": "1b29eb59648f48b462744b3d2860ecde6287e4f7",
         "type": "github"
       },
       "original": {
         "owner": "jolars",
         "repo": "metewand",
-        "rev": "10f6b13ef8d5607b6e26a7a1ab10ebca17d278e4",
+        "rev": "1b29eb59648f48b462744b3d2860ecde6287e4f7",
         "type": "github"
       }
     },

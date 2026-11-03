@@ -7,8 +7,6 @@ import numpy as np
 from artifacts import read_objective, write_result
 from metewand import serve_implementation
 
-_warmed = False
-
 
 def make_solver(context):
     objective = read_objective(context)
@@ -27,17 +25,15 @@ def applicability(context):
 
 
 def prepare(context):
-    global _warmed
     np.random.seed(context.seed % 2**32)
     solver, objective = make_solver(context)
     solver.set_objective(**objective.get_objective())
-    if not _warmed:
-        solver.run(1 if sys.argv[1] == "solution_path" else 0.1)
-        _warmed = True
-        solver, objective = make_solver(context)
-        solver.set_objective(**objective.get_objective())
     solver._initial_result = objective.get_one_result()
     return solver
+
+
+def warmup(solver, context):
+    solver.run(1 if sys.argv[1] == "solution_path" else 0.1)
 
 
 def execute(solver, context):
@@ -72,6 +68,7 @@ def statistics(output, context):
 if __name__ == "__main__":
     serve_implementation(
         prepare=prepare,
+        warmup=warmup,
         execute=execute,
         reset=lambda state, context: None,
         check_applicability=applicability,

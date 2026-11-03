@@ -23,10 +23,7 @@ def evaluate(context):
     if metrics["rel_duality_gap"] < floor:
         return Evaluation({}, "invalid")
     verdict = "reached" if metrics["rel_duality_gap"] <= target else "not_reached"
-    # Reference conformance needs stable reported values across numerical libraries.
-    return Evaluation(
-        {name: round(float(value), 12) for name, value in metrics.items()}, verdict
-    )
+    return Evaluation({name: float(value) for name, value in metrics.items()}, verdict)
 
 
 if __name__ == "__main__":

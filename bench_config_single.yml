@@ -1,24 +1,20 @@
-# Native Metewand convergence benchmark.
+# Shared definitions for full, smoke, and example runs.
 version: 1
 name: slope-single
+default-experiment: full
 worker-timeouts: {hello: 60 s, materialize: 30 min, prepare: 10 min, execute: 60 s, reset: 30 s, evaluate: 2
     min, shutdown: 30 s}
+environments:
+  local:
+    kind: local
+    environment-variables: {BLIS_NUM_THREADS: '1', MKL_NUM_THREADS: '1', NUMEXPR_NUM_THREADS: '1', OMP_NUM_THREADS: '1',
+      OPENBLAS_NUM_THREADS: '1', VECLIB_MAXIMUM_THREADS: '1', OMP_DYNAMIC: 'FALSE', PYTHONHASHSEED: '0'}
 datasets:
   simulated-high:
-    runner: python
-    protocol-transport: socket
-    entrypoint: benchmark_slope/dataset_worker.py
-    args: [simulated]
-    sources: &id001 [benchmark_slope/__init__.py, benchmark_slope/artifacts.py, benchmark_slope/dataset_worker.py,
-      benchmark_slope/evaluator.py, benchmark_slope/objective.py, benchmark_slope/solver_worker.py,
-      benchmark_slope/validate.py, benchmark_slope/solvers/*.py, benchmark_slope/datasets/*.py, benchmark_slope/ORIGINS.json]
-    output-schema: &id002
-      type: object
-      properties:
-        schema_version: {const: 1}
-        complete: {const: true}
-        files: {type: array, minItems: 1}
-      required: [schema_version, complete, files]
+    sources: &sources [benchmark_slope/*.py, benchmark_slope/solvers/*.py, benchmark_slope/datasets/*.py,
+      benchmark_slope/ORIGINS.json]
+    output-schema: &id001 {type: object, properties: {schema_version: {const: 1}, complete: {const: true},
+        files: {type: array, minItems: 1}}, required: [schema_version, complete, files]}
     parameters:
       n_samples: {type: integer, default: 100}
       n_features: {type: integer, default: 20000}
@@ -26,13 +22,10 @@ datasets:
       X_density: {type: number, default: 1.0}
       rho: {type: number, default: 0.6}
       random_state: {type: integer, default: 27}
+    function: benchmark_slope/dataset_worker.py:simulated
   simulated-low:
-    runner: python
-    protocol-transport: socket
-    entrypoint: benchmark_slope/dataset_worker.py
-    args: [simulated]
-    sources: *id001
-    output-schema: *id002
+    sources: *sources
+    output-schema: *id001
     parameters:
       n_samples: {type: integer, default: 20000}
       n_features: {type: integer, default: 100}
@@ -40,13 +33,10 @@ datasets:
       X_density: {type: number, default: 1.0}
       rho: {type: number, default: 0.6}
       random_state: {type: integer, default: 27}
+    function: benchmark_slope/dataset_worker.py:simulated
   simulated-sparse:
-    runner: python
-    protocol-transport: socket
-    entrypoint: benchmark_slope/dataset_worker.py
-    args: [simulated]
-    sources: *id001
-    output-schema: *id002
+    sources: *sources
+    output-schema: *id001
     parameters:
       n_samples: {type: integer, default: 2000}
       n_features: {type: integer, default: 200000}
@@ -54,66 +44,73 @@ datasets:
       X_density: {type: number, default: 0.001}
       rho: {type: number, default: 0.6}
       random_state: {type: integer, default: 27}
+    function: benchmark_slope/dataset_worker.py:simulated
   brca1:
-    runner: python
-    protocol-transport: socket
-    entrypoint: benchmark_slope/dataset_worker.py
-    args: [breheny]
-    sources: *id001
-    output-schema: *id002
+    sources: *sources
+    output-schema: *id001
     parameters:
       dataset: {type: string, default: brca1}
       standardize: {type: boolean, default: true}
+    function: benchmark_slope/dataset_worker.py:breheny
   Rhee2006:
-    runner: python
-    protocol-transport: socket
-    entrypoint: benchmark_slope/dataset_worker.py
-    args: [breheny]
-    sources: *id001
-    output-schema: *id002
+    sources: *sources
+    output-schema: *id001
     parameters:
       dataset: {type: string, default: Rhee2006}
       standardize: {type: boolean, default: true}
+    function: benchmark_slope/dataset_worker.py:breheny
   Koussounadis2014:
-    runner: python
-    protocol-transport: socket
-    entrypoint: benchmark_slope/dataset_worker.py
-    args: [breheny]
-    sources: *id001
-    output-schema: *id002
+    sources: *sources
+    output-schema: *id001
     parameters:
       dataset: {type: string, default: Koussounadis2014}
       standardize: {type: boolean, default: true}
+    function: benchmark_slope/dataset_worker.py:breheny
   rcv1-binary:
-    runner: python
-    protocol-transport: socket
-    entrypoint: benchmark_slope/dataset_worker.py
-    args: [libsvm]
-    sources: *id001
-    output-schema: *id002
+    sources: *sources
+    output-schema: *id001
     parameters:
       dataset: {type: string, default: rcv1.binary}
       standardize: {type: boolean, default: true}
+    function: benchmark_slope/dataset_worker.py:libsvm
   real-sim:
-    runner: python
-    protocol-transport: socket
-    entrypoint: benchmark_slope/dataset_worker.py
-    args: [libsvm]
-    sources: *id001
-    output-schema: *id002
+    sources: *sources
+    output-schema: *id001
     parameters:
       dataset: {type: string, default: real-sim}
       standardize: {type: boolean, default: true}
+    function: benchmark_slope/dataset_worker.py:libsvm
   YearPredictionMSD:
-    runner: python
-    protocol-transport: socket
-    entrypoint: benchmark_slope/dataset_worker.py
-    args: [libsvm]
-    sources: *id001
-    output-schema: *id002
+    sources: *sources
+    output-schema: *id001
     parameters:
       dataset: {type: string, default: YearPredictionMSD}
       standardize: {type: boolean, default: true}
+    function: benchmark_slope/dataset_worker.py:libsvm
+  smoke-dense:
+    sources: *sources
+    output-schema: {type: object, properties: {schema_version: {const: 1}, complete: {const: true}, files: {
+          type: array, minItems: 1}}, required: [schema_version, complete, files]}
+    parameters:
+      n_samples: {type: integer, default: 40}
+      n_features: {type: integer, default: 20}
+      n_signals: {type: integer, default: 5}
+      X_density: {type: number, default: 1.0}
+      rho: {type: number, default: 0.2}
+      random_state: {type: integer, default: 27}
+    function: benchmark_slope/dataset_worker.py:simulated
+  smoke-sparse:
+    sources: *sources
+    output-schema: {type: object, properties: {schema_version: {const: 1}, complete: {const: true}, files: {
+          type: array, minItems: 1}}, required: [schema_version, complete, files]}
+    parameters:
+      n_samples: {type: integer, default: 40}
+      n_features: {type: integer, default: 30}
+      n_signals: {type: integer, default: 5}
+      X_density: {type: number, default: 0.2}
+      rho: {type: number, default: 0.2}
+      random_state: {type: integer, default: 27}
+    function: benchmark_slope/dataset_worker.py:simulated
 problems:
   slope:
     family: slope
@@ -122,11 +119,9 @@ problems:
       q: {type: number, exclusiveMinimum: 0, exclusiveMaximum: 1, default: 0.2}
       fit_intercept: {type: boolean, default: false}
     dataset-schemas:
-    - *id002
+    - *id001
     result:
-      coefficients:
-        type: string
-        enum: [beta.npy]
+      coefficients: {type: string, enum: [beta.npy]}
     metrics:
       value: {type: number, optional: true}
       duality_gap: {type: number, optional: true}
@@ -142,54 +137,34 @@ problems:
       validity: {relative_gap_floor: -1.0e-10, coefficients: finite_intercept_first_vector_matching_design,
         absent_intercept: zero}
       one_shot_completion: {rel_duality_gap: 1.0e-07}
-    reference-cases: [{dataset: benchmark_slope/reference/dataset, result: benchmark_slope/reference/result,
-        expected-metrics: benchmark_slope/reference/metrics.json}]
+    reference-cases:
+    - dataset: benchmark_slope/reference/dataset
+      result: benchmark_slope/reference/result
+      expected-metrics: benchmark_slope/reference/metrics.json
+      metric-tolerance: {absolute: 1.0e-12, relative: 1.0e-12}
     evaluator:
       runner: python
       protocol-transport: socket
       entrypoint: benchmark_slope/evaluator.py
-      args: []
-      sources: *id001
+      sources: *sources
 implementations:
-  pgd-fista:
+  pgd:
     runner: python
     protocol-transport: socket
     entrypoint: benchmark_slope/solver_worker.py
     args: [python_pgd]
-    sources: *id001
+    sources: *sources
     problem-contracts: [slope]
     capabilities: [streaming_profile, applicability]
     parameters:
       prox: {type: string, default: prox_fast_stack}
-      acceleration: {type: string, default: fista}
-  pgd-bb:
-    runner: python
-    protocol-transport: socket
-    entrypoint: benchmark_slope/solver_worker.py
-    args: [python_pgd]
-    sources: *id001
-    problem-contracts: [slope]
-    capabilities: [streaming_profile, applicability]
-    parameters:
-      prox: {type: string, default: prox_fast_stack}
-      acceleration: {type: string, default: bb}
-  pgd-anderson:
-    runner: python
-    protocol-transport: socket
-    entrypoint: benchmark_slope/solver_worker.py
-    args: [python_pgd]
-    sources: *id001
-    problem-contracts: [slope]
-    capabilities: [streaming_profile, applicability]
-    parameters:
-      prox: {type: string, default: prox_fast_stack}
-      acceleration: {type: string, default: anderson}
+      acceleration: {type: string, enum: [none, fista, bb, anderson], default: fista}
   admm:
     runner: python
     protocol-transport: socket
     entrypoint: benchmark_slope/solver_worker.py
     args: [admm]
-    sources: *id001
+    sources: *sources
     problem-contracts: [slope]
     capabilities: [streaming_profile, applicability]
     parameters:
@@ -200,7 +175,7 @@ implementations:
     protocol-transport: socket
     entrypoint: benchmark_slope/solver_worker.py
     args: [sortedl1]
-    sources: *id001
+    sources: *sources
     problem-contracts: [slope]
     capabilities: [fresh_sequence, applicability]
     parameters:
@@ -210,34 +185,31 @@ implementations:
     protocol-transport: socket
     entrypoint: benchmark_slope/solver_worker.py
     args: [tick]
-    sources: *id001
+    sources: *sources
     problem-contracts: [slope]
     capabilities: [fresh_sequence, applicability]
-    parameters: {}
   skglm:
     runner: python
     protocol-transport: socket
     entrypoint: benchmark_slope/solver_worker.py
     args: [skglm]
-    sources: *id001
+    sources: *sources
     problem-contracts: [slope]
     capabilities: [fresh_sequence, applicability]
-    parameters: {}
   slope-path:
     runner: python
     protocol-transport: socket
     entrypoint: benchmark_slope/solver_worker.py
     args: [slope_path]
-    sources: *id001
+    sources: *sources
     problem-contracts: [slope]
     capabilities: [fresh_sequence, applicability]
-    parameters: {}
   newt-alm:
     runner: python
     protocol-transport: socket
     entrypoint: benchmark_slope/solver_worker.py
     args: [newt_alm]
-    sources: *id001
+    sources: *sources
     problem-contracts: [slope]
     capabilities: [streaming_profile, applicability]
     parameters:
@@ -247,18 +219,17 @@ implementations:
     protocol-transport: socket
     entrypoint: benchmark_slope/solver_worker.py
     args: [pgd_safe_screening]
-    sources: *id001
+    sources: *sources
     problem-contracts: [slope]
     capabilities: [fresh_sequence, applicability]
     parameters:
       accelerated: {type: boolean, default: true}
 experiments:
-- name: single
+- name: full
   problem: slope
   datasets: [simulated-high, simulated-low, simulated-sparse, brca1, Rhee2006, Koussounadis2014, rcv1-binary,
     real-sim, YearPredictionMSD]
-  implementations: [pgd-fista, pgd-bb, pgd-anderson, admm, sortedl1, tick, skglm, slope-path, newt-alm,
-    safe-pgd]
+  implementations: [pgd, admm, sortedl1, tick, skglm, slope-path, newt-alm, safe-pgd]
   execution-policy: local
   observation-policy: convergence
   measurement-repetitions: 1
@@ -266,6 +237,30 @@ experiments:
   problem-parameters:
     reg:
       grid: [0.5, 0.1, 0.02]
+  implementation-parameters:
+    pgd:
+      acceleration:
+        grid: [fista, bb, anderson]
+- name: smoke
+  problem: slope
+  datasets: [smoke-dense, smoke-sparse]
+  implementations: [pgd, admm, sortedl1, tick, skglm, slope-path, newt-alm, safe-pgd]
+  execution-policy: local
+  observation-policy: convergence
+  measurement-repetitions: 1
+  seed: 27
+  implementation-parameters:
+    pgd:
+      acceleration:
+        grid: [fista, bb, anderson]
+- name: example
+  problem: slope
+  datasets: [smoke-dense]
+  implementations: [pgd, sortedl1, tick]
+  execution-policy: local
+  observation-policy: convergence
+  measurement-repetitions: 1
+  seed: 27
 execution-policies:
   local: {timing-scope: execute_only, primary-time: timed_wall_time, worker-reuse: true, warmup-runs: 1,
     max-concurrency: 1, timeout: 30 s}
@@ -279,136 +274,40 @@ observation-policies:
     max-checkpoint-bytes: 67108864
     max-active-time: 30 s
     implementations:
-      pgd-fista:
-        delivery: streaming_profile
-        measurement-basis: executor_observed
-        check-schedule:
-          indices: &id003 [0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768,
-            65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864,
-            134217728, 268435456, 536870912, 1073741824]
-      pgd-bb:
-        delivery: streaming_profile
-        measurement-basis: executor_observed
-        check-schedule:
-          indices: *id003
-      pgd-anderson:
-        delivery: streaming_profile
-        measurement-basis: executor_observed
-        check-schedule:
-          indices: *id003
       admm:
         delivery: streaming_profile
         measurement-basis: executor_observed
-        check-schedule:
-          indices: *id003
+        check-schedule: {kind: geometric, start: 1, ratio: 2, count: 31, prefix: [0]}
       sortedl1:
         delivery: fresh_sequence
-        control-schema:
-          type: object
-          oneOf:
-          - properties:
-              initial: {const: true}
-            required: [initial]
-            additionalProperties: false
-          - properties:
-              tolerance: {type: number, exclusiveMinimum: 0}
-            required: [tolerance]
-            additionalProperties: false
-        schedule:
-          kind: explicit
-          controls: [{initial: true}, {tolerance: 0.1}, {tolerance: 0.01}, {tolerance: 0.001}, {tolerance: 0.0001},
-            {tolerance: 1.0e-05}, {tolerance: 1.0e-06}, {tolerance: 1.0e-07}, {tolerance: 1.0e-08}, {
-              tolerance: 1.0e-09}, {tolerance: 1.0e-10}, {tolerance: 1.0e-11}, {tolerance: 1.0e-12}]
+        schedule: {kind: geometric, field: tolerance, start: 0.1, ratio: 0.1, count: 12, prefix: [{initial: true}]}
+        controls:
+          tolerance: {type: number, exclusiveMinimum: 0}
       tick:
         delivery: fresh_sequence
-        control-schema:
-          type: object
-          oneOf:
-          - properties:
-              initial: {const: true}
-            required: [initial]
-            additionalProperties: false
-          - properties:
-              iterations: {type: integer, minimum: 1}
-            required: [iterations]
-            additionalProperties: false
-        schedule:
-          kind: explicit
-          controls: [{initial: true}, {iterations: 1}, {iterations: 2}, {iterations: 4}, {iterations: 8},
-            {iterations: 16}, {iterations: 32}, {iterations: 64}, {iterations: 128}, {iterations: 256},
-            {iterations: 512}, {iterations: 1024}, {iterations: 2048}, {iterations: 4096}, {iterations: 8192},
-            {iterations: 16384}, {iterations: 32768}, {iterations: 65536}, {iterations: 131072}, {iterations: 262144},
-            {iterations: 524288}, {iterations: 1048576}, {iterations: 2097152}, {iterations: 4194304},
-            {iterations: 8388608}, {iterations: 16777216}, {iterations: 33554432}, {iterations: 67108864},
-            {iterations: 134217728}, {iterations: 268435456}, {iterations: 536870912}, {iterations: 1073741824}]
+        schedule: {kind: geometric, field: iterations, start: 1, ratio: 2, count: 31, prefix: [{initial: true}]}
+        controls:
+          iterations: {type: integer, minimum: 1}
       skglm:
         delivery: fresh_sequence
-        control-schema:
-          type: object
-          oneOf:
-          - properties:
-              initial: {const: true}
-            required: [initial]
-            additionalProperties: false
-          - properties:
-              iterations: {type: integer, minimum: 1}
-            required: [iterations]
-            additionalProperties: false
-        schedule:
-          kind: explicit
-          controls: [{initial: true}, {iterations: 1}, {iterations: 2}, {iterations: 4}, {iterations: 8},
-            {iterations: 16}, {iterations: 32}, {iterations: 64}, {iterations: 128}, {iterations: 256},
-            {iterations: 512}, {iterations: 1024}, {iterations: 2048}, {iterations: 4096}, {iterations: 8192},
-            {iterations: 16384}, {iterations: 32768}, {iterations: 65536}, {iterations: 131072}, {iterations: 262144},
-            {iterations: 524288}, {iterations: 1048576}, {iterations: 2097152}, {iterations: 4194304},
-            {iterations: 8388608}, {iterations: 16777216}, {iterations: 33554432}, {iterations: 67108864},
-            {iterations: 134217728}, {iterations: 268435456}, {iterations: 536870912}, {iterations: 1073741824}]
+        schedule: {kind: geometric, field: iterations, start: 1, ratio: 2, count: 31, prefix: [{initial: true}]}
+        controls:
+          iterations: {type: integer, minimum: 1}
       slope-path:
         delivery: fresh_sequence
-        control-schema:
-          type: object
-          oneOf:
-          - properties:
-              initial: {const: true}
-            required: [initial]
-            additionalProperties: false
-          - properties:
-              iterations: {type: integer, minimum: 1}
-            required: [iterations]
-            additionalProperties: false
-        schedule:
-          kind: explicit
-          controls: [{initial: true}, {iterations: 1}, {iterations: 2}, {iterations: 4}, {iterations: 8},
-            {iterations: 16}, {iterations: 32}, {iterations: 64}, {iterations: 128}, {iterations: 256},
-            {iterations: 512}, {iterations: 1024}, {iterations: 2048}, {iterations: 4096}, {iterations: 8192},
-            {iterations: 16384}, {iterations: 32768}, {iterations: 65536}, {iterations: 131072}, {iterations: 262144},
-            {iterations: 524288}, {iterations: 1048576}, {iterations: 2097152}, {iterations: 4194304},
-            {iterations: 8388608}, {iterations: 16777216}, {iterations: 33554432}, {iterations: 67108864},
-            {iterations: 134217728}, {iterations: 268435456}, {iterations: 536870912}, {iterations: 1073741824}]
+        schedule: {kind: geometric, field: iterations, start: 1, ratio: 2, count: 31, prefix: [{initial: true}]}
+        controls:
+          iterations: {type: integer, minimum: 1}
       newt-alm:
         delivery: streaming_profile
         measurement-basis: executor_observed
-        check-schedule:
-          indices: *id003
+        check-schedule: {kind: geometric, start: 1, ratio: 2, count: 31, prefix: [0]}
       safe-pgd:
         delivery: fresh_sequence
-        control-schema:
-          type: object
-          oneOf:
-          - properties:
-              initial: {const: true}
-            required: [initial]
-            additionalProperties: false
-          - properties:
-              iterations: {type: integer, minimum: 1}
-            required: [iterations]
-            additionalProperties: false
-        schedule:
-          kind: explicit
-          controls: [{initial: true}, {iterations: 1}, {iterations: 2}, {iterations: 4}, {iterations: 8},
-            {iterations: 16}, {iterations: 32}, {iterations: 64}, {iterations: 128}, {iterations: 256},
-            {iterations: 512}, {iterations: 1024}, {iterations: 2048}, {iterations: 4096}, {iterations: 8192},
-            {iterations: 16384}, {iterations: 32768}, {iterations: 65536}, {iterations: 131072}, {iterations: 262144},
-            {iterations: 524288}, {iterations: 1048576}, {iterations: 2097152}, {iterations: 4194304},
-            {iterations: 8388608}, {iterations: 16777216}, {iterations: 33554432}, {iterations: 67108864},
-            {iterations: 134217728}, {iterations: 268435456}, {iterations: 536870912}, {iterations: 1073741824}]
+        schedule: {kind: geometric, field: iterations, start: 1, ratio: 2, count: 31, prefix: [{initial: true}]}
+        controls:
+          iterations: {type: integer, minimum: 1}
+      pgd:
+        delivery: streaming_profile
+        measurement-basis: executor_observed
+        check-schedule: {kind: geometric, start: 1, ratio: 2, count: 31, prefix: [0]}
