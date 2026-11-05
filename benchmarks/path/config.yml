@@ -32,10 +32,10 @@ datasets:
   brca1:
     sources:
       &sources [
-        benchmark_slope_path/*.py,
-        benchmark_slope_path/solvers/*.py,
-        benchmark_slope_path/datasets/*.py,
-        benchmark_slope_path/ORIGINS.json,
+        "*.py",
+        solvers/*.py,
+        datasets/*.py,
+        ORIGINS.json,
       ]
     output-schema:
       &id001 {
@@ -51,7 +51,7 @@ datasets:
     parameters:
       dataset: { type: string, default: brca1 }
       standardize: { type: boolean, default: true }
-    function: benchmark_slope_path/dataset_worker.py:breheny
+    function: dataset_worker.py:breheny
 
   Koussounadis2014:
     sources: *sources
@@ -59,7 +59,7 @@ datasets:
     parameters:
       dataset: { type: string, default: Koussounadis2014 }
       standardize: { type: boolean, default: true }
-    function: benchmark_slope_path/dataset_worker.py:breheny
+    function: dataset_worker.py:breheny
 
   Rhee2006:
     sources: *sources
@@ -67,7 +67,7 @@ datasets:
     parameters:
       dataset: { type: string, default: Rhee2006 }
       standardize: { type: boolean, default: true }
-    function: benchmark_slope_path/dataset_worker.py:breheny
+    function: dataset_worker.py:breheny
 
   smoke-dense:
     sources: *sources
@@ -89,7 +89,7 @@ datasets:
       X_density: { type: number, default: 1.0 }
       rho: { type: number, default: 0.2 }
       random_state: { type: integer, default: 27 }
-    function: benchmark_slope_path/dataset_worker.py:simulated
+    function: dataset_worker.py:simulated
   smoke-sparse:
     sources: *sources
     output-schema:
@@ -110,7 +110,7 @@ datasets:
       X_density: { type: number, default: 0.2 }
       rho: { type: number, default: 0.2 }
       random_state: { type: integer, default: 27 }
-    function: benchmark_slope_path/dataset_worker.py:simulated
+    function: dataset_worker.py:simulated
 
 problems:
   slope-path:
@@ -156,24 +156,24 @@ problems:
         }
       one_shot_completion: { max_rel_duality_gap: 1.0e-07 }
     reference-cases:
-      - dataset: benchmark_slope_path/reference/dataset
-        result: benchmark_slope_path/reference/result
-        expected-metrics: benchmark_slope_path/reference/metrics.json
+      - dataset: reference/dataset
+        result: reference/result
+        expected-metrics: reference/metrics.json
         metric-tolerance: { absolute: 1.0e-12, relative: 1.0e-12 }
     evaluator:
       runner: python
-      entrypoint: benchmark_slope_path/evaluator.py
+      entrypoint: evaluator.py
       sources: *sources
       protocol-transport: socket
     preparation:
-      function: benchmark_slope_path/preparation.py:prepare_grid
+      function: preparation.py:prepare_grid
       sources: *sources
       output-schema: *id001
 
 implementations:
   sortedl1:
     runner: python
-    entrypoint: benchmark_slope_path/solver_worker.py
+    entrypoint: solver_worker.py
     args: [sortedl1_solver]
     sources: *sources
     protocol-transport: socket
@@ -184,7 +184,7 @@ implementations:
 
   solution-path:
     runner: python
-    entrypoint: benchmark_slope_path/solver_worker.py
+    entrypoint: solver_worker.py
     args: [solution_path]
     sources: *sources
     protocol-transport: socket
@@ -193,7 +193,7 @@ implementations:
 
   admm:
     runner: python
-    entrypoint: benchmark_slope_path/solver_worker.py
+    entrypoint: solver_worker.py
     args: [admm]
     sources: *sources
     protocol-transport: socket
@@ -204,7 +204,7 @@ implementations:
 
   pgd-fista:
     runner: python
-    entrypoint: benchmark_slope_path/solver_worker.py
+    entrypoint: solver_worker.py
     args: [pgd]
     sources: *sources
     protocol-transport: socket
@@ -215,7 +215,7 @@ implementations:
 
   rslope:
     runner: python
-    entrypoint: benchmark_slope_path/solver_worker.py
+    entrypoint: solver_worker.py
     args: [rslope]
     sources: *sources
     protocol-transport: socket

@@ -7,13 +7,13 @@ import pytest
 from scipy import sparse
 from sortedl1 import Slope
 
-from benchmark_slope_path.artifacts import (
+from benchmarks.path.artifacts import (
     read_objective,
     write_dataset,
     write_preparation,
 )
-from benchmark_slope_path.datasets.simulated import Dataset
-from benchmark_slope_path.objective import Objective
+from benchmarks.path.datasets.simulated import Dataset
+from benchmarks.path.objective import Objective
 
 
 @pytest.mark.parametrize("density", [1.0, 0.2])

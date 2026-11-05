@@ -11,7 +11,7 @@ from pathlib import Path
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--metewand", default="metewand")
-    parser.add_argument("--manifest", default="bench_config_single.yml")
+    parser.add_argument("--manifest", default="benchmarks/single/config.yml")
     parser.add_argument("--experiment", default="smoke")
     parser.add_argument("--metric", default="rel_duality_gap")
     parser.add_argument("--output-dir", required=True)

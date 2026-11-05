@@ -49,7 +49,7 @@ setting them to equal magnitudes.
 
 This repository is organized into several key components:
 
-- **Benchmarks** (`benchmark_slope/`, `benchmark_slope_path/`): Two
+- **Benchmarks** (`benchmarks/single/`, `benchmarks/path/`): Two
   native Metewand benchmarks for comparing SLOPE solvers on single-penalty
   problems and full path fitting
 - **Results** (`results/`): Benchmark outputs with performance comparisons
@@ -111,16 +111,16 @@ benchmark-single
 benchmark-path
 ```
 
-The full configurations are `bench_config_single.yml` and
-`bench_config_path.yml`. The single-penalty comparison preserves ten solver
+The full configurations are `benchmarks/single/config.yml` and
+`benchmarks/path/config.yml`. The single-penalty comparison preserves ten solver
 configurations and nine datasets. The path comparison preserves four solver
 configurations, three datasets, and requested path lengths 50, 100, and 200.
 Both collect independently evaluated convergence curves. New runs appear
 beneath the corresponding benchmark's `outputs/` directory, with materialized
 data cached under `.benchmark-data/`.
 
-The [single-penalty guide](benchmark_slope/README.md) and
-[path guide](benchmark_slope_path/README.md) cover smaller runs, resuming,
+The [single-penalty guide](benchmarks/single/README.md) and
+[path guide](benchmarks/path/README.md) cover smaller runs, resuming,
 exports, plotting, and timing boundaries. `benchmark-smoke` checks both suites
 on small dense and sparse inputs. Saved paper results under `results/` remain
 historical Benchopt tables; the plotting scripts accept those tables and new
@@ -172,7 +172,7 @@ benchmark-single
 benchmark-path
 ```
 
-These commands use `bench_config_single.yml` and `bench_config_path.yml`.
+These commands use `benchmarks/single/config.yml` and `benchmarks/path/config.yml`.
 Metewand collects both comparisons with a 30-second active-time budget per
 profile. Neither command installs dependencies during a run.
 

@@ -6,7 +6,7 @@ full experiment preserves the paper's three datasets (BRCA1, Koussounadis2014,
 and Rhee2006), requested path lengths 50, 100, and 200, q = 0.2, and no
 intercept. This gives 36 candidates.
 
-The shared `bench_config_path.yml` defines `full`, `smoke`, and `example`
+The shared [`config.yml`](config.yml) defines `full`, `smoke`, and `example`
 experiments. `full` is the default; the smaller experiments reuse the same
 workers, scientific contract, and profile policies. Numerical-library thread
 limits are declared in the worker environment, including OpenMP and BLAS limits
@@ -22,8 +22,8 @@ benchmark-path
 Choose a destination or resume an existing run with:
 
 ```sh
-benchmark-path --output-dir benchmark_slope_path/outputs/comparison
-benchmark-path --output-dir benchmark_slope_path/outputs/comparison --resume
+benchmark-path --output-dir benchmarks/path/outputs/comparison
+benchmark-path --output-dir benchmarks/path/outputs/comparison --resume
 ```
 
 Add `--resume --retry` to explicitly retry failed measurements while retaining
@@ -35,11 +35,11 @@ scikit-learn, Numba, sortedl1, and the slope-path package pinned in
 `nix/benchmark-python-packages.nix`:
 
 ```sh
-mkdir -p benchmark_slope_path/outputs
-metewand check --manifest bench_config_path.yml --experiment example --workers
-metewand plan --manifest bench_config_path.yml --experiment example
-metewand run --manifest bench_config_path.yml --experiment example \
-  --output-dir benchmark_slope_path/outputs/example
+mkdir -p benchmarks/path/outputs
+metewand check --manifest benchmarks/path/config.yml --experiment example --workers
+metewand plan --manifest benchmarks/path/config.yml --experiment example
+metewand run --manifest benchmarks/path/config.yml --experiment example \
+  --output-dir benchmarks/path/outputs/example
 ```
 
 `benchmark-smoke` additionally checks sparse inputs, intercept fitting, and the
@@ -50,8 +50,8 @@ references, execution, status, resume, complete export, and observation
 inspection:
 
 ```sh
-python benchmark_slope/validate.py --manifest bench_config_path.yml --experiment smoke \
-  --metric max_rel_duality_gap --output-dir benchmark_slope_path/outputs/smoke
+python benchmarks/validate.py --manifest benchmarks/path/config.yml --experiment smoke \
+  --metric max_rel_duality_gap --output-dir benchmarks/path/outputs/smoke
 ```
 
 ## Scientific and timing choices
@@ -98,10 +98,10 @@ convergence across dense, sparse, and intercept configurations.
 ## Export and plot
 
 ```sh
-metewand export --output-dir benchmark_slope_path/outputs/comparison \
-  --format json --destination benchmark_slope_path/outputs/comparison-export
+metewand export --output-dir benchmarks/path/outputs/comparison \
+  --format json --destination benchmarks/path/outputs/comparison-export
 python code/plot_benchmark_path.py \
-  --results benchmark_slope_path/outputs/comparison-export --output /tmp/path.pdf
+  --results benchmarks/path/outputs/comparison-export --output /tmp/path.pdf
 ```
 
 Add `--require-complete` when every applicable candidate must reach its target.
@@ -111,5 +111,5 @@ dashed lines. The default still reads the historical Benchopt tables in
 `results/path_1007/`.
 
 See the [single-penalty
-guide](../benchmark_slope/README.md#developing-metewand-alongside-the-benchmark)
+guide](../single/README.md#developing-metewand-alongside-the-benchmark)
 for building both suites against a local Metewand checkout.

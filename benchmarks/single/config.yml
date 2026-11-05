@@ -11,8 +11,8 @@ environments:
       OPENBLAS_NUM_THREADS: '1', VECLIB_MAXIMUM_THREADS: '1', OMP_DYNAMIC: 'FALSE', PYTHONHASHSEED: '0'}
 datasets:
   simulated-high:
-    sources: &sources [benchmark_slope/*.py, benchmark_slope/solvers/*.py, benchmark_slope/datasets/*.py,
-      benchmark_slope/ORIGINS.json]
+    sources: &sources ["*.py", solvers/*.py, datasets/*.py,
+      ORIGINS.json]
     output-schema: &id001 {type: object, properties: {schema_version: {const: 1}, complete: {const: true},
         files: {type: array, minItems: 1}}, required: [schema_version, complete, files]}
     parameters:
@@ -22,7 +22,7 @@ datasets:
       X_density: {type: number, default: 1.0}
       rho: {type: number, default: 0.6}
       random_state: {type: integer, default: 27}
-    function: benchmark_slope/dataset_worker.py:simulated
+    function: dataset_worker.py:simulated
   simulated-low:
     sources: *sources
     output-schema: *id001
@@ -33,7 +33,7 @@ datasets:
       X_density: {type: number, default: 1.0}
       rho: {type: number, default: 0.6}
       random_state: {type: integer, default: 27}
-    function: benchmark_slope/dataset_worker.py:simulated
+    function: dataset_worker.py:simulated
   simulated-sparse:
     sources: *sources
     output-schema: *id001
@@ -44,49 +44,49 @@ datasets:
       X_density: {type: number, default: 0.001}
       rho: {type: number, default: 0.6}
       random_state: {type: integer, default: 27}
-    function: benchmark_slope/dataset_worker.py:simulated
+    function: dataset_worker.py:simulated
   brca1:
     sources: *sources
     output-schema: *id001
     parameters:
       dataset: {type: string, default: brca1}
       standardize: {type: boolean, default: true}
-    function: benchmark_slope/dataset_worker.py:breheny
+    function: dataset_worker.py:breheny
   Rhee2006:
     sources: *sources
     output-schema: *id001
     parameters:
       dataset: {type: string, default: Rhee2006}
       standardize: {type: boolean, default: true}
-    function: benchmark_slope/dataset_worker.py:breheny
+    function: dataset_worker.py:breheny
   Koussounadis2014:
     sources: *sources
     output-schema: *id001
     parameters:
       dataset: {type: string, default: Koussounadis2014}
       standardize: {type: boolean, default: true}
-    function: benchmark_slope/dataset_worker.py:breheny
+    function: dataset_worker.py:breheny
   rcv1-binary:
     sources: *sources
     output-schema: *id001
     parameters:
       dataset: {type: string, default: rcv1.binary}
       standardize: {type: boolean, default: true}
-    function: benchmark_slope/dataset_worker.py:libsvm
+    function: dataset_worker.py:libsvm
   real-sim:
     sources: *sources
     output-schema: *id001
     parameters:
       dataset: {type: string, default: real-sim}
       standardize: {type: boolean, default: true}
-    function: benchmark_slope/dataset_worker.py:libsvm
+    function: dataset_worker.py:libsvm
   YearPredictionMSD:
     sources: *sources
     output-schema: *id001
     parameters:
       dataset: {type: string, default: YearPredictionMSD}
       standardize: {type: boolean, default: true}
-    function: benchmark_slope/dataset_worker.py:libsvm
+    function: dataset_worker.py:libsvm
   smoke-dense:
     sources: *sources
     output-schema: {type: object, properties: {schema_version: {const: 1}, complete: {const: true}, files: {
@@ -98,7 +98,7 @@ datasets:
       X_density: {type: number, default: 1.0}
       rho: {type: number, default: 0.2}
       random_state: {type: integer, default: 27}
-    function: benchmark_slope/dataset_worker.py:simulated
+    function: dataset_worker.py:simulated
   smoke-sparse:
     sources: *sources
     output-schema: {type: object, properties: {schema_version: {const: 1}, complete: {const: true}, files: {
@@ -110,7 +110,7 @@ datasets:
       X_density: {type: number, default: 0.2}
       rho: {type: number, default: 0.2}
       random_state: {type: integer, default: 27}
-    function: benchmark_slope/dataset_worker.py:simulated
+    function: dataset_worker.py:simulated
 problems:
   slope:
     family: slope
@@ -138,20 +138,20 @@ problems:
         absent_intercept: zero}
       one_shot_completion: {rel_duality_gap: 1.0e-07}
     reference-cases:
-    - dataset: benchmark_slope/reference/dataset
-      result: benchmark_slope/reference/result
-      expected-metrics: benchmark_slope/reference/metrics.json
+    - dataset: reference/dataset
+      result: reference/result
+      expected-metrics: reference/metrics.json
       metric-tolerance: {absolute: 1.0e-12, relative: 1.0e-12}
     evaluator:
       runner: python
       protocol-transport: socket
-      entrypoint: benchmark_slope/evaluator.py
+      entrypoint: evaluator.py
       sources: *sources
 implementations:
   pgd:
     runner: python
     protocol-transport: socket
-    entrypoint: benchmark_slope/solver_worker.py
+    entrypoint: solver_worker.py
     args: [python_pgd]
     sources: *sources
     problem-contracts: [slope]
@@ -162,7 +162,7 @@ implementations:
   admm:
     runner: python
     protocol-transport: socket
-    entrypoint: benchmark_slope/solver_worker.py
+    entrypoint: solver_worker.py
     args: [admm]
     sources: *sources
     problem-contracts: [slope]
@@ -173,7 +173,7 @@ implementations:
   sortedl1:
     runner: python
     protocol-transport: socket
-    entrypoint: benchmark_slope/solver_worker.py
+    entrypoint: solver_worker.py
     args: [sortedl1]
     sources: *sources
     problem-contracts: [slope]
@@ -183,7 +183,7 @@ implementations:
   tick:
     runner: python
     protocol-transport: socket
-    entrypoint: benchmark_slope/solver_worker.py
+    entrypoint: solver_worker.py
     args: [tick]
     sources: *sources
     problem-contracts: [slope]
@@ -191,7 +191,7 @@ implementations:
   skglm:
     runner: python
     protocol-transport: socket
-    entrypoint: benchmark_slope/solver_worker.py
+    entrypoint: solver_worker.py
     args: [skglm]
     sources: *sources
     problem-contracts: [slope]
@@ -199,7 +199,7 @@ implementations:
   slope-path:
     runner: python
     protocol-transport: socket
-    entrypoint: benchmark_slope/solver_worker.py
+    entrypoint: solver_worker.py
     args: [slope_path]
     sources: *sources
     problem-contracts: [slope]
@@ -207,7 +207,7 @@ implementations:
   newt-alm:
     runner: python
     protocol-transport: socket
-    entrypoint: benchmark_slope/solver_worker.py
+    entrypoint: solver_worker.py
     args: [newt_alm]
     sources: *sources
     problem-contracts: [slope]
@@ -217,7 +217,7 @@ implementations:
   safe-pgd:
     runner: python
     protocol-transport: socket
-    entrypoint: benchmark_slope/solver_worker.py
+    entrypoint: solver_worker.py
     args: [pgd_safe_screening]
     sources: *sources
     problem-contracts: [slope]

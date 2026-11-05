@@ -97,12 +97,7 @@ let
       in
       (
         toString path == toString ./.
-        || builtins.elem top [
-          "bench_config_path.yml"
-          "bench_config_single.yml"
-          "benchmark_slope"
-          "benchmark_slope_path"
-        ]
+        || top == "benchmarks"
       )
       && !(builtins.elem (baseNameOf path) [
         ".git"
@@ -269,21 +264,21 @@ in
     scripts.benchmark-single = {
       description = "Run the pinned single-penalty benchmark";
       exec = ''
-        test -d benchmark_slope || {
+        test -d benchmarks/single || {
           echo "Run benchmark-single from the repository root." >&2
           exit 1
         }
         ${prepareBenchmarkData}
         export PATH="${benchmarkWorker}/bin:$PATH"
-        mkdir -p benchmark_slope/outputs "$benchmark_data_dir"
+        mkdir -p benchmarks/single/outputs "$benchmark_data_dir"
         have_output=false
         for argument in "$@"; do
           case "$argument" in --output-dir|--output-dir=*) have_output=true ;; esac
         done
         if ! "$have_output"; then
-          set -- --output-dir "benchmark_slope/outputs/run-$(date +%Y%m%d-%H%M%S-%N)" "$@"
+          set -- --output-dir "benchmarks/single/outputs/run-$(date +%Y%m%d-%H%M%S-%N)" "$@"
         fi
-        exec metewand run --manifest bench_config_single.yml \
+        exec metewand run --manifest benchmarks/single/config.yml \
           --cache-dir "$benchmark_data_dir/metewand" "$@"
       '';
     };
@@ -291,21 +286,21 @@ in
     scripts.benchmark-path = {
       description = "Run the pinned solution-path benchmark";
       exec = ''
-        test -d benchmark_slope_path || {
+        test -d benchmarks/path || {
           echo "Run benchmark-path from the repository root." >&2
           exit 1
         }
         ${prepareBenchmarkData}
         export PATH="${benchmarkWorker}/bin:$PATH"
-        mkdir -p benchmark_slope_path/outputs "$benchmark_data_dir"
+        mkdir -p benchmarks/path/outputs "$benchmark_data_dir"
         have_output=false
         for argument in "$@"; do
           case "$argument" in --output-dir|--output-dir=*) have_output=true ;; esac
         done
         if ! "$have_output"; then
-          set -- --output-dir "benchmark_slope_path/outputs/run-$(date +%Y%m%d-%H%M%S-%N)" "$@"
+          set -- --output-dir "benchmarks/path/outputs/run-$(date +%Y%m%d-%H%M%S-%N)" "$@"
         fi
-        exec metewand run --manifest bench_config_path.yml \
+        exec metewand run --manifest benchmarks/path/config.yml \
           --cache-dir "$benchmark_data_dir/metewand" "$@"
       '';
     };
@@ -342,7 +337,7 @@ in
         fi
         python - <<'PYTHON'
         import yaml
-        for manifest in ("bench_config_single.yml", "bench_config_path.yml"):
+        for manifest in ("benchmarks/single/config.yml", "benchmarks/path/config.yml"):
             with open(manifest) as stream:
                 settings = yaml.safe_load(stream)["environments"]["local"]["environment-variables"]
             print(f"Worker settings ({manifest}):")
@@ -358,21 +353,21 @@ in
       description = "Run fast checks through both pinned benchmark suites";
       exec = ''
         set -e
-        test -d benchmark_slope && test -d benchmark_slope_path || {
+        test -d benchmarks/single && test -d benchmarks/path || {
           echo "Run benchmark-smoke from the repository root." >&2
           exit 1
         }
         ${prepareBenchmarkData}
         export PATH="${benchmarkWorker}/bin:$PATH"
-        mkdir -p benchmark_slope/outputs benchmark_slope_path/outputs "$benchmark_data_dir"
-        metewand check --manifest bench_config_single.yml --experiment smoke --workers
-        metewand run --manifest bench_config_single.yml --experiment smoke \
+        mkdir -p benchmarks/single/outputs benchmarks/path/outputs "$benchmark_data_dir"
+        metewand check --manifest benchmarks/single/config.yml --experiment smoke --workers
+        metewand run --manifest benchmarks/single/config.yml --experiment smoke \
           --cache-dir "$benchmark_data_dir/metewand" \
-          --output-dir "benchmark_slope/outputs/smoke-$(date +%Y%m%d-%H%M%S-%N)"
-        metewand check --manifest bench_config_path.yml --experiment smoke --workers
-        metewand run --manifest bench_config_path.yml --experiment smoke \
+          --output-dir "benchmarks/single/outputs/smoke-$(date +%Y%m%d-%H%M%S-%N)"
+        metewand check --manifest benchmarks/path/config.yml --experiment smoke --workers
+        metewand run --manifest benchmarks/path/config.yml --experiment smoke \
           --cache-dir "$benchmark_data_dir/metewand" \
-          --output-dir "benchmark_slope_path/outputs/smoke-$(date +%Y%m%d-%H%M%S-%N)"
+          --output-dir "benchmarks/path/outputs/smoke-$(date +%Y%m%d-%H%M%S-%N)"
       '';
     };
 
@@ -398,8 +393,8 @@ in
       julia --project=. -e 'using Pkg; Pkg.instantiate(); using SLOPE; versions = [dep.version for dep in values(Pkg.dependencies()) if dep.name == "SLOPE"]; @assert only(versions) == v"${slopeJuliaVersion}"'
       python -c 'import libsvmdata, modules, rpy2, skglm, slopescreening, tick'
       python -c 'import metewand'
-      python -m pytest benchmark_slope/tests slopeutils/tests -q
-      ${benchmarkWorker}/bin/python3 -m pytest benchmark_slope_path/tests -q
+      python -m pytest benchmarks/single/tests slopeutils/tests -q
+      ${benchmarkWorker}/bin/python3 -m pytest benchmarks/path/tests -q
       benchmark-smoke >/dev/null
       slope-example >/dev/null
     '';

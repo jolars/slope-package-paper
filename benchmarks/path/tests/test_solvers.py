@@ -3,8 +3,8 @@ from importlib import import_module
 import numpy as np
 import pytest
 
-from benchmark_slope_path.datasets.simulated import Dataset
-from benchmark_slope_path.objective import Objective
+from benchmarks.path.datasets.simulated import Dataset
+from benchmarks.path.objective import Objective
 
 
 @pytest.mark.parametrize(
@@ -32,7 +32,7 @@ def test_native_solvers_reach_the_shared_path_target(
     ).get_data()
     objective = Objective(path_length=5, q=0.2, fit_intercept=intercept)
     objective.set_data(**values)
-    solver = import_module(f"benchmark_slope_path.solvers.{module}").Solver(
+    solver = import_module(f"benchmarks.path.solvers.{module}").Solver(
         **parameters
     )
     skipped, reason = solver.skip(**objective.get_objective())
@@ -48,7 +48,7 @@ def test_native_solvers_reach_the_shared_path_target(
 
 
 def test_solution_path_interpolates_without_reordering_alphas():
-    from benchmark_slope_path.solvers.solution_path import Solver
+    from benchmarks.path.solvers.solution_path import Solver
 
     solver = Solver()
     solver.n_features = 2

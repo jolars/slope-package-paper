@@ -4,9 +4,9 @@ This native [Metewand](https://github.com/jolars/metewand) benchmark compares
 the ten solver configurations and nine datasets used by the paper. The full
 experiment selects three regularization values, giving 270 candidates before
 applicability exclusions. The [path
-benchmark](../benchmark_slope_path/README.md) also uses Metewand.
+benchmark](../path/README.md) also uses Metewand.
 
-The shared `bench_config_single.yml` defines `full`, `smoke`, and `example`
+The shared [`config.yml`](config.yml) defines `full`, `smoke`, and `example`
 experiments. `full` is the default; the smaller experiments reuse the same
 workers, scientific contract, and profile policies. Numerical-library thread
 limits are declared in the worker environment, including OpenMP and BLAS limits
@@ -21,12 +21,12 @@ devenv shell
 benchmark-single
 ```
 
-`benchmark-single` creates a run beneath `benchmark_slope/outputs/`. To choose a
+`benchmark-single` creates a run beneath `benchmarks/single/outputs/`. To choose a
 destination or resume an existing run:
 
 ```sh
-benchmark-single --output-dir benchmark_slope/outputs/comparison
-benchmark-single --output-dir benchmark_slope/outputs/comparison --resume
+benchmark-single --output-dir benchmarks/single/outputs/comparison
+benchmark-single --output-dir benchmarks/single/outputs/comparison --resume
 ```
 
 Use `--resume --retry` to retain earlier evidence and explicitly retry failed
@@ -37,20 +37,21 @@ For a small comparison, use a Python environment with Metewand's Python package,
 NumPy, SciPy, scikit-learn, Numba, sortedl1, and tick installed:
 
 ```sh
-metewand check --manifest bench_config_single.yml --experiment example --workers
-metewand plan --manifest bench_config_single.yml --experiment example
-metewand run --manifest bench_config_single.yml --experiment example \
-  --output-dir benchmark_slope/outputs/example
+mkdir -p benchmarks/single/outputs
+metewand check --manifest benchmarks/single/config.yml --experiment example --workers
+metewand plan --manifest benchmarks/single/config.yml --experiment example
+metewand run --manifest benchmarks/single/config.yml --experiment example \
+  --output-dir benchmarks/single/outputs/example
 ```
 
-Create the output parent first. The smoke experiment additionally uses skglm,
+The smoke experiment additionally uses skglm,
 slope-path, and slopescreening and covers dense and sparse designs. It runs
-through `benchmark-smoke`, alongside the native path benchmark. `validate.py`
-checks worker references, runs a comparison, exercises resume and inspection,
+through `benchmark-smoke`, alongside the native path benchmark. The shared
+[`validate.py`](../validate.py) checks worker references, runs a comparison, exercises resume and inspection,
 and retains a complete JSON export:
 
 ```sh
-python benchmark_slope/validate.py --output-dir benchmark_slope/outputs/smoke
+python benchmarks/validate.py --output-dir benchmarks/single/outputs/smoke
 ```
 
 ## Scientific and timing choices
@@ -99,12 +100,12 @@ fixtures also check equality with the original Benchopt generator.
 ## Export and plot
 
 ```sh
-metewand export --output-dir benchmark_slope/outputs/comparison \
-  --format json --destination benchmark_slope/outputs/comparison-export
+metewand export --output-dir benchmarks/single/outputs/comparison \
+  --format json --destination benchmarks/single/outputs/comparison-export
 python code/plot_benchmark_simul.py \
-  --results benchmark_slope/outputs/comparison-export --output /tmp/simulated.pdf
+  --results benchmarks/single/outputs/comparison-export --output /tmp/simulated.pdf
 python code/plot_benchmark_real.py \
-  --results benchmark_slope/outputs/comparison-export --output /tmp/real.pdf
+  --results benchmarks/single/outputs/comparison-export --output /tmp/real.pdf
 ```
 
 Add `--require-complete` to export when every applicable comparison must have

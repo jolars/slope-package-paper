@@ -6,15 +6,15 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from benchmark_slope_path.artifacts import (
+from benchmarks.path.artifacts import (
     read_objective,
     write_dataset,
     write_preparation,
     write_result,
 )
-from benchmark_slope_path.evaluator import evaluate
-from benchmark_slope_path.objective import Objective
-from benchmark_slope_path.solvers.pgd import Solver
+from benchmarks.path.evaluator import evaluate
+from benchmarks.path.objective import Objective
+from benchmarks.path.solvers.pgd import Solver
 
 
 def test_intercept_dual_point_is_centered():
