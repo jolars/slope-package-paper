@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "files": {
+    "brca1.rds": {
+      "url": "https://github.com/IowaBiostat/data-sets/raw/main/brca1/brca1.rds",
+      "sha256": "fef18f989a5599cf303ebd8cfaa72f611b07de700abb60832a221786f6350fe3"
+    },
+    "Rhee2006.rds": {
+      "url": "https://github.com/IowaBiostat/data-sets/raw/main/Rhee2006/Rhee2006.rds",
+      "sha256": "51b532e605d8594e70e9198053ccaf4da8bee2fd30660fc9c77e08c16b1cf47f"
+    },
+    "Koussounadis2014.rds": {
+      "url": "https://github.com/IowaBiostat/data-sets/raw/main/Koussounadis2014/Koussounadis2014.rds",
+      "sha256": "d618fbb3b66096523df3029aab0d1e948f68eed2fa8392e50b1380ce46f77722"
+    },
+    "rcv1_train.binary.bz2": {
+      "url": "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/rcv1_train.binary.bz2",
+      "sha256": "dda0c6381811484e284e70dd0641335917debce50948346416fde7fb32fad2e2"
+    },
+    "real-sim.bz2": {
+      "url": "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/real-sim.bz2",
+      "sha256": "7cd52374f55ce62e803ef33ca1c44689427c23d481eff64026f8ba9f53b8cc27"
+    },
+    "YearPredictionMSD.bz2": {
+      "url": "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/YearPredictionMSD.bz2",
+      "sha256": "bd820472d9a6d87ae30d6208dcbfd0e80386e96e6e6832f78c498cd78df6da29"
+    }
+  }
+}

@@ -12,17 +12,21 @@ from sklearn.preprocessing import MaxAbsScaler, StandardScaler
 
 
 def fetch_breheny(dataset: str):
-    base_dir = appdirs.user_cache_dir("benchmark_slope")
+    if os.environ.get("SLOPE_BENCHMARK_OFFLINE") == "1":
+        from .prepared import raw_path
+        path = str(raw_path(dataset + ".rds"))
+    else:
+        base_dir = appdirs.user_cache_dir("benchmark_slope")
 
-    path = os.path.join(base_dir, dataset + ".rds")
+        path = os.path.join(base_dir, dataset + ".rds")
 
-    # download raw data unless it is stored in data folder already
-    if not os.path.isfile(path):
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        url = (
-            f"https://github.com/IowaBiostat/data-sets/raw/main/{dataset}/{dataset}.rds"
-        )
-        urllib.request.urlretrieve(url, path)
+        # download raw data unless it is stored in data folder already
+        if not os.path.isfile(path):
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            url = (
+                f"https://github.com/IowaBiostat/data-sets/raw/main/{dataset}/{dataset}.rds"
+            )
+            urllib.request.urlretrieve(url, path)
 
     read_rds = robjects.r["readRDS"]
 

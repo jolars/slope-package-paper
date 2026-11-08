@@ -646,3 +646,8 @@ devenv.local.yaml
 /images/*.svg
 
 **/*.quarto_ipynb
+
+# Generated offline benchmark inputs and manifest variants.
+/benchmarks/*/prepared-data/
+/benchmarks/*/.metewand-*.yml
+/benchmarks/*/metewand.lock

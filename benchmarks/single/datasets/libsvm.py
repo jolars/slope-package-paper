@@ -59,6 +59,11 @@ def _without_x509_strict():
 
 
 def _fetch_libsvm(dataset):
+    import os
+    if os.environ.get("SLOPE_BENCHMARK_OFFLINE") == "1":
+        from .prepared import libsvm
+        return libsvm(dataset)
+
     try:
         return fetch_dataset(dataset)
     except RuntimeError as error:

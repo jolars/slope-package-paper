@@ -107,6 +107,7 @@ let
         "__pycache__"
         "__cache__"
         "outputs"
+        "prepared-data"
       ])
       && !(lib.hasSuffix ".pyc" relative);
   };
@@ -210,6 +211,9 @@ in
     env = {
       PYTHONHASHSEED = "0";
     }
+    // pkgs.lib.optionalAttrs config.container.isBuilding {
+      PATH = "${benchmarkWorker}/bin:${metewandPackages.cli}/bin:${pkgs.R}/bin:${pkgs.bashInteractive}/bin:${pkgs.coreutils}/bin";
+    }
     // pkgs.lib.optionalAttrs (!config.container.isBuilding) {
       # Keep personal Pandoc overrides from changing Quarto's document model.
       QUARTO_PANDOC = "${pkgs.pandoc}/bin/pandoc";
@@ -261,6 +265,14 @@ in
         exampleCpp
       ];
 
+    scripts.benchmark-data-prepare = {
+      description = "Fetch and verify the pinned raw benchmark datasets";
+      exec = ''
+        ${prepareBenchmarkData}
+        exec python benchmarks/container.py prepare-data --data-dir "$benchmark_data_dir" "$@"
+      '';
+    };
+
     scripts.benchmark-single = {
       description = "Run the pinned single-penalty benchmark";
       exec = ''
@@ -278,7 +290,8 @@ in
         if ! "$have_output"; then
           set -- --output-dir "benchmarks/single/outputs/run-$(date +%Y%m%d-%H%M%S-%N)" "$@"
         fi
-        exec metewand run --manifest benchmarks/single/config.yml \
+        benchmark_manifest="$(python benchmarks/container.py manifest --suite single --data-dir "$benchmark_data_dir" --run-args "$@")"
+        exec metewand run --manifest "$benchmark_manifest" \
           --cache-dir "$benchmark_data_dir/metewand" "$@"
       '';
     };
@@ -300,7 +313,8 @@ in
         if ! "$have_output"; then
           set -- --output-dir "benchmarks/path/outputs/run-$(date +%Y%m%d-%H%M%S-%N)" "$@"
         fi
-        exec metewand run --manifest benchmarks/path/config.yml \
+        benchmark_manifest="$(python benchmarks/container.py manifest --suite path --data-dir "$benchmark_data_dir" --run-args "$@")"
+        exec metewand run --manifest "$benchmark_manifest" \
           --cache-dir "$benchmark_data_dir/metewand" "$@"
       '';
     };
@@ -360,12 +374,14 @@ in
         ${prepareBenchmarkData}
         export PATH="${benchmarkWorker}/bin:$PATH"
         mkdir -p benchmarks/single/outputs benchmarks/path/outputs "$benchmark_data_dir"
-        metewand check --manifest benchmarks/single/config.yml --experiment smoke --workers
-        metewand run --manifest benchmarks/single/config.yml --experiment smoke \
+        benchmark_manifest="$(python benchmarks/container.py manifest --suite single --experiment smoke --data-dir "$benchmark_data_dir")"
+        metewand check --manifest "$benchmark_manifest" --experiment smoke --workers
+        metewand run --manifest "$benchmark_manifest" --experiment smoke \
           --cache-dir "$benchmark_data_dir/metewand" \
           --output-dir "benchmarks/single/outputs/smoke-$(date +%Y%m%d-%H%M%S-%N)"
-        metewand check --manifest benchmarks/path/config.yml --experiment smoke --workers
-        metewand run --manifest benchmarks/path/config.yml --experiment smoke \
+        benchmark_manifest="$(python benchmarks/container.py manifest --suite path --experiment smoke --data-dir "$benchmark_data_dir")"
+        metewand check --manifest "$benchmark_manifest" --experiment smoke --workers
+        metewand run --manifest "$benchmark_manifest" --experiment smoke \
           --cache-dir "$benchmark_data_dir/metewand" \
           --output-dir "benchmarks/path/outputs/smoke-$(date +%Y%m%d-%H%M%S-%N)"
       '';
@@ -393,7 +409,7 @@ in
       julia --project=. -e 'using Pkg; Pkg.instantiate(); using SLOPE; versions = [dep.version for dep in values(Pkg.dependencies()) if dep.name == "SLOPE"]; @assert only(versions) == v"${slopeJuliaVersion}"'
       python -c 'import libsvmdata, modules, rpy2, skglm, slopescreening, tick'
       python -c 'import metewand'
-      python -m pytest benchmarks/single/tests slopeutils/tests -q
+      python -m pytest benchmarks/tests benchmarks/single/tests slopeutils/tests -q
       ${benchmarkWorker}/bin/python3 -m pytest benchmarks/path/tests -q
       benchmark-smoke >/dev/null
       slope-example >/dev/null

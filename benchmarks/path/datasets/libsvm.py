@@ -12,7 +12,12 @@ class Dataset:
         self.standardize = standardize
 
     def get_data(self):
-        X, y = fetch_libsvm(self.dataset)
+        import os
+        if os.environ.get("SLOPE_BENCHMARK_OFFLINE") == "1":
+            from .prepared import libsvm
+            X, y = libsvm(self.dataset)
+        else:
+            X, y = fetch_libsvm(self.dataset)
 
         if self.standardize:
             X = VarianceThreshold().fit_transform(X)
