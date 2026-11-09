@@ -25,15 +25,21 @@ def test_simulations_and_grids_match_the_original_benchmark(density, intercept):
         n_samples=8, n_features=6, n_signals=3, rho=0.6, X_density=density
     ).get_data()
     X, y = values["X"], values["y"]
-    np.testing.assert_array_equal(
-        X.toarray() if sparse.issparse(X) else X, expected["X"]
+    # Numerical libraries can round generated data differently across platforms.
+    np.testing.assert_allclose(
+        X.toarray() if sparse.issparse(X) else X,
+        expected["X"],
+        rtol=1e-13,
+        atol=1e-14,
     )
-    np.testing.assert_array_equal(y, expected["y"])
+    np.testing.assert_allclose(y, expected["y"], rtol=1e-13, atol=1e-14)
     objective = Objective(path_length=5, q=0.2, fit_intercept=intercept)
     objective.set_data(X, y)
     grid = np.load(fixtures / f"grid-{density}-{intercept}.npz")
-    np.testing.assert_array_equal(objective.alphas, grid["alphas"])
-    np.testing.assert_array_equal(objective.lambdas, grid["lambdas"])
+    np.testing.assert_allclose(objective.alphas, grid["alphas"], rtol=1e-13, atol=1e-14)
+    np.testing.assert_allclose(
+        objective.lambdas, grid["lambdas"], rtol=1e-13, atol=1e-14
+    )
 
 
 @pytest.mark.parametrize("sparse_input", [False, True])

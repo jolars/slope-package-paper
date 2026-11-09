@@ -15,7 +15,7 @@ inputs:
   mk-shell-bin:
     url: github:rrbutani/nix-mk-shell-bin
   metewand:
-    url: github:jolars/metewand/1b29eb59648f48b462744b3d2860ecde6287e4f7
+    url: github:jolars/metewand/7205589e87a9b031cab8b79a62e52f8cd375dda1
     flake: false
   rust-overlay:
     url: github:oxalica/rust-overlay/b962e5d0c8cd97196c6a882d659fe451b52ad989

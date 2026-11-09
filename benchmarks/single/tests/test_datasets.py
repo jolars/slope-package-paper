@@ -15,10 +15,14 @@ def test_generator_matches_the_original_benchopt_data(density):
         8, 6, rho=0.6, density=0.5, X_density=density, random_state=27
     )
     assert sparse.issparse(X) == (density < 1)
-    np.testing.assert_array_equal(
-        X.toarray() if sparse.issparse(X) else X, expected["X"]
+    # Numerical libraries can round generated data differently across platforms.
+    np.testing.assert_allclose(
+        X.toarray() if sparse.issparse(X) else X,
+        expected["X"],
+        rtol=1e-13,
+        atol=1e-14,
     )
-    np.testing.assert_array_equal(y, expected["y"])
+    np.testing.assert_allclose(y, expected["y"], rtol=1e-13, atol=1e-14)
 
 
 @pytest.mark.parametrize("sparse_input", [False, True])
